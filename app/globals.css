@@ -1,26 +1,111 @@
+@config "../tailwind.config.js";
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-noto-arabic), ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand Palette */
+  --color-brand: #6047EA;
+  --color-brand-dark: #3B1F8A;
+  --color-brand-light: #A78BFA;
+  --color-brand-muted: #CAB5F0;
+  --color-brand-bg: rgba(96, 71, 234, 0.08);
+  --color-brand-border: rgba(96, 71, 234, 0.22);
+  --color-accent-2: #4B7BEE;
+
+  /* VIP Palette */
+  --color-vip: #7C3AED;
+  --color-vip-2: #C026D3;
+  --color-vip-bg: #F5F3FF;
+
+  /* Semantic Palette */
+  --color-semantic-green: #16A34A;
+  --color-semantic-green-bg: #DCFCE7;
+  --color-semantic-red: #DC2626;
+  --color-semantic-red-bg: #FEE2E2;
+  --color-semantic-amber: #D97706;
+  --color-semantic-amber-bg: #FCD34D;
+  --color-semantic-teal: #0D9488;
+  --color-semantic-teal-bg: #CCFBF1;
+
+  /* Light Surfaces */
+  --color-bg: #F0F2F8;
+  --color-surface-1: #FFFFFF;
+  --color-surface-2: #F8F9FB;
+  --color-surface-3: #F1F3F7;
+  --color-border-1: #E2E8F0;
+  --color-border-2: #F1F5F9;
+
+  /* Dark Surfaces for Quiz and Landing */
+  --color-dark-1: #08081A;
+  --color-dark-2: #0E0830;
+  --color-dark-3: #180A50;
+  --color-dark-4: #1A0A40;
+  --color-card-dark: #070426;
+
+  /* Text Colors */
+  --color-text-1: #0F172A;
+  --color-text-2: #555C68;
+  --color-text-3: #555C68;
+  --color-text-inverse: #FFFFFF;
+
+  /* Border Radiuses */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+  --radius-circle: 50%;
+
+  /* Shadows */
+  --shadow-none: none;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.05), 0 2px 10px rgba(15,23,42,0.06);
+  --shadow-md: 0 2px 6px rgba(15,23,42,0.05), 0 8px 28px rgba(15,23,42,0.08);
+  --shadow-lg: 0 4px 14px rgba(15,23,42,0.07), 0 16px 48px rgba(15,23,42,0.10);
+  --shadow-btn: 0 4px 14px rgba(96,71,234,0.38);
+  --shadow-hero: 0 8px 32px rgba(96,71,234,0.42);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gradient-brand: linear-gradient(135deg, #6047EA, #4B7BEE);
+  --gradient-dark-space: linear-gradient(145deg, #08081A, #1B0A50);
+  --gradient-banner: linear-gradient(135deg, #3B1F8A, #6047EA, #4B7BEE);
+  --gradient-vip: linear-gradient(135deg, #7C3AED, #C026D3);
+  --gradient-qeem: linear-gradient(135deg, #D97706, #FCD34D);
+  --gradient-hero-accent: linear-gradient(135deg, #A78BFA, #60A5FA, #34D399);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
 }
+
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* Utilities to access custom gradients easily */
+.bg-gradient-brand { background: var(--gradient-brand); }
+.bg-gradient-dark-space { background: var(--gradient-dark-space); }
+.bg-gradient-banner { background: var(--gradient-banner); }
+.bg-gradient-vip { background: var(--gradient-vip); }
+.bg-gradient-qeem { background: var(--gradient-qeem); }
+.bg-gradient-hero-accent { background: var(--gradient-hero-accent); }
