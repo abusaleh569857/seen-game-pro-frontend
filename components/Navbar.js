@@ -2,13 +2,26 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from '@/store/slices/authSlice';
+import { CircleDot } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+
+const LANGUAGES = [
+  { code: 'en', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/GB.svg', label: 'EN' },
+  { code: 'ar', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/KW.svg', label: 'AR' },
+  { code: 'fr', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/FR.svg', label: 'FR' },
+  { code: 'ur', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/PK.svg', label: 'UR' },
+];
 
 export default function Navbar() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { user, isLoggedIn } = useSelector((state) => state.auth);
+  
+  // Local state for UI only (Will connect to i18n later)
+  const [activeLang, setActiveLang] = useState('en');
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -16,68 +29,101 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 border-b border-gray-800 bg-gray-900/95 px-4 py-3 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-        <Link
-          href="/"
-          className="text-xl font-bold text-purple-400 transition hover:text-purple-300"
-        >
-          Seen Game Pro
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-white/5 bg-[#180A50] h-[76px] overflow-hidden">
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(circle at top right, #240E6A 0%, transparent 60%),
+            radial-gradient(circle at bottom left, #110B33 0%, transparent 50%)
+          `,
+        }}
+      />
+      
+      <div className="w-full max-w-7xl mx-auto px-4 lg:px-10 h-full flex items-center justify-between relative z-10">
+        {/* Left Area: Logo & Brand */}
+        <Link href="/" className="relative z-10 flex items-center gap-3 hover:opacity-90 transition-opacity">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#6248FF] to-[#486CFF] shadow-lg border border-white/10">
+            <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-white/80">
+              <CircleDot className="h-3 w-3 text-white" strokeWidth={3} />
+            </div>
+          </div>
+          <div className="hidden sm:flex flex-col">
+            <h1 className="text-[17px] font-black uppercase leading-none tracking-tight text-white mb-1">
+              Seen Game Pro
+            </h1>
+            <p className="text-[9px] lg:text-[10px] font-bold uppercase tracking-[1.5px] leading-none text-white/50">
+              Quiz Platform
+            </p>
+          </div>
         </Link>
 
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/leaderboard" className="text-gray-300 transition hover:text-white">
-            Leaderboard
-          </Link>
-
-          {isLoggedIn ? (
-            <>
-              <Link
-                href="/shop"
-                className="flex items-center gap-1 rounded-full border border-yellow-700 bg-yellow-900 px-3 py-1 text-xs font-bold text-yellow-300 transition hover:bg-yellow-800"
-              >
-                <span>Qeem</span>
-                <span>{user?.qeemBalance ?? user?.qeem_balance ?? 0}</span>
-              </Link>
-
-              <Link
-                href="/profile"
-                className="hidden text-gray-300 transition hover:text-white sm:block"
-              >
-                {user?.username}
-              </Link>
-
-              {user?.role === 'admin' ? (
-                <Link
-                  href="/admin"
-                  className="text-xs font-bold text-red-400 transition hover:text-red-300"
-                >
-                  ADMIN
-                </Link>
-              ) : null}
-
+        {/* Right Area: Actions */}
+        <div className="relative z-10 flex items-center gap-3 lg:gap-5">
+        {/* Languages (Hidden on very small mobile) */}
+        {!isLoggedIn && (
+          <div className="hidden md:flex items-center gap-1.5 mr-2">
+            {LANGUAGES.map((lang) => (
               <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-1 text-xs transition hover:bg-gray-700"
+                key={lang.code}
+                onClick={() => setActiveLang(lang.code)}
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
+                  activeLang === lang.code
+                    ? 'bg-white/10 border-white/20 text-white shadow-sm'
+                    : 'bg-transparent border-white/10 text-white/50 hover:bg-white/5 hover:text-white/80 hover:border-white/20'
+                }`}
               >
-                Logout
+                <div className="h-[9px] w-[13px] overflow-hidden rounded-[1.5px] shadow-sm">
+                  <img src={lang.flag} alt={lang.label} className="h-full w-full object-cover" />
+                </div>
+                <span>{lang.label}</span>
               </button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-gray-300 transition hover:text-white">
+            ))}
+          </div>
+        )}
+
+        {isLoggedIn ? (
+          <div className="flex items-center gap-3">
+            <Link
+              href="/shop"
+              className="flex items-center justify-center px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+            >
+              <span className="text-white/80 text-[12px] font-bold mr-1.5">Qeem Balance:</span>
+              <span className="text-[#FFD700] text-[13px] font-black">{user?.qeemBalance ?? user?.qeem_balance ?? 0}</span>
+            </Link>
+
+            <Link
+              href="/profile"
+              className="hidden sm:block text-white/70 hover:text-white text-[13px] font-semibold transition"
+            >
+              {user?.username}
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center px-4 h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[13px] font-semibold hover:bg-white/5 transition"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 lg:gap-3">
+            <Link href="/login">
+              <button className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[12px] lg:text-[13px] font-semibold hover:bg-white/5 transition">
                 Login
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-bold transition hover:bg-purple-500"
+              </button>
+            </Link>
+            <Link href="/register">
+              <button 
+                className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg text-white text-[12px] lg:text-[13px] font-bold tracking-wide hover:brightness-110 transition shadow-lg shadow-[#4E5BFF]/20"
+                style={{ background: 'linear-gradient(90deg, #6248FF 0%, #486CFF 100%)' }}
               >
-                Register
-              </Link>
-            </>
-          )}
-        </div>
+                Sign Up Free
+              </button>
+            </Link>
+          </div>
+        )}
+      </div>
       </div>
     </nav>
   );

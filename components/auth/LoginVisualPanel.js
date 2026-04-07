@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { CircleDot } from "lucide-react";
+import Link from "next/link";
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
 
 const CATEGORIES = [
@@ -44,7 +45,7 @@ export default function LoginVisualPanel() {
         
         {/* Logo Section */}
         <div className="shrink-0 mb-6 lg:mb-0 w-full">
-          <div className="flex lg:items-center justify-center lg:justify-start gap-3 lg:gap-4 flex-col lg:flex-row hidden lg:flex">
+          <Link href="/" className="flex lg:items-center justify-center lg:justify-start gap-3 lg:gap-4 flex-col lg:flex-row hidden lg:flex hover:opacity-90 transition-opacity">
             <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-brand shadow-hero border border-white/10">
               <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/60">
                 <CircleDot className="h-4 w-4 text-white" strokeWidth={3} />
@@ -58,9 +59,9 @@ export default function LoginVisualPanel() {
                 Multilingual Quiz Platform
               </p>
             </div>
-          </div>
+          </Link>
 
-          <div className="flex items-center justify-center gap-3.5 lg:hidden mx-auto">
+          <Link href="/" className="flex items-center justify-center gap-3.5 lg:hidden mx-auto hover:opacity-90 transition-opacity">
             <div className="flex h-[52px] w-[52px] items-center justify-center rounded-[16px] bg-[#4E5BFF] shadow-hero border border-white/10 shrink-0">
               <div className="flex h-6 w-6 items-center justify-center rounded-full border-[2.5px] border-white/80">
                 <CircleDot className="h-3.5 w-3.5 text-white" strokeWidth={3} />
@@ -74,7 +75,7 @@ export default function LoginVisualPanel() {
                 Multilingual Quiz
               </p>
             </div>
-          </div>
+          </Link>
         </div>
 
         {/* Categories Section */}

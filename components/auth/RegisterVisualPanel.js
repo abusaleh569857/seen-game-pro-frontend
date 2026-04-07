@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { CircleDot } from "lucide-react";
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
@@ -76,7 +77,7 @@ export default function RegisterVisualPanel() {
       <div className="relative z-10 flex h-full w-full max-w-[560px] mx-auto flex-col items-center lg:items-start text-center lg:text-left">
         
         {/* Desktop Header */}
-        <div className="hidden lg:flex items-center gap-4 shrink-0 w-full mb-6 lg:mb-0">
+        <Link href="/" className="hidden lg:flex items-center gap-4 shrink-0 w-full mb-6 lg:mb-0 hover:opacity-90 transition-opacity">
           <BrandMark />
           <div>
             <h2 className="text-[18px] lg:text-[20px] xl:text-[22px] font-black uppercase leading-none tracking-tight text-white">
@@ -86,10 +87,10 @@ export default function RegisterVisualPanel() {
               Free to Join · Start Playing
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Mobile Header */}
-        <div className="flex items-center justify-center gap-3.5 lg:hidden mx-auto shrink-0 w-full mb-5">
+        <Link href="/" className="flex items-center justify-center gap-3.5 lg:hidden mx-auto shrink-0 w-full mb-5 hover:opacity-90 transition-opacity">
           <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[14px] bg-[#4E5BFF] shadow-hero border border-white/10 shrink-0">
             <div className="flex h-5 w-5 items-center justify-center rounded-full border-[2px] border-white/80">
               <CircleDot className="h-3 w-3 text-white" strokeWidth={3} />
@@ -103,7 +104,7 @@ export default function RegisterVisualPanel() {
               Free to join - Start earning Qeem
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Mobile Pills Grid */}
         <div className="lg:hidden grid grid-cols-2 gap-2 w-full max-w-[300px] mx-auto">
