@@ -1,4 +1,4 @@
-﻿# Seen Game Pro Project Context
+# Seen Game Pro Project Context
 
 Last updated: 2026-04-07
 
@@ -162,6 +162,23 @@ Current direction:
 Important caveat:
 - many register-page refinements happened iteratively and visually; if future work continues there, inspect the latest live file state first before changing layout again
 
+### Landing Page (Recent Refactor)
+The Landing Page was completely modularized and redesigned to match the Figma visual exactness.
+- Extracted sections into `components/landing/`: `HeroSection`, `CategoriesSection`, `FeaturesSection`, `PricingSection`, `CtaSection`, `Footer`.
+- Implemented a unified flowing `linear-gradient` background across the entire lower half of the page (`#08081A` to `#180A50`).
+- Implemented exact Figma color codes (e.g., `#0E0830` for cards, custom dynamic multi-color Pricing cards).
+- Implemented high-end responsive states:
+  - Mobile Pricing: Auto-scrolling infinite horizontal marquee.
+  - Desktop Pricing: Standard 4-column grid.
+  - Mobile Categories: 3-column grid.
+  - Desktop Categories: 5-column grid.
+  - Responsive padding and text alignment to match industry standards (using `max-w-7xl` wrappers uniformly).
+
+## Strategy / Workflow Confirmed
+- We have explicitly agreed on a **"Frontend First / UI-Driven Development"** workflow.
+- All UI pages (Landing, Login, Dashboard, Shop, Leaderboard, etc.) will be fully built with pixel-perfect responsive CSS and hardcoded dummy data first.
+- Only after the frontend visual work is 100% complete and approved, we will build the backend APIs and refactor the hardcoded UI to map real data from Redux/Fetch.
+
 ## Register Page / Visual Component History
 Files involved over the thread:
 - `app/register/page.js`
@@ -268,5 +285,6 @@ Context:
 - Frontend has real Google/Facebook social auth wiring in code
 - Register page and auth visuals were iteratively refactored multiple times
 - `design.md` now contains the extracted Seen Game Pro design-system requirements from the client screenshots
-- Next best step is to implement global design tokens + shared UI primitives based on `design.md`
-- Inspect current frontend files before editing because auth/register visuals changed across several iterations
+- The entire Landing Page was successfully modularized and styled pixel-perfectly based on Figma constraints.
+- We are currently executing a strictly **Frontend First / UI-Driven** workflow: UI and dummy data first -> Backend APIs second -> Data connection third.
+- Inspect current frontend files before editing because layouts and colors have been intensely polished.
