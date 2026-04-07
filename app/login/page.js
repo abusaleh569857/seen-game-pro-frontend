@@ -17,7 +17,7 @@ import {
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import LoginVisualPanel from "@/components/auth/LoginVisualPanel";
-import { getGoogleAccessToken } from "@/lib/socialAuth";
+import { getGoogleAccessToken, getFacebookAccessToken } from "@/lib/socialAuth";
 import { clearError, loginUser, socialAuthUser } from "@/store/slices/authSlice";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -79,6 +79,24 @@ function LoginForm() {
       }
     } catch (socialError) {
       window.alert(socialError.message || "Google login failed.");
+    } finally {
+      setSocialLoading("");
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      setSocialLoading("facebook");
+      dispatch(clearError());
+      const token = await getFacebookAccessToken();
+      const result = await dispatch(
+        socialAuthUser({ provider: "facebook", token })
+      );
+      if (socialAuthUser.fulfilled.match(result)) {
+        router.push("/");
+      }
+    } catch (socialError) {
+      window.alert(socialError.message || "Facebook login failed.");
     } finally {
       setSocialLoading("");
     }
@@ -227,41 +245,15 @@ function LoginForm() {
                 </div>
               </div>
 
-              {/* Desktop Google Button */}
-              <div className="mt-4 hidden lg:block">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleGoogleLogin}
-                  disabled={loading || !!socialLoading}
-                  className="w-full h-[48px] sm:h-[52px] text-[13px] sm:text-[14px]"
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="mr-3"
-                  >
-                    <path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4558 15.9119 17.5888 17.1589 16.3414 17.9711V20.9701H20.1794C22.4339 18.906 23.766 15.8563 23.766 12.2764Z" fill="#4285F4"/>
-                    <path d="M12.2401 24.0008C15.4766 24.0008 18.2059 22.9382 20.1845 21.1103L16.3465 18.1113C15.2858 18.8297 13.8846 19.2317 12.2452 19.2317C9.11746 19.2317 6.46344 17.1353 5.5133 14.3036H1.54V17.3712C3.51859 21.2913 7.59451 24.0008 12.2401 24.0008Z" fill="#34A853"/>
-                    <path d="M5.50824 14.3036C5.26054 13.5686 5.12336 12.7858 5.12336 11.9984C5.12336 11.211 5.26054 10.4282 5.50824 9.69317V6.62561H1.54C0.706734 8.2439 0.240051 10.0633 0.240051 11.9984C0.240051 13.9334 0.706734 15.7529 1.54 17.3712L5.50824 14.3036Z" fill="#FBBC05"/>
-                    <path d="M12.2401 4.75668C13.9979 4.72621 15.6901 5.38131 16.9451 6.58501L20.2607 3.26941C18.1501 1.2384 15.2505 0.081156 12.2401 0.000104167C7.59451 0.000104167 3.51859 2.70957 1.54 6.62967L5.50824 9.69722C6.46344 6.86552 9.11746 4.76918 12.2401 4.75668Z" fill="#EA4335"/>
-                  </svg>
-                  Continue with Google
-                </Button>
-              </div>
-
-              {/* Mobile Google & Facebook Buttons Side-by-Side */}
-              <div className="grid lg:hidden grid-cols-2 gap-3 w-full">
+              {/* Social Login Buttons Side-by-Side (Desktop & Mobile) */}
+              <div className="mt-4 grid grid-cols-2 gap-3 w-full">
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={loading || !!socialLoading}
-                  className="flex items-center justify-center h-[46px] rounded-[16px] bg-white border border-border-1 text-[13px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex items-center justify-center h-[46px] sm:h-[52px] rounded-xl lg:rounded-[16px] bg-white border border-border-1 text-[13px] sm:text-[14px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2 sm:mr-3">
                     <path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4558 15.9119 17.5888 17.1589 16.3414 17.9711V20.9701H20.1794C22.4339 18.906 23.766 15.8563 23.766 12.2764Z" fill="#4285F4"/>
                     <path d="M12.2401 24.0008C15.4766 24.0008 18.2059 22.9382 20.1845 21.1103L16.3465 18.1113C15.2858 18.8297 13.8846 19.2317 12.2452 19.2317C9.11746 19.2317 6.46344 17.1353 5.5133 14.3036H1.54V17.3712C3.51859 21.2913 7.59451 24.0008 12.2401 24.0008Z" fill="#34A853"/>
                     <path d="M5.50824 14.3036C5.26054 13.5686 5.12336 12.7858 5.12336 11.9984C5.12336 11.211 5.26054 10.4282 5.50824 9.69317V6.62561H1.54C0.706734 8.2439 0.240051 10.0633 0.240051 11.9984C0.240051 13.9334 0.706734 15.7529 1.54 17.3712L5.50824 14.3036Z" fill="#FBBC05"/>
@@ -271,11 +263,11 @@ function LoginForm() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.alert("Facebook login coming soon...")}
+                  onClick={handleFacebookLogin}
                   disabled={loading || !!socialLoading}
-                  className="flex items-center justify-center h-[46px] rounded-[16px] bg-white border border-border-1 text-[13px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex items-center justify-center h-[46px] sm:h-[52px] rounded-xl lg:rounded-[16px] bg-white border border-border-1 text-[13px] sm:text-[14px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2 sm:mr-3">
                     <path d="M24 12.073C24 5.405 18.627 0 12 0C5.372 0 0 5.405 0 12.073C0 18.101 4.418 23.094 10.125 24V15.56H7.078V12.073H10.125V9.418C10.125 6.388 11.916 4.717 14.657 4.717C15.97 4.717 17.343 4.953 17.343 4.953V7.935H15.829C14.339 7.935 13.875 8.868 13.875 9.829V12.073H17.187L16.658 15.56H13.875V24C19.582 23.094 24 18.101 24 12.073Z" fill="#1877F2"/>
                   </svg>
                   Facebook
