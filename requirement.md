@@ -3,7 +3,7 @@
 **Project Name:** Seen Game Pro
 **Document Version:** 1.1 (Revised Scope)
 **Project Scope:** Phase 1 (Monetization MVP) + Phase 2 (Social Ecosystem)
-**Target Market:** Arabic (Default), English, French, Urdu.
+**Target Market:** Arabic (Default), English, French, Spanish.
 **Budget Focus:** Revenue generation, AI-automation, and user retention.
 
 ---

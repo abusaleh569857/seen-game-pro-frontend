@@ -1,30 +1,9 @@
-const LANGS = [
-  {
-    code: "en",
-    label: "EN",
-    flag: "https://purecatamphetamine.github.io/country-flag-icons/3x2/GB.svg",
-  },
-  {
-    code: "ar",
-    label: "العربية",
-    flag: "https://purecatamphetamine.github.io/country-flag-icons/3x2/KW.svg",
-  },
-  {
-    code: "fr",
-    label: "Français",
-    flag: "https://purecatamphetamine.github.io/country-flag-icons/3x2/FR.svg",
-  },
-  {
-    code: "ur",
-    label: "اردو",
-    flag: "https://purecatamphetamine.github.io/country-flag-icons/3x2/PK.svg",
-  },
-];
+import { SUPPORTED_LANGUAGES } from "@/lib/languages";
 
 export default function LanguageTabs({ active, onChange }) {
   return (
     <div className="grid grid-cols-4 gap-2 sm:gap-3">
-      {LANGS.map((lang) => {
+      {SUPPORTED_LANGUAGES.map((lang) => {
         const selected = active === lang.code;
         return (
           <button
@@ -37,16 +16,14 @@ export default function LanguageTabs({ active, onChange }) {
                 : "border-slate-100 bg-[#F8FAFC] hover:border-slate-200 hover:bg-white"
             }`}
           >
-            {/* Real Flag Image */}
             <div className="mb-1.5 h-3 w-5 overflow-hidden rounded-[2px] shadow-sm sm:h-4 sm:w-6">
               <img
                 src={lang.flag}
-                alt={lang.label}
+                alt={lang.englishLabel}
                 className="h-full w-full object-cover"
               />
             </div>
 
-            {/* Language Text */}
             <span
               className={`text-[12px] font-bold tracking-tight sm:text-[13px] ${
                 selected
@@ -54,7 +31,7 @@ export default function LanguageTabs({ active, onChange }) {
                   : "text-slate-500 group-hover:text-slate-700"
               }`}
             >
-              {lang.label}
+              {lang.nativeLabel}
             </span>
           </button>
         );

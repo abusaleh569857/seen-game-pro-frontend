@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { fetchCategories } from '@/store/slices/quizSlice';
 import { motion } from 'framer-motion';
+import { getLocalizedCategoryName, isRtlLanguage } from '@/lib/languages';
 
 // For visual consistency with the design if actual DB is empty or lacks icons, 
 // we normally fall back to these styles. The design has colored top borders.
@@ -17,6 +18,7 @@ export default function CategoriesSection() {
   const router = useRouter();
   const { categories, categoriesLoading, selectedLang } = useSelector((state) => state.quiz);
   const { isLoggedIn } = useSelector((state) => state.auth);
+  const isRTL = isRtlLanguage(selectedLang);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -30,22 +32,12 @@ export default function CategoriesSection() {
     router.push(`/play/${categoryId}?lang=${selectedLang}`);
   };
 
-  const getCatName = (category, lang) => {
-    const names = {
-      ar: category.name_ar,
-      en: category.name_en,
-      fr: category.name_fr,
-      ur: category.name_ur,
-    };
-    return names[lang] || category.name_en;
-  };
-
   // Mock categories for skeleton/design purposes if none are loaded
   const displayCats = categories && categories.length > 0 ? categories : [];
 
   return (
     <section className="relative w-full pt-20 pb-12 px-4 lg:px-10">
-      <div className="w-full max-w-6xl mx-auto flex flex-col items-center lg:items-start text-center lg:text-left">
+      <div className={`w-full max-w-6xl mx-auto flex flex-col items-center ${isRTL ? 'lg:items-end text-center lg:text-right' : 'lg:items-start text-center lg:text-left'}`}>
         
         <p className="text-[12px] font-bold tracking-[2px] uppercase text-white/50 mb-3">
           15 Categories
@@ -91,10 +83,10 @@ export default function CategoriesSection() {
                   </span>
                   
                   <span className="text-[13px] font-bold text-white tracking-wide mb-1 transition-colors group-hover:text-white">
-                    {getCatName(cat, 'en')}
+                    {getLocalizedCategoryName(cat, selectedLang)}
                   </span>
                   <span className="text-[10px] font-medium text-white/40">
-                    {getCatName(cat, 'ar')}
+                    {cat.name_en}
                   </span>
                 </motion.button>
               );

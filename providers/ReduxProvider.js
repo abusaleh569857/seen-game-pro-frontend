@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Provider } from 'react-redux';
+import LanguageSync from '@/components/LanguageSync';
 import { store } from '@/store';
 import { initAuth } from '@/store/slices/authSlice';
 
@@ -16,7 +17,10 @@ function AuthInitializer({ children }) {
 export default function ReduxProvider({ children }) {
   return (
     <Provider store={store}>
-      <AuthInitializer>{children}</AuthInitializer>
+      <AuthInitializer>
+        <LanguageSync />
+        {children}
+      </AuthInitializer>
     </Provider>
   );
 }

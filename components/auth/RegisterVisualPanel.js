@@ -34,7 +34,7 @@ const FEATURE_ITEMS = [
     icon: "/icons/globe.png",
     title: "4 Languages",
     description:
-      "Arabic (default), English, French, Urdu — full RTL support for Arabic and Urdu speakers",
+      "Arabic (default), English, French, Spanish — full RTL support for Arabic players",
   },
 ];
 
@@ -75,8 +75,6 @@ export default function RegisterVisualPanel() {
       <AnimatedDotBackground opacityClass="opacity-15" />
 
       <div className="relative z-10 flex h-full w-full max-w-[560px] mx-auto flex-col items-center lg:items-start text-center lg:text-left">
-        
-        {/* Desktop Header */}
         <Link href="/" className="hidden lg:flex items-center gap-4 shrink-0 w-full mb-6 lg:mb-0 hover:opacity-90 transition-opacity">
           <BrandMark />
           <div>
@@ -89,7 +87,6 @@ export default function RegisterVisualPanel() {
           </div>
         </Link>
 
-        {/* Mobile Header */}
         <Link href="/" className="flex items-center justify-center gap-3.5 lg:hidden mx-auto shrink-0 w-full mb-5 hover:opacity-90 transition-opacity">
           <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[14px] bg-[#4E5BFF] shadow-hero border border-white/10 shrink-0">
             <div className="flex h-5 w-5 items-center justify-center rounded-full border-[2px] border-white/80">
@@ -106,7 +103,6 @@ export default function RegisterVisualPanel() {
           </div>
         </Link>
 
-        {/* Mobile Pills Grid */}
         <div className="lg:hidden grid grid-cols-2 gap-2 w-full max-w-[300px] mx-auto">
           <div className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
             <span className="text-[12px]">🌍</span>
@@ -126,54 +122,54 @@ export default function RegisterVisualPanel() {
           </div>
         </div>
 
-      <div className="relative z-10 hidden lg:flex flex-1 mt-16 flex-col space-y-8 xl:mt-20 xl:space-y-10">
-        {FEATURE_ITEMS.map((item, index) => (
-          <div key={index} className="flex gap-5 items-start">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/5 shadow-sm overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all">
-              <Image
-                src={item.icon}
-                alt={item.title}
-                width={32}
-                height={32}
-                className="relative z-10 drop-shadow-md object-contain"
-              />
-            </div>
+        <div className="relative z-10 hidden lg:flex flex-1 mt-16 flex-col space-y-8 xl:mt-20 xl:space-y-10">
+          {FEATURE_ITEMS.map((item, index) => (
+            <div key={index} className="flex gap-5 items-start">
+              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/5 shadow-sm overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all">
+                <Image
+                  src={item.icon}
+                  alt={item.title}
+                  width={32}
+                  height={32}
+                  className="relative z-10 drop-shadow-md object-contain"
+                />
+              </div>
 
-            <div className="pt-1 w-full max-w-[240px] xl:max-w-[280px]">
-              <h3 className="text-[14px] xl:text-[16px] font-black text-white tracking-tight">
-                {item.title}
-              </h3>
-              <p className="mt-1 xl:mt-1.5 text-[11px] xl:text-[13px] font-medium leading-relaxed xl:leading-[21px] text-white/50">
-                {item.description}
+              <div className="pt-1 w-full max-w-[240px] xl:max-w-[280px]">
+                <h3 className="text-[14px] xl:text-[16px] font-black text-white tracking-tight">
+                  {item.title}
+                </h3>
+                <p className="mt-1 xl:mt-1.5 text-[11px] xl:text-[13px] font-medium leading-relaxed xl:leading-[21px] text-white/50">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="relative z-10 hidden lg:block shrink-0 mt-10 border-t border-white/10 pt-8 w-full">
+          <div className="flex items-center gap-4">
+            <div className="flex -space-x-3">
+              {COMMUNITY.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dark-1 text-[12px] font-black text-white shadow-md relative z-10 hover:z-20 transition-transform hover:scale-110"
+                  style={{ backgroundColor: COMMUNITY_COLORS[index] }}
+                >
+                  {item}
+                </div>
+              ))}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[12px] xl:text-[14px] font-[800] uppercase tracking-[1.2px] xl:tracking-[1.6px] leading-snug xl:leading-[21px] text-white whitespace-nowrap overflow-visible">
+                Join LearnMira, GrowthX & more
+              </p>
+              <p className="mt-0.5 xl:mt-1 text-[11px] xl:text-[13px] font-medium text-white/50 whitespace-nowrap overflow-visible">
+                Growing community · Kuwait · Free
               </p>
             </div>
           </div>
-        ))}
-      </div>
-
-      <div className="relative z-10 hidden lg:block shrink-0 mt-10 border-t border-white/10 pt-8 w-full">
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-3">
-            {COMMUNITY.map((item, index) => (
-              <div
-                key={index}
-                className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dark-1 text-[12px] font-black text-white shadow-md relative z-10 hover:z-20 transition-transform hover:scale-110"
-                style={{ backgroundColor: COMMUNITY_COLORS[index] }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[12px] xl:text-[14px] font-[800] uppercase tracking-[1.2px] xl:tracking-[1.6px] leading-snug xl:leading-[21px] text-white whitespace-nowrap overflow-visible">
-              Join LearnMira, GrowthX & more
-            </p>
-            <p className="mt-0.5 xl:mt-1 text-[11px] xl:text-[13px] font-medium text-white/50 whitespace-nowrap overflow-visible">
-              Growing community · Kuwait · Free
-            </p>
-          </div>
         </div>
-      </div>
       </div>
     </aside>
   );
