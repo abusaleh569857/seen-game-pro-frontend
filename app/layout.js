@@ -25,12 +25,12 @@ export const metadata = {
     default: "Seen Game Pro - Quiz Platform",
   },
   description:
-    "Multilingual interactive quiz platform. Arabic, English, French, Urdu.",
+    "Multilingual interactive quiz platform. Arabic, English, French, Spanish.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ar" suppressHydrationWarning>
       <body
         className={`min-h-screen bg-bg text-text-1 font-sans ${plusJakartaSans.variable} ${notoSansArabic.variable}`}
         suppressHydrationWarning

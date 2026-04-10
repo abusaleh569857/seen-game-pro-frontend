@@ -2,30 +2,26 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { getLanguageByCode, SUPPORTED_LANGUAGES } from '@/lib/languages';
 import { logoutUser } from '@/store/slices/authSlice';
+import { setSelectedLang } from '@/store/slices/quizSlice';
 import { CircleDot } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-
-const LANGUAGES = [
-  { code: 'en', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/GB.svg', label: 'EN' },
-  { code: 'ar', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/KW.svg', label: 'AR' },
-  { code: 'fr', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/FR.svg', label: 'FR' },
-  { code: 'ur', flag: 'https://purecatamphetamine.github.io/country-flag-icons/3x2/PK.svg', label: 'UR' },
-];
 
 export default function Navbar() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { user, isLoggedIn } = useSelector((state) => state.auth);
-  
-  // Local state for UI only (Will connect to i18n later)
-  const [activeLang, setActiveLang] = useState('en');
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const activeLanguage = getLanguageByCode(selectedLang);
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
     router.push('/login');
+  };
+
+  const handleLanguageChange = (languageCode) => {
+    dispatch(setSelectedLang(languageCode));
   };
 
   return (
@@ -63,20 +59,20 @@ export default function Navbar() {
         {/* Languages (Hidden on very small mobile) */}
         {!isLoggedIn && (
           <div className="hidden md:flex items-center gap-1.5 mr-2">
-            {LANGUAGES.map((lang) => (
+            {SUPPORTED_LANGUAGES.map((lang) => (
               <button
                 key={lang.code}
-                onClick={() => setActiveLang(lang.code)}
+                onClick={() => handleLanguageChange(lang.code)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all border ${
-                  activeLang === lang.code
+                  activeLanguage.code === lang.code
                     ? 'bg-white/10 border-white/20 text-white shadow-sm'
                     : 'bg-transparent border-white/10 text-white/50 hover:bg-white/5 hover:text-white/80 hover:border-white/20'
                 }`}
               >
                 <div className="h-[9px] w-[13px] overflow-hidden rounded-[1.5px] shadow-sm">
-                  <img src={lang.flag} alt={lang.label} className="h-full w-full object-cover" />
+                  <img src={lang.flag} alt={lang.englishLabel} className="h-full w-full object-cover" />
                 </div>
-                <span>{lang.label}</span>
+                <span>{lang.shortLabel}</span>
               </button>
             ))}
           </div>
@@ -98,6 +94,15 @@ export default function Navbar() {
             >
               {user?.username}
             </Link>
+
+            {user?.role === 'admin' && (
+              <Link
+                href="/admin"
+                className="hidden sm:flex items-center justify-center px-3 h-[34px] rounded-lg border border-[#6248FF]/50 bg-[#6248FF]/10 text-[#A78BFA] text-[12px] font-bold hover:bg-[#6248FF]/20 transition"
+              >
+                Admin Panel
+              </Link>
+            )}
 
             <button
               onClick={handleLogout}

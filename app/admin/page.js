@@ -3,6 +3,14 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { 
+  Users, 
+  BookOpen, 
+  Gamepad2, 
+  CreditCard, 
+  Sparkles, 
+  LayoutDashboard 
+} from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { fetchAdminStats } from '@/store/slices/adminSlice';
@@ -19,25 +27,25 @@ function AdminContent() {
     {
       label: 'Total Users',
       value: stats?.totalUsers,
-      icon: '??',
+      icon: <Users className="w-8 h-8 text-blue-400" />,
       color: 'border-blue-700 bg-blue-900/20',
     },
     {
       label: 'Questions',
       value: stats?.totalQuestions,
-      icon: '?',
+      icon: <BookOpen className="w-8 h-8 text-purple-400" />,
       color: 'border-purple-700 bg-purple-900/20',
     },
     {
       label: 'Games Played',
       value: stats?.totalGames,
-      icon: '??',
+      icon: <Gamepad2 className="w-8 h-8 text-green-400" />,
       color: 'border-green-700 bg-green-900/20',
     },
     {
       label: 'Revenue (KWD)',
       value: Number.parseFloat(stats?.totalRevenue || 0).toFixed(2),
-      icon: '??',
+      icon: <CreditCard className="w-8 h-8 text-yellow-400" />,
       color: 'border-yellow-700 bg-yellow-900/20',
     },
   ];
@@ -45,20 +53,20 @@ function AdminContent() {
   const navLinks = [
     {
       href: '/admin/ai-generator',
-      icon: '??',
+      icon: <Sparkles className="w-10 h-10 text-pink-500" />,
       label: 'AI Generator',
-      desc: 'Generate questions with GPT-4o',
+      desc: 'Generate questions with Gemini AI',
     },
     {
       href: '/admin/questions',
-      icon: '?',
-      label: 'Questions',
+      icon: <BookOpen className="w-10 h-10 text-purple-400" />,
+      label: 'Questions Management',
       desc: 'Edit and delete questions',
     },
     {
       href: '/admin/users',
-      icon: '??',
-      label: 'Users',
+      icon: <Users className="w-10 h-10 text-blue-400" />,
+      label: 'User Management',
       desc: 'Manage and ban users',
     },
   ];
@@ -66,35 +74,80 @@ function AdminContent() {
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="mb-8 text-3xl font-bold">?? Admin Dashboard</h1>
-
-        <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-          {statCards.map((card) => (
-            <div key={card.label} className={`rounded-xl border p-4 text-center ${card.color}`}>
-              <p className="mb-2 text-3xl">{card.icon}</p>
-              <p className="text-2xl font-black">{statsLoading ? '...' : card.value ?? '0'}</p>
-              <p className="mt-1 text-xs text-gray-400">{card.label}</p>
+      <div className="min-h-screen bg-black text-white">
+        <main className="mx-auto max-w-5xl px-4 py-12">
+          {/* Header */}
+          <div className="mb-12 flex items-center gap-4">
+            <div className="bg-purple-600/20 p-3 rounded-2xl border border-purple-500/30">
+              <LayoutDashboard className="w-10 h-10 text-purple-500" />
             </div>
-          ))}
-        </div>
+            <div>
+              <h1 className="text-4xl font-extrabold tracking-tight">Admin Dashboard</h1>
+              <p className="text-gray-400 mt-1">Manage your quiz platform analytics and content</p>
+            </div>
+          </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="group rounded-2xl border border-gray-700 bg-gray-900 p-6 transition-all hover:border-purple-500"
-            >
-              <p className="mb-3 inline-block text-4xl transition-transform group-hover:scale-110">
-                {link.icon}
-              </p>
-              <p className="text-lg font-bold">{link.label}</p>
-              <p className="mt-1 text-sm text-gray-400">{link.desc}</p>
-            </Link>
-          ))}
-        </div>
-      </main>
+          {/* Stats Grid */}
+          <div className="mb-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((card) => (
+              <div 
+                key={card.label} 
+                className={`rounded-3xl border p-6 flex flex-col items-center justify-center transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-${card.color.split(' ')[1]}/20 ${card.color}`}
+              >
+                <div className="mb-4 p-3 bg-black/40 rounded-2xl border border-white/5">
+                  {card.icon}
+                </div>
+                <div className="text-center">
+                  <p className="text-4xl font-black tabular-nums tracking-tighter">
+                    {statsLoading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      card.value ?? '0'
+                    )}
+                  </p>
+                  <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
+                    {card.label}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Management Selection */}
+          <h2 className="mb-8 text-sm font-bold text-gray-500 uppercase tracking-[0.3em] flex items-center gap-4">
+            Management Control
+            <div className="h-[1px] flex-grow bg-gray-800"></div>
+          </h2>
+          
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 text-center">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group relative overflow-hidden rounded-[2.5rem] border border-gray-800 bg-gray-900/30 p-10 transition-all duration-300 hover:border-purple-500/50 hover:bg-gray-900/80 active:scale-95"
+              >
+                <div className="mb-6 flex justify-center transition-all duration-500 group-hover:scale-125 group-hover:-rotate-3">
+                  <div className="relative">
+                    {link.icon}
+                    <div className="absolute inset-0 bg-white/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+                <p className="text-2xl font-bold tracking-tight mb-2 group-hover:text-purple-400 transition-colors">
+                  {link.label}
+                </p>
+                <p className="text-sm text-gray-400 leading-relaxed font-medium">
+                  {link.desc}
+                </p>
+                
+                {/* Visual Accent */}
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                  <Sparkles className="w-12 h-12 text-white" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </main>
+      </div>
     </>
   );
 }
@@ -106,4 +159,3 @@ export default function AdminPage() {
     </ProtectedRoute>
   );
 }
-

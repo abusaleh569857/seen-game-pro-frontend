@@ -6,7 +6,6 @@ import { useEffect, useState, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import {
-  CircleDot,
   Eye,
   EyeOff,
   Lock,
@@ -14,11 +13,12 @@ import {
   Check,
 } from "lucide-react";
 
-import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import LoginVisualPanel from "@/components/auth/LoginVisualPanel";
+import { normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken, getFacebookAccessToken } from "@/lib/socialAuth";
 import { clearError, loginUser, socialAuthUser } from "@/store/slices/authSlice";
+import { setSelectedLang } from "@/store/slices/quizSlice";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -27,9 +27,10 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get("registered");
-  const { loading, error, isLoggedIn } = useSelector((state) => state.auth);
+  const { loading, error, isLoggedIn, user } = useSelector((state) => state.auth);
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
 
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState(selectedLang);
   const [showPassword, setShowPassword] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
   const [form, setForm] = useState({
@@ -39,12 +40,20 @@ function LoginForm() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push("/");
+      router.push(user?.role === 'admin' ? '/admin' : '/');
     }
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch, isLoggedIn, router]);
+  }, [dispatch, isLoggedIn, router, user]);
+
+  useEffect(() => {
+    dispatch(setSelectedLang(normalizeLanguageCode(lang)));
+  }, [dispatch, lang]);
+
+  useEffect(() => {
+    setLang(selectedLang);
+  }, [selectedLang]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -124,7 +133,7 @@ function LoginForm() {
                   Log in to your account
                 </h1>
                 <p className="mt-2 md:mt-2.5 text-[13px] sm:text-[14px] xl:text-[15px] font-medium text-text-2">
-                  Ready to earn some Qeem coins today? Let's go!
+                  Ready to earn some Qeem coins today? Let&apos;s go!
                 </p>
               </header>
 
@@ -275,7 +284,7 @@ function LoginForm() {
               </div>
 
               <p className="mt-6 text-center text-[13px] font-medium text-text-2">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
                   className="font-bold text-[#4E5BFF] hover:brightness-110 ml-1"

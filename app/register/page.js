@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import {
   Check,
-  CircleDot,
   Eye,
   EyeOff,
   Lock,
@@ -16,9 +15,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import RegisterVisualPanel from "@/components/auth/RegisterVisualPanel";
+import { normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken } from "@/lib/socialAuth";
 import {
   clearError,
@@ -26,6 +25,7 @@ import {
   registerUser,
   socialAuthUser,
 } from "@/store/slices/authSlice";
+import { setSelectedLang } from "@/store/slices/quizSlice";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
@@ -35,8 +35,9 @@ export default function RegisterPage() {
   const { loading, error, registerSuccess } = useSelector(
     (state) => state.auth,
   );
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
 
-  const [lang, setLang] = useState("en");
+  const [lang, setLang] = useState(selectedLang);
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [socialLoading, setSocialLoading] = useState("");
@@ -59,6 +60,14 @@ export default function RegisterPage() {
       dispatch(clearError());
     };
   }, [dispatch, registerSuccess, router]);
+
+  useEffect(() => {
+    dispatch(setSelectedLang(normalizeLanguageCode(lang)));
+  }, [dispatch, lang]);
+
+  useEffect(() => {
+    setLang(selectedLang);
+  }, [selectedLang]);
 
   const passwordsMatch = useMemo(
     () => form.password.length > 0 && form.password === form.confirmPassword,
