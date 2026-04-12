@@ -8,6 +8,7 @@ import {
   isRtlLanguage,
   normalizeLanguageCode,
 } from '@/lib/languages';
+import { detectBrowserLanguage } from '@/lib/i18n';
 import { setSelectedLang } from '@/store/slices/quizSlice';
 
 export default function LanguageSync() {
@@ -21,7 +22,9 @@ export default function LanguageSync() {
     }
 
     const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const nextLanguage = normalizeLanguageCode(storedLanguage || DEFAULT_LANGUAGE);
+    const nextLanguage = storedLanguage
+      ? normalizeLanguageCode(storedLanguage)
+      : detectBrowserLanguage();
 
     if (nextLanguage !== selectedLang) {
       dispatch(setSelectedLang(nextLanguage));

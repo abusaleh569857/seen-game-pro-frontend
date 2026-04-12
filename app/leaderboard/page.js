@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '@/components/Navbar';
+import { useI18n } from '@/lib/i18n';
 import { fetchLeaderboard } from '@/store/slices/quizSlice';
 
 const MEDALS = ['??', '??', '??'];
@@ -10,6 +11,7 @@ const MEDALS = ['??', '??', '??'];
 export default function LeaderboardPage() {
   const dispatch = useDispatch();
   const { leaderboard, leaderboardLoading } = useSelector((state) => state.quiz);
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchLeaderboard());
@@ -19,7 +21,7 @@ export default function LeaderboardPage() {
     <>
       <Navbar />
       <main className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-8 text-center text-3xl font-bold">?? Leaderboard</h1>
+        <h1 className="mb-8 text-center text-3xl font-bold">{t('leaderboard.title')}</h1>
 
         {leaderboardLoading ? (
           <div className="space-y-3">
@@ -28,7 +30,7 @@ export default function LeaderboardPage() {
             ))}
           </div>
         ) : leaderboard.length === 0 ? (
-          <p className="py-12 text-center text-gray-500">No players yet. Be the first!</p>
+          <p className="py-12 text-center text-gray-500">{t('leaderboard.empty')}</p>
         ) : (
           <div className="space-y-2">
             {leaderboard.map((player, index) => (
@@ -51,7 +53,9 @@ export default function LeaderboardPage() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">{player.username}</p>
-                  <p className="text-xs text-gray-500">{player.games_played} games played</p>
+                  <p className="text-xs text-gray-500">
+                    {t('leaderboard.games_played', { count: player.games_played })}
+                  </p>
                 </div>
                 <p className="text-lg font-black text-purple-400">{player.points}</p>
               </div>

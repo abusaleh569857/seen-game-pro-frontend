@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { fetchLeaderboard, resetQuiz } from '@/store/slices/quizSlice';
 
 const RANKING_COLORS = [
@@ -86,11 +87,12 @@ function ResultContent() {
 
   const { user } = useSelector((state) => state.auth);
   const { result, leaderboard } = useSelector((state) => state.quiz);
+  const { t } = useI18n();
 
   const score = Number.parseInt(searchParams.get('score') || `${result?.score || 0}`, 10);
   const total = Number.parseInt(searchParams.get('total') || `${result?.total || 0}`, 10);
   const earnedPoints = Number.parseInt(searchParams.get('points') || `${result?.earnedPoints || 0}`, 10);
-  const categoryName = searchParams.get('category') || 'Quiz';
+  const categoryName = searchParams.get('category') || t('quiz.page_title');
   const timeSpent = Number.parseInt(searchParams.get('time') || '0', 10);
   const bestStreak = Number.parseInt(searchParams.get('streak') || '0', 10);
 
@@ -127,29 +129,33 @@ function ResultContent() {
 
   const summaryRows = [
     {
-      label: 'Correct Answers',
-      detail: `${score} answers x 10 pts each`,
+      key: 'correct',
+      label: t('result.correct_answers'),
+      detail: t('result.answers_each', { score }),
       amount: `+${earnedPoints}`,
       tone: 'text-emerald-600 bg-emerald-50 border-emerald-100',
       icon: Check,
     },
     {
-      label: 'Streak Bonus',
-      detail: `${bestStreak}-question streak achieved`,
+      key: 'streak',
+      label: t('result.streak_bonus'),
+      detail: t('result.streak_achieved', { streak: bestStreak }),
       amount: '+0',
       tone: 'text-amber-600 bg-amber-50 border-amber-100',
       icon: Flame,
     },
     {
-      label: 'Speed Bonus',
-      detail: `Finished in ${formatTime(timeSpent)}`,
+      key: 'speed',
+      label: t('result.speed_bonus'),
+      detail: t('result.finished_in', { time: formatTime(timeSpent) }),
       amount: '+0',
       tone: 'text-cyan-600 bg-cyan-50 border-cyan-100',
       icon: Clock3,
     },
     {
-      label: 'Wrong Answers',
-      detail: `${wrongAnswers} answers missed`,
+      key: 'wrong',
+      label: t('result.wrong_answers'),
+      detail: t('result.answers_missed', { count: wrongAnswers }),
       amount: '0',
       tone: 'text-rose-600 bg-rose-50 border-rose-100',
       icon: X,
@@ -164,10 +170,10 @@ function ResultContent() {
   return (
     <div className="min-h-screen bg-[#eef2ff]">
       <PageHeader
-        pageName="Result"
+        pageName={t('result.page_title')}
         breadcrumbs={[
-          { label: 'Category Grid', href: '/categories' },
-          { label: 'Active Quiz', href: '/categories' },
+          { label: t('categoriesPage.title'), href: '/categories' },
+          { label: t('quiz.page_title'), href: '/categories' },
         ]}
       />
 
@@ -181,13 +187,13 @@ function ResultContent() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[12px] font-black uppercase tracking-[0.24em] text-white/55">
-                  Score Summary
+                  {t('result.score_summary')}
                 </p>
                 <h1 className="mt-2 text-[24px] font-black leading-[1.1] lg:text-[28px]">
-                  Well Done, <span className="opacity-90">{displayName}</span>!
+                  {t('result.well_done', { name: displayName })}
                 </h1>
                 <p className="mt-2 text-sm text-white/70 lg:text-[15px]">
-                  You completed the {categoryName} quiz · {total} questions
+                  {t('result.completed_quiz', { category: categoryName, total })}
                 </p>
                 <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-black text-white/90">
                   <Trophy className="h-4 w-4 text-amber-300" />
@@ -198,20 +204,20 @@ function ResultContent() {
 
             <div className="grid grid-cols-3 gap-2 sm:gap-3 xl:min-w-[450px]">
               <div className="rounded-[22px] border border-white/10 bg-white/10 px-3 py-3 text-center sm:px-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Score</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">{t('result.score')}</p>
                 <p className="mt-2 text-3xl font-black sm:text-[38px]">{earnedPoints}</p>
-                <p className="mt-1 text-xs text-white/55">pts earned</p>
+                <p className="mt-1 text-xs text-white/55">{t('result.pts_earned')}</p>
               </div>
               <div className="rounded-[22px] border border-white/10 bg-white/10 px-3 py-3 text-center sm:px-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Your Rank</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">{t('result.your_rank')}</p>
                 <p className="mt-2 text-3xl font-black text-amber-300 sm:text-[38px]">#{yourRank}</p>
-                <p className="mt-1 text-xs text-white/55">this session</p>
+                <p className="mt-1 text-xs text-white/55">{t('result.this_session')}</p>
               </div>
               <div className="rounded-[22px] border border-white/10 bg-white/10 px-3 py-3 text-center sm:px-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">Accuracy</p>
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">{t('result.accuracy')}</p>
                 <p className="mt-2 text-3xl font-black text-emerald-300 sm:text-[38px]">{accuracy}%</p>
                 <p className="mt-1 text-xs text-white/55">
-                  {score} of {total} right
+                  {t('result.of_right', { score, total })}
                 </p>
               </div>
             </div>
@@ -226,34 +232,34 @@ function ResultContent() {
                 <div className="rounded-[22px] border border-emerald-100 bg-emerald-50 px-4 py-4 text-center">
                   <Check className="mx-auto h-5 w-5 text-emerald-500" />
                   <p className="mt-2 text-3xl font-black text-emerald-600">{score}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Correct</p>
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.correct')}</p>
                 </div>
                 <div className="rounded-[22px] border border-rose-100 bg-rose-50 px-4 py-4 text-center">
                   <X className="mx-auto h-5 w-5 text-rose-500" />
                   <p className="mt-2 text-3xl font-black text-rose-600">{wrongAnswers}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Wrong</p>
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.wrong')}</p>
                 </div>
                 <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-4 text-center">
                   <Flame className="mx-auto h-5 w-5 text-amber-500" />
                   <p className="mt-2 text-3xl font-black text-amber-600">{bestStreak}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Streak</p>
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.streak')}</p>
                 </div>
                 <div className="rounded-[22px] border border-violet-100 bg-violet-50 px-4 py-4 text-center">
                   <Target className="mx-auto h-5 w-5 text-violet-500" />
                   <p className="mt-2 text-3xl font-black text-violet-600">{accuracy}%</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Accuracy</p>
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('result.accuracy')}</p>
                 </div>
                 <div className="rounded-[22px] border border-cyan-100 bg-cyan-50 px-4 py-4 text-center">
                   <Clock3 className="mx-auto h-5 w-5 text-cyan-500" />
                   <p className="mt-2 text-3xl font-black text-cyan-600">{formatTime(timeSpent)}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Time</p>
+                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('result.time')}</p>
                 </div>
               </div>
 
               <div className="rounded-[30px] border border-white/80 bg-white p-5 shadow-sm lg:p-6">
                 <div className="mb-4">
-                  <h2 className="text-2xl font-black text-slate-900">Points Earned</h2>
-                  <p className="mt-1 text-sm text-slate-500">Breakdown of your score this round</p>
+                  <h2 className="text-2xl font-black text-slate-900">{t('result.points_earned')}</h2>
+                  <p className="mt-1 text-sm text-slate-500">{t('result.points_subtitle')}</p>
                 </div>
 
                 <div className="space-y-2.5">
@@ -275,7 +281,7 @@ function ResultContent() {
                         </div>
                         <div
                           className={`rounded-full px-4 py-2 text-sm font-black ${
-                            row.label === 'Wrong Answers'
+                            row.key === 'wrong'
                               ? 'bg-rose-50 text-rose-600'
                               : 'bg-emerald-50 text-emerald-600'
                           }`}
@@ -293,7 +299,7 @@ function ResultContent() {
                   className="mt-4 lg:mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[20px] bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3.5 text-base font-black text-white shadow-[0_18px_45px_rgba(99,102,241,0.24)] transition hover:from-violet-500 hover:to-blue-400"
                 >
                   <Play className="h-4 w-4 fill-white" />
-                  Play Again
+                  {t('result.play_again')}
                 </button>
               </div>
             </div>
@@ -303,7 +309,7 @@ function ResultContent() {
             <div className="flex flex-col gap-5">
               <div className="rounded-[28px] border border-white/80 bg-white p-4 lg:p-5 lg:pb-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Question Map</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('result.question_map')}</p>
                   <span className="text-sm font-semibold text-slate-500">
                     {score}/{total}
                   </span>
@@ -337,11 +343,11 @@ function ResultContent() {
                 <div className="mt-3 flex flex-wrap gap-4 text-xs font-semibold text-slate-500">
                   <span className="inline-flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                    Correct
+                    {t('quiz.correct')}
                   </span>
                   <span className="inline-flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-                    Wrong
+                    {t('quiz.wrong')}
                   </span>
                   <span className="inline-flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
@@ -352,10 +358,10 @@ function ResultContent() {
 
               <div className="rounded-[28px] border border-white/80 bg-white p-4 lg:p-5 lg:pt-4 shadow-sm">
                 <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Live Ranking</p>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('result.live_ranking')}</p>
                   <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.18em] text-rose-500">
                     <span className="h-2 w-2 rounded-full bg-rose-500" />
-                    Live
+                    {t('common.live')}
                   </span>
                 </div>
 
@@ -392,7 +398,7 @@ function ResultContent() {
                   className="mt-3 lg:mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100"
                 >
                   <BarChart3 className="h-4 w-4" />
-                  Leaderboard
+                  {t('result.leaderboard')}
                 </button>
               </div>
             </div>

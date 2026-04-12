@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import {
   buyJokerStock,
   clearCheckoutUrl,
@@ -30,7 +31,7 @@ import { fetchJokerInventory } from '@/store/slices/quizSlice';
 const JOKER_META = {
   fifty_fifty: {
     label: '50 / 50',
-    description: 'Removes 2 wrong answer options',
+    descriptionKey: 'quiz.remove_wrong_answers',
     icon: Scissors,
     cost: 1,
     cardClass: 'from-[#4c2e9f] to-[#3a247a] border-violet-500/30',
@@ -39,7 +40,7 @@ const JOKER_META = {
   },
   skip: {
     label: 'Skip',
-    description: 'Skip this question entirely',
+    descriptionKey: 'quiz.jump_next_question',
     icon: SkipForward,
     cost: 1,
     cardClass: 'from-[#244d80] to-[#1b3b61] border-sky-500/30',
@@ -48,7 +49,7 @@ const JOKER_META = {
   },
   time: {
     label: 'Time',
-    description: 'Adds 10 extra seconds to the timer',
+    descriptionKey: 'quiz.add_extra_time',
     icon: Clock3,
     cost: 1,
     cardClass: 'from-[#36510d] to-[#243b07] border-lime-500/30',
@@ -57,7 +58,7 @@ const JOKER_META = {
   },
   reveal: {
     label: 'Reveal',
-    description: 'Reveals the correct answer instantly',
+    descriptionKey: 'quiz.show_correct_answer',
     icon: Eye,
     cost: 2,
     cardClass: 'from-[#6b3a14] to-[#4f290b] border-orange-500/30',
@@ -95,6 +96,7 @@ function ShopContent() {
     jokerPurchaseResult,
     error,
   } = useSelector((state) => state.shop);
+  const { t } = useI18n();
 
   const qeemBalance = user?.qeemBalance ?? user?.qeem_balance ?? 0;
   const packageList = useMemo(() => Object.entries(packages), [packages]);
@@ -134,25 +136,25 @@ function ShopContent() {
 
   return (
     <div className="min-h-screen bg-[#eef2ff]">
-      <PageHeader pageName="The Shop" breadcrumbs={[]} />
+      <PageHeader pageName={t('shop.page_title')} breadcrumbs={[]} />
 
       <div className="mx-auto max-w-[1440px] px-4 pb-20 pt-4 lg:px-8 lg:pb-10">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-[32px] font-black tracking-tight text-slate-900">The Shop</h1>
+            <h1 className="text-[32px] font-black tracking-tight text-slate-900">{t('shop.title')}</h1>
             <p className="mt-1 text-sm font-medium text-slate-500">
-              Buy Qeem packages — powered by Tap Payment Gateway
+              {t('shop.subtitle')}
             </p>
           </div>
 
           <div className="rounded-[20px] border border-violet-100 bg-white px-5 py-4 shadow-sm">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400">
-              Qeem Balance
+              {t('common.qeem_balance')}
             </p>
             <div className="mt-1 flex items-center justify-between gap-6">
               <div>
                 <p className="text-[34px] font-black leading-none text-slate-900">{qeemBalance}</p>
-                <p className="mt-1 text-xs text-slate-500">Available coins</p>
+                <p className="mt-1 text-xs text-slate-500">{t('common.available_coins')}</p>
               </div>
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-xl">
                 🪙
@@ -168,7 +170,7 @@ function ShopContent() {
                 <ShieldCheck className="h-6 w-6 text-emerald-300" />
               </div>
               <div>
-                <p className="text-lg font-black">Secured by Tap Payment Gateway</p>
+                <p className="text-lg font-black">{t('shop.secured_tap')}</p>
                 <p className="mt-1 text-sm text-white/70">
                   All transactions processed securely in KWD currency via Tap Payment Integration
                 </p>
@@ -177,13 +179,13 @@ function ShopContent() {
 
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em]">
-                KWD Currency
+                {t('shop.kwd_currency')}
               </span>
               <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em]">
-                Instant Top-Up
+                {t('shop.instant_topup')}
               </span>
               <span className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-black uppercase tracking-[0.18em]">
-                Tap Integration
+                {t('shop.tap_integration')}
               </span>
             </div>
           </div>
@@ -197,9 +199,9 @@ function ShopContent() {
 
         <section>
           <div className="mb-5">
-            <h2 className="text-[30px] font-black tracking-tight text-slate-900">Qeem Packages</h2>
+            <h2 className="text-[30px] font-black tracking-tight text-slate-900">{t('shop.qeem_packages')}</h2>
             <p className="mt-1 text-sm text-slate-500">
-              Choose a package — Qeem coins are credited instantly after payment
+              {t('shop.choose_package')}
             </p>
           </div>
 
@@ -232,7 +234,7 @@ function ShopContent() {
 
                     <div className={`mt-4 rounded-[18px] px-4 py-4 text-center ${pkg.badgeClass}`}>
                       <p className="text-[42px] font-black leading-none">{pkg.qeem}</p>
-                      <p className="mt-1 text-xs font-black uppercase tracking-[0.18em]">Qeem</p>
+                      <p className="mt-1 text-xs font-black uppercase tracking-[0.18em]">{t('common.qeem')}</p>
                     </div>
 
                     <p className="mt-4 text-center text-[34px] font-black text-slate-900">
@@ -253,7 +255,7 @@ function ShopContent() {
                       className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[16px] bg-gradient-to-r ${pkg.buttonClass} px-4 py-3 text-sm font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
                     >
                       <ShoppingCart className="h-4 w-4" />
-                      {loadingPackage === packageKey ? 'Redirecting...' : 'Buy'}
+                      {loadingPackage === packageKey ? t('common.redirecting') : t('common.buy')}
                     </button>
                   </article>
                 ))}
@@ -262,7 +264,7 @@ function ShopContent() {
 
         <section className="mt-8">
           <div className="mb-5">
-            <h2 className="text-[30px] font-black tracking-tight text-slate-900">Joker System</h2>
+            <h2 className="text-[30px] font-black tracking-tight text-slate-900">{t('shop.joker_system')}</h2>
             <p className="mt-1 text-sm text-slate-500">
               50/50, Skip, Time, Reveal — deduct from inventory or balance
             </p>
@@ -284,14 +286,14 @@ function ShopContent() {
                       <Icon className="h-5 w-5" />
                     </div>
                     <span className={`rounded-full px-3 py-1 text-xs font-black ${meta.badgeClass}`}>
-                      {isEmpty ? 'x0 — Empty' : `x${stock} in stock`}
+                      {isEmpty ? t('shop.empty') : t('shop.in_stock', { count: stock })}
                     </span>
                   </div>
 
                   <h3 className="text-[28px] font-black">{meta.label}</h3>
-                  <p className="mt-3 min-h-[44px] text-sm leading-6 text-white/65">{meta.description}</p>
+                  <p className="mt-3 min-h-[44px] text-sm leading-6 text-white/65">{t(meta.descriptionKey)}</p>
                   <p className="mt-5 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-amber-200">
-                    {meta.cost} Qeem each
+                    {t('shop.qeem_each', { count: meta.cost })}
                   </p>
 
                   <button
@@ -301,7 +303,7 @@ function ShopContent() {
                     className={`mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[16px] bg-gradient-to-r ${meta.buttonClass} px-4 py-3 text-sm font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <BadgeDollarSign className="h-4 w-4" />
-                    {loadingJoker === jokerType ? 'Buying...' : 'Buy'}
+                    {loadingJoker === jokerType ? t('common.loading') : t('common.buy')}
                   </button>
                 </article>
               );

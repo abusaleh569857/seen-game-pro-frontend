@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -100,8 +101,8 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
                       currentLanguage.code === lang.code ? 'bg-violet-50 text-violet-600' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="h-[10px] w-[14px] overflow-hidden rounded-[2px] shadow-sm">
-                      <img src={lang.flag} alt={lang.englishLabel} className="h-full w-full object-cover" />
+                    <div className="relative h-[10px] w-[14px] overflow-hidden rounded-[2px] shadow-sm">
+                      <Image src={lang.flag} alt={lang.englishLabel} fill className="object-cover" />
                     </div>
                     <span>{lang.nativeLabel}</span>
                   </button>
@@ -162,8 +163,8 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
                       currentLanguage.code === lang.code ? 'bg-violet-50 text-violet-600' : 'text-gray-600 hover:bg-gray-50'
                     }`}
                   >
-                    <div className="h-[10px] w-[14px] overflow-hidden rounded-[2px] shadow-sm">
-                      <img src={lang.flag} alt={lang.englishLabel} className="h-full w-full object-cover" />
+                    <div className="relative h-[10px] w-[14px] overflow-hidden rounded-[2px] shadow-sm">
+                      <Image src={lang.flag} alt={lang.englishLabel} fill className="object-cover" />
                     </div>
                     <span>{lang.nativeLabel}</span>
                   </button>

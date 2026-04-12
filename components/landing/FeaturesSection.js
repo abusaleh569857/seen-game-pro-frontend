@@ -1,98 +1,102 @@
 'use client';
+
 import { motion } from 'framer-motion';
 import { Trophy, Zap, Coins, Layers, Globe, Shield, Crown, Bot } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 const FEATURES = [
   {
     icon: <Trophy size={18} className="text-yellow-500" />,
     bg: 'bg-yellow-500/10',
-    title: 'Live Tournaments',
-    desc: 'Scheduled group competitions across all 15 categories. Free entry, real Qeem prizes paid via Tap Payment.',
+    titleKey: 'landing.live_tournaments',
+    descKey: 'landing.live_tournaments_desc',
   },
   {
     icon: <Zap size={18} className="text-purple-400" />,
     bg: 'bg-purple-500/10',
-    title: '1v1 Challenge System',
-    desc: 'Challenge pro friends or a random wager. Pay entry in Qeem, winner takes some until winner is declared.',
+    titleKey: 'landing.challenge_system',
+    descKey: 'landing.challenge_system_desc',
   },
   {
     icon: <Coins size={18} className="text-orange-400" />,
     bg: 'bg-orange-500/10',
-    title: 'Qeem Coin Economy',
-    desc: 'Buy Qeem, wager on challenges, earn tournament prizes. Secure payments via Tap Gateway in KWD.',
+    titleKey: 'landing.qeem_economy',
+    descKey: 'landing.qeem_economy_desc',
   },
   {
     icon: <Layers size={18} className="text-green-400" />,
     bg: 'bg-green-500/10',
-    title: 'Joker Power-Ups',
-    desc: '50/50, Skip, Time and Reveal jokers — from your inventory first, then Qeem balance. Strategy is key.',
+    titleKey: 'landing.joker_powerups',
+    descKey: 'landing.joker_powerups_desc',
   },
   {
     icon: <Globe size={18} className="text-cyan-400" />,
     bg: 'bg-cyan-500/10',
-    title: '4 Languages · RTL',
-    desc: 'Arabic (default), English, French, Spanish. Flawless RTL layout for Arabic — designed Mobile-First from the ground up.',
+    titleKey: 'landing.languages_rtl',
+    descKey: 'landing.languages_rtl_desc',
   },
   {
     icon: <Shield size={18} className="text-red-400" />,
     bg: 'bg-red-500/10',
-    title: 'Clan & Group Play',
-    desc: 'Join QuizClans or create your own clan. Aggregate scores, rule the group leaderboards and dominate rivals.',
+    titleKey: 'landing.clan_play',
+    descKey: 'landing.clan_play_desc',
   },
   {
     icon: <Crown size={18} className="text-pink-400" />,
     bg: 'bg-pink-500/10',
-    title: 'VIP Subscription',
-    desc: 'Monthly token allowance, 5-10% Qeem match back, exclusive badges, frames and leaderboard priority.',
+    titleKey: 'landing.vip_subscription',
+    descKey: 'landing.vip_subscription_desc',
   },
   {
     icon: <Bot size={18} className="text-blue-400" />,
     bg: 'bg-blue-500/10',
-    title: 'AI Question Engine',
-    desc: 'Admin generates 10 fresh questions per category per batch via OpenAI. Content always culturally appropriate.',
+    titleKey: 'landing.ai_engine',
+    descKey: 'landing.ai_engine_desc',
   },
 ];
 
 export default function FeaturesSection() {
+  const { t } = useI18n();
+
   return (
-    <section className="w-full pt-4 pb-12 px-4 lg:px-10">
-      <div className="w-full max-w-6xl mx-auto flex flex-col items-start sm:items-center">
-        <p className="text-[11px] font-bold tracking-[2px] uppercase text-white/40 mb-3 text-left sm:text-center w-full sm:w-auto">
-          Everything You Need
+    <section className="w-full pb-12 pt-4 px-4 lg:px-10">
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-start sm:items-center">
+        <p className="mb-3 w-full text-left text-[11px] font-bold uppercase tracking-[2px] text-white/40 sm:w-auto sm:text-center">
+          {t('landing.everything_you_need')}
         </p>
 
-        <h2 className="hidden sm:block text-[32px] sm:text-[40px] lg:text-[44px] font-black tracking-tight text-white mb-4 leading-[1.1] text-center w-full">
-          Built for competitive players
+        <h2 className="mb-4 hidden w-full text-center text-[32px] font-black leading-[1.1] tracking-tight text-white sm:block sm:text-[40px] lg:text-[44px]">
+          {t('landing.built_for_competitive_players')}
         </h2>
-        <p className="hidden sm:block text-[14px] lg:text-[15px] font-medium text-white/50 max-w-[600px] mb-16 text-center leading-relaxed">
-          From casual quizzes to high-stakes tournaments — Seen Game Pro has everything you need to compete and earn.
+        <p className="mb-16 hidden max-w-[600px] text-center text-[14px] font-medium leading-relaxed text-white/50 sm:block lg:text-[15px]">
+          {t('landing.built_for_competitive_players_subtitle')}
         </p>
 
-        <h2 className="block sm:hidden text-[32px] font-black tracking-tight text-white mb-4 leading-[1.1] text-left w-full">
-          Built to win
+        <h2 className="mb-4 block w-full text-left text-[32px] font-black leading-[1.1] tracking-tight text-white sm:hidden">
+          {t('landing.built_to_win')}
         </h2>
-        <p className="block sm:hidden text-[14px] font-medium text-white/50 max-w-[600px] mb-12 text-left leading-relaxed w-full">
-          From casual quizzes to live tournaments —<br/>compete and earn.
+        <p className="mb-12 block w-full max-w-[600px] text-left text-[14px] font-medium leading-relaxed text-white/50 sm:hidden">
+          {t('landing.built_to_win_subtitle')}
         </p>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-          {FEATURES.map((feat, i) => (
+        <div className="grid w-full grid-cols-2 gap-4 lg:grid-cols-4">
+          {FEATURES.map((feature, index) => (
             <motion.div
-              key={i}
+              key={feature.titleKey}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.4 }}
-              className="flex flex-col p-6 rounded-[20px] bg-gray-900 border border-white/5 hover:brightness-125 transition-all"
+              transition={{ delay: index * 0.1, duration: 0.4 }}
+              className="flex flex-col rounded-[20px] border border-white/5 bg-gray-900 p-6 transition-all hover:brightness-125"
             >
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full ${feat.bg} mb-5`}>
-                {feat.icon}
+              <div className={`mb-5 flex h-10 w-10 items-center justify-center rounded-full ${feature.bg}`}>
+                {feature.icon}
               </div>
-              <h3 className="text-[16px] font-bold text-white mb-2 leading-snug tracking-tight">
-                {feat.title}
+              <h3 className="mb-2 text-[16px] font-bold leading-snug tracking-tight text-white">
+                {t(feature.titleKey)}
               </h3>
-              <p className="text-[13px] font-medium text-white/50 leading-relaxed">
-                {feat.desc}
+              <p className="text-[13px] font-medium leading-relaxed text-white/50">
+                {t(feature.descKey)}
               </p>
             </motion.div>
           ))}
