@@ -5,16 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  Check,
-} from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, Check } from "lucide-react";
 
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import LoginVisualPanel from "@/components/auth/LoginVisualPanel";
+import { useI18n } from "@/lib/i18n";
 import { normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken, getFacebookAccessToken } from "@/lib/socialAuth";
 import { clearError, loginUser, socialAuthUser } from "@/store/slices/authSlice";
@@ -29,6 +24,7 @@ function LoginForm() {
   const registered = searchParams.get("registered");
   const { loading, error, isLoggedIn, user } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const { t } = useI18n();
 
   const [lang, setLang] = useState(selectedLang);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +36,7 @@ function LoginForm() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push(user?.role === 'admin' ? '/admin' : '/');
+      router.push(user?.role === "admin" ? "/admin" : "/");
     }
     return () => {
       dispatch(clearError());
@@ -59,7 +55,7 @@ function LoginForm() {
     event.preventDefault();
 
     if (!form.email || !form.password) {
-      window.alert("Please fill in all fields.");
+      window.alert(t("auth.please_fill_all"));
       return;
     }
 
@@ -67,7 +63,7 @@ function LoginForm() {
       loginUser({
         email: form.email,
         password: form.password,
-      })
+      }),
     );
 
     if (loginUser.fulfilled.match(result)) {
@@ -80,14 +76,12 @@ function LoginForm() {
       setSocialLoading("google");
       dispatch(clearError());
       const token = await getGoogleAccessToken();
-      const result = await dispatch(
-        socialAuthUser({ provider: "google", token })
-      );
+      const result = await dispatch(socialAuthUser({ provider: "google", token }));
       if (socialAuthUser.fulfilled.match(result)) {
         router.push("/");
       }
     } catch (socialError) {
-      window.alert(socialError.message || "Google login failed.");
+      window.alert(socialError.message || t("auth.google_login_failed"));
     } finally {
       setSocialLoading("");
     }
@@ -98,14 +92,12 @@ function LoginForm() {
       setSocialLoading("facebook");
       dispatch(clearError());
       const token = await getFacebookAccessToken();
-      const result = await dispatch(
-        socialAuthUser({ provider: "facebook", token })
-      );
+      const result = await dispatch(socialAuthUser({ provider: "facebook", token }));
       if (socialAuthUser.fulfilled.match(result)) {
         router.push("/");
       }
     } catch (socialError) {
-      window.alert(socialError.message || "Facebook login failed.");
+      window.alert(socialError.message || t("auth.facebook_login_failed"));
     } finally {
       setSocialLoading("");
     }
@@ -113,41 +105,36 @@ function LoginForm() {
 
   return (
     <div className="relative min-h-screen w-full bg-surface-2 text-text-1">
-      <div className="relative z-10 mx-auto flex flex-col lg:grid min-h-screen w-full max-w-[1440px] lg:grid-cols-2">
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1440px] flex-col lg:grid lg:grid-cols-2">
         <LoginVisualPanel />
 
-        <section className="flex lg:min-h-screen h-full flex-col items-center justify-start lg:justify-center bg-surface-2 px-5 py-6 sm:px-6 md:px-8 md:py-8 lg:px-12 xl:px-16 2xl:px-20 z-20">
+        <section className="z-20 flex h-full flex-col items-center justify-start bg-surface-2 px-5 py-6 lg:min-h-screen lg:justify-center lg:px-12 xl:px-16 2xl:px-20 sm:px-6 md:px-8 md:py-8">
           <div className="w-full max-w-[480px]">
-
             <motion.div
               initial={{ opacity: 0, x: 18 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-transparent lg:bg-surface-1 rounded-none lg:rounded-[18px] border-none lg:border-solid lg:border lg:border-border-1 shadow-none lg:shadow-lg lg:px-7 px-0 py-2 lg:py-6 xl:px-8 xl:py-7 w-full"
+              className="w-full rounded-none border-none bg-transparent px-0 py-2 shadow-none lg:rounded-[18px] lg:border lg:border-border-1 lg:bg-surface-1 lg:px-7 lg:py-6 lg:shadow-lg xl:px-8 xl:py-7"
             >
-              {/* Desktop Header */}
-              <header className="mb-5 sm:mb-6 hidden lg:block">
-                <p className="mb-1.5 md:mb-2 text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] md:tracking-[0.22em] text-text-3">
-                  Welcome Back
+              <header className="mb-5 hidden lg:block sm:mb-6">
+                <p className="mb-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-text-3 md:mb-2 md:text-[11px] md:tracking-[0.22em]">
+                  {t("auth.welcome_back")}
                 </p>
-                <h1 className="text-[26px] sm:text-[31px] xl:text-[33px] font-black leading-tight tracking-tighter text-text-1">
-                  Log in to your account
+                <h1 className="text-[26px] font-black leading-tight tracking-tighter text-text-1 sm:text-[31px] xl:text-[33px]">
+                  {t("auth.login_title")}
                 </h1>
-                <p className="mt-2 md:mt-2.5 text-[13px] sm:text-[14px] xl:text-[15px] font-medium text-text-2">
-                  Ready to earn some Qeem coins today? Let&apos;s go!
+                <p className="mt-2 text-[13px] font-medium text-text-2 md:mt-2.5 sm:text-[14px] xl:text-[15px]">
+                  {t("auth.login_subtitle")}
                 </p>
               </header>
 
-              {/* Mobile Header per Screenshot */}
               <header className="mb-5 block lg:hidden">
                 <p className="mb-1 text-[11px] font-extrabold uppercase tracking-widest text-[#6B7280]">
-                  WELCOME BACK
+                  {t("auth.welcome_back")}
                 </p>
-                <h1 className="text-[24px] font-bold text-[#111827] tracking-tight">
-                  Login to Seen Game Pro
+                <h1 className="text-[24px] font-bold tracking-tight text-[#111827]">
+                  {t("auth.mobile_login_title")}
                 </h1>
-                <p className="mt-1 text-[13px] text-[#6B7280]">
-                  Email or username · your Qeem balance awaits
-                </p>
+                <p className="mt-1 text-[13px] text-[#6B7280]">{t("auth.mobile_login_subtitle")}</p>
               </header>
 
               <LanguageTabs active={lang} onChange={setLang} />
@@ -155,7 +142,7 @@ function LoginForm() {
               {registered ? (
                 <div className="mt-4 flex items-start gap-3 rounded-[14px] border border-semantic-green bg-semantic-green-bg px-4 py-3 text-[12px] font-medium text-semantic-green shadow-sm sm:mt-5 sm:text-[13px]">
                   <Check className="mt-0.5 h-4 w-4 shrink-0" />
-                  <p>Account created successfully! Please log in.</p>
+                  <p>{t("auth.account_created")}</p>
                 </div>
               ) : null}
 
@@ -167,33 +154,30 @@ function LoginForm() {
 
               <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
                 <div className="space-y-1.5 lg:space-y-2">
-                  <label className="text-[12px] font-bold text-[#4B5563] lg:font-semibold lg:text-text-1 sm:text-[13px]">
-                    <span className="hidden lg:inline">Email Address</span>
-                    <span className="inline lg:hidden">Email or Username</span>
+                  <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
+                    <span className="hidden lg:inline">{t("auth.email_address")}</span>
+                    <span className="inline lg:hidden">{t("auth.email_or_username")}</span>
                   </label>
                   <Input
                     type="email"
                     icon={Mail}
                     value={form.email}
-                    onChange={(event) =>
-                      setForm({ ...form, email: event.target.value })
-                    }
-                    placeholder="your@email.com or username"
+                    onChange={(event) => setForm({ ...form, email: event.target.value })}
+                    placeholder="your@email.com"
                   />
                 </div>
 
                 <div className="space-y-1.5 lg:space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-[12px] font-bold text-[#4B5563] lg:font-semibold lg:text-text-1 sm:text-[13px]">
-                      Password
+                    <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
+                      {t("auth.password")}
                     </label>
-                    {/* Desktop Forgot Password */}
                     <Link
                       href="/forgot-password"
-                      className="hidden lg:flex text-[11px] font-medium text-brand hover:brightness-110 sm:text-[12px]"
+                      className="hidden text-[11px] font-medium text-brand hover:brightness-110 sm:text-[12px] lg:flex"
                       tabIndex={-1}
                     >
-                      Forgot password?
+                      {t("auth.forgot_password")}
                     </Link>
                   </div>
                   <div className="relative">
@@ -201,10 +185,8 @@ function LoginForm() {
                       type={showPassword ? "text" : "password"}
                       icon={Lock}
                       value={form.password}
-                      onChange={(event) =>
-                        setForm({ ...form, password: event.target.value })
-                      }
-                      placeholder="Enter your password"
+                      onChange={(event) => setForm({ ...form, password: event.target.value })}
+                      placeholder={t("auth.password")}
                       className="pr-14"
                     />
                     <button
@@ -215,13 +197,9 @@ function LoginForm() {
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {/* Mobile Forgot Password */}
-                  <div className="mt-2 text-right block lg:hidden">
-                    <Link
-                      href="/forgot-password"
-                      className="text-[13px] font-bold text-[#4E5BFF]"
-                    >
-                      Forgot password?
+                  <div className="mt-2 block text-right lg:hidden">
+                    <Link href="/forgot-password" className="text-[13px] font-bold text-[#4E5BFF]">
+                      {t("auth.forgot_password")}
                     </Link>
                   </div>
                 </div>
@@ -230,13 +208,15 @@ function LoginForm() {
                   type="submit"
                   disabled={loading || !!socialLoading}
                   variant="primary"
-                  className="w-full h-[48px] lg:h-[58px] mt-4 rounded-xl lg:rounded-[20px] text-[15px] font-bold tracking-wide"
-                  style={{ background: 'linear-gradient(90deg, #6248FF 0%, #486CFF 100%)' }}
+                  className="mt-4 h-[48px] w-full rounded-xl text-[15px] font-bold tracking-wide lg:h-[58px] lg:rounded-[20px]"
+                  style={{ background: "linear-gradient(90deg, #6248FF 0%, #486CFF 100%)" }}
                 >
-                  {loading && !socialLoading ? "Logging in..." : (
+                  {loading && !socialLoading ? (
+                    t("auth.logging_in")
+                  ) : (
                     <span className="flex items-center justify-center gap-2">
-                      <span className="lg:hidden">→</span>
-                      Log In
+                      <span className="lg:hidden">&rarr;</span>
+                      {t("auth.login_button")}
                     </span>
                   )}
                 </Button>
@@ -246,21 +226,19 @@ function LoginForm() {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-border-1" />
                 </div>
-                <div className="relative mt-5 mb-5 lg:mt-6 lg:mb-6 flex items-center justify-center">
-                  <span className="relative bg-surface-2 lg:bg-surface-1 px-4 text-[13px] font-medium text-text-3">
-                    <span className="hidden lg:inline">or continue with</span>
-                    <span className="inline lg:hidden">or</span>
+                <div className="relative mb-5 mt-5 flex items-center justify-center lg:mb-6 lg:mt-6">
+                  <span className="relative bg-surface-2 px-4 text-[13px] font-medium text-text-3 lg:bg-surface-1">
+                    {t("auth.or_continue_with")}
                   </span>
                 </div>
               </div>
 
-              {/* Social Login Buttons Side-by-Side (Desktop & Mobile) */}
-              <div className="mt-4 grid grid-cols-2 gap-3 w-full">
+              <div className="mt-4 grid w-full grid-cols-2 gap-3">
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
                   disabled={loading || !!socialLoading}
-                  className="flex items-center justify-center h-[46px] sm:h-[52px] rounded-xl lg:rounded-[16px] bg-white border border-border-1 text-[13px] sm:text-[14px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex h-[46px] items-center justify-center rounded-xl border border-border-1 bg-white text-[13px] font-bold text-[#374151] shadow-sm transition-colors hover:bg-gray-50 sm:h-[52px] sm:text-[14px] lg:rounded-[16px]"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2 sm:mr-3">
                     <path d="M23.766 12.2764C23.766 11.4607 23.6999 10.6406 23.5588 9.83807H12.24V14.4591H18.7217C18.4558 15.9119 17.5888 17.1589 16.3414 17.9711V20.9701H20.1794C22.4339 18.906 23.766 15.8563 23.766 12.2764Z" fill="#4285F4"/>
@@ -274,7 +252,7 @@ function LoginForm() {
                   type="button"
                   onClick={handleFacebookLogin}
                   disabled={loading || !!socialLoading}
-                  className="flex items-center justify-center h-[46px] sm:h-[52px] rounded-xl lg:rounded-[16px] bg-white border border-border-1 text-[13px] sm:text-[14px] font-bold text-[#374151] hover:bg-gray-50 transition-colors shadow-sm"
+                  className="flex h-[46px] items-center justify-center rounded-xl border border-border-1 bg-white text-[13px] font-bold text-[#374151] shadow-sm transition-colors hover:bg-gray-50 sm:h-[52px] sm:text-[14px] lg:rounded-[16px]"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2 sm:mr-3">
                     <path d="M24 12.073C24 5.405 18.627 0 12 0C5.372 0 0 5.405 0 12.073C0 18.101 4.418 23.094 10.125 24V15.56H7.078V12.073H10.125V9.418C10.125 6.388 11.916 4.717 14.657 4.717C15.97 4.717 17.343 4.953 17.343 4.953V7.935H15.829C14.339 7.935 13.875 8.868 13.875 9.829V12.073H17.187L16.658 15.56H13.875V24C19.582 23.094 24 18.101 24 12.073Z" fill="#1877F2"/>
@@ -284,12 +262,9 @@ function LoginForm() {
               </div>
 
               <p className="mt-6 text-center text-[13px] font-medium text-text-2">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/register"
-                  className="font-bold text-[#4E5BFF] hover:brightness-110 ml-1"
-                >
-                  Create account →
+                {t("auth.dont_have_account")}{" "}
+                <Link href="/register" className="ml-1 font-bold text-[#4E5BFF] hover:brightness-110">
+                  {t("auth.create_account_link")}
                 </Link>
               </p>
             </motion.div>

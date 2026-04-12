@@ -13,11 +13,13 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { fetchAdminStats } from '@/store/slices/adminSlice';
 
 function AdminContent() {
   const dispatch = useDispatch();
   const { stats, statsLoading } = useSelector((state) => state.admin);
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchAdminStats());
@@ -25,25 +27,25 @@ function AdminContent() {
 
   const statCards = [
     {
-      label: 'Total Users',
+      label: t('admin.total_users'),
       value: stats?.totalUsers,
       icon: <Users className="w-8 h-8 text-blue-400" />,
       color: 'border-blue-700 bg-blue-900/20',
     },
     {
-      label: 'Questions',
+      label: t('admin.questions_total'),
       value: stats?.totalQuestions,
       icon: <BookOpen className="w-8 h-8 text-purple-400" />,
       color: 'border-purple-700 bg-purple-900/20',
     },
     {
-      label: 'Games Played',
+      label: t('admin.games_played'),
       value: stats?.totalGames,
       icon: <Gamepad2 className="w-8 h-8 text-green-400" />,
       color: 'border-green-700 bg-green-900/20',
     },
     {
-      label: 'Revenue (KWD)',
+      label: t('admin.revenue_kwd'),
       value: Number.parseFloat(stats?.totalRevenue || 0).toFixed(2),
       icon: <CreditCard className="w-8 h-8 text-yellow-400" />,
       color: 'border-yellow-700 bg-yellow-900/20',
@@ -54,20 +56,20 @@ function AdminContent() {
     {
       href: '/admin/ai-generator',
       icon: <Sparkles className="w-10 h-10 text-pink-500" />,
-      label: 'AI Generator',
-      desc: 'Generate questions with Gemini AI',
+      label: t('admin.ai_generator_nav'),
+      desc: t('admin.ai_generator_desc'),
     },
     {
       href: '/admin/questions',
       icon: <BookOpen className="w-10 h-10 text-purple-400" />,
-      label: 'Questions Management',
-      desc: 'Edit and delete questions',
+      label: t('admin.questions_management'),
+      desc: t('admin.questions_management_desc'),
     },
     {
       href: '/admin/users',
       icon: <Users className="w-10 h-10 text-blue-400" />,
-      label: 'User Management',
-      desc: 'Manage and ban users',
+      label: t('admin.user_management'),
+      desc: t('admin.user_management_desc'),
     },
   ];
 
@@ -82,8 +84,8 @@ function AdminContent() {
               <LayoutDashboard className="w-10 h-10 text-purple-500" />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold tracking-tight">Admin Dashboard</h1>
-              <p className="text-gray-400 mt-1">Manage your quiz platform analytics and content</p>
+              <h1 className="text-4xl font-extrabold tracking-tight">{t('admin.dashboard_title')}</h1>
+              <p className="text-gray-400 mt-1">{t('admin.dashboard_subtitle')}</p>
             </div>
           </div>
 
@@ -115,7 +117,7 @@ function AdminContent() {
 
           {/* Management Selection */}
           <h2 className="mb-8 text-sm font-bold text-gray-500 uppercase tracking-[0.3em] flex items-center gap-4">
-            Management Control
+            {t('admin.management_control')}
             <div className="h-[1px] flex-grow bg-gray-800"></div>
           </h2>
           

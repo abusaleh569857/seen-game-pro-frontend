@@ -2,80 +2,80 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Search, 
-  Play, 
-  Flame, 
-  Gamepad2, 
-  Globe2, 
-  BookOpen, 
-  Music, 
-  Brush, 
-  Microscope, 
-  User, 
-  Building2, 
-  Pizza, 
-  Car, 
-  Monitor, 
-  Coffee 
+import {
+  Search,
+  Play,
+  Flame,
+  Gamepad2,
+  Globe2,
+  BookOpen,
+  Music,
+  Brush,
+  Microscope,
+  User,
+  Building2,
+  Pizza,
+  Car,
+  Monitor,
+  Coffee,
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
+import { getLocalizedCategoryName, isRtlLanguage } from '@/lib/languages';
 import { fetchCategories } from '@/store/slices/quizSlice';
 import { useRouter } from 'next/navigation';
-import { getLocalizedCategoryName, isRtlLanguage } from '@/lib/languages';
 
-// Mapping icons for common categories
 const ICON_MAP = {
-  'Sports': Gamepad2, // Fallback
+  Sports: Gamepad2,
   'Sports & Nature': Gamepad2,
-  'History': BookOpen,
-  'Science': Microscope,
-  'Geography': Globe2,
-  'Culture': Coffee,
-  'Arts': Brush,
-  'Entertainment': Play,
-  'Nature': Flame,
-  'Technology': Monitor,
-  'Food': Pizza,
-  'Cars': Car,
-  'Business': Building2,
-  'Games': Gamepad2,
-  'Music': Music,
-  'General': User,
+  History: BookOpen,
+  Science: Microscope,
+  Geography: Globe2,
+  Culture: Coffee,
+  Arts: Brush,
+  Entertainment: Play,
+  Nature: Flame,
+  Technology: Monitor,
+  Food: Pizza,
+  Cars: Car,
+  Business: Building2,
+  Games: Gamepad2,
+  Music: Music,
+  General: User,
 };
 
-// Mapping category names to colors for top border
 const COLOR_MAP = {
-  'Sports': 'border-t-[#16A34A]',
-  'History': 'border-t-[#D97706]',
-  'Science': 'border-t-[#0D9488]',
-  'Geography': 'border-t-[#4B7BEE]',
-  'Culture': 'border-t-[#A855F7]',
-  'Arts': 'border-t-[#EC4899]',
-  'Entertainment': 'border-t-[#EF4444]',
-  'Nature': 'border-t-[#10B981]',
-  'Technology': 'border-t-[#3B82F6]',
-  'Food': 'border-t-[#F59E0B]',
-  'Cars': 'border-t-[#EF4444]',
-  'Business': 'border-t-[#8B5CF6]',
-  'Games': 'border-t-[#10B981]',
-  'Music': 'border-t-[#EC4899]',
-  'General': 'border-t-[#64748B]',
+  Sports: 'border-t-[#16A34A]',
+  History: 'border-t-[#D97706]',
+  Science: 'border-t-[#0D9488]',
+  Geography: 'border-t-[#4B7BEE]',
+  Culture: 'border-t-[#A855F7]',
+  Arts: 'border-t-[#EC4899]',
+  Entertainment: 'border-t-[#EF4444]',
+  Nature: 'border-t-[#10B981]',
+  Technology: 'border-t-[#3B82F6]',
+  Food: 'border-t-[#F59E0B]',
+  Cars: 'border-t-[#EF4444]',
+  Business: 'border-t-[#8B5CF6]',
+  Games: 'border-t-[#10B981]',
+  Music: 'border-t-[#EC4899]',
+  General: 'border-t-[#64748B]',
 };
 
 const FILTERS = [
-  { id: 'all', label: 'All 15', icon: null },
-  { id: 'popular', label: 'Popular', icon: Flame },
-  { id: 'sports', label: 'Sports & Nature', icon: Gamepad2 },
-  { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
-  { id: 'culture', label: 'Culture & Arts', icon: Brush },
-  { id: 'business', label: 'Tech & Business', icon: Building2 },
+  { id: 'all', key: 'all', icon: null },
+  { id: 'popular', key: 'popular', icon: Flame },
+  { id: 'sports', key: 'sports', icon: Gamepad2 },
+  { id: 'knowledge', key: 'knowledge', icon: BookOpen },
+  { id: 'culture', key: 'culture', icon: Brush },
+  { id: 'business', key: 'business', icon: Building2 },
 ];
 
 function CategoriesContent() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { t } = useI18n();
   const { categories, categoriesLoading, selectedLang } = useSelector((state) => state.quiz);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
@@ -92,7 +92,6 @@ function CategoriesContent() {
   const filteredCategories = categories.filter((cat) => {
     const localizedName = getLocalizedCategoryName(cat, selectedLang).toLowerCase();
     const query = searchQuery.toLowerCase();
-
     return (
       localizedName.includes(query) ||
       cat.name_en?.toLowerCase().includes(query) ||
@@ -102,55 +101,53 @@ function CategoriesContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
-      <PageHeader pageName="Game Categories" />
+      <PageHeader pageName={t('categoriesPage.page_title')} />
 
       <div className={`max-w-[1440px] mx-auto px-4 lg:px-8 mt-6 ${isRTL ? 'text-right' : ''}`}>
-        {/* Header Section */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-black text-gray-900">Category Grid</h2>
-            <p className="text-[13px] text-gray-400 font-medium">Choose a category to start your quiz — 10 questions per round</p>
+            <h2 className="text-2xl font-black text-gray-900">{t('categoriesPage.title')}</h2>
+            <p className="text-[13px] text-gray-400 font-medium">{t('categoriesPage.subtitle')}</p>
           </div>
-          <button 
+          <button
             className="flex items-center justify-center gap-2 bg-violet-600 text-white px-6 py-2.5 rounded-2xl font-bold hover:bg-violet-700 transition shadow-lg shadow-violet-500/20 w-fit"
             onClick={() => filteredCategories[0] && handleStartQuiz(filteredCategories[0].id)}
           >
             <Play className="w-4 h-4 fill-white" />
-            Start Quiz
+            {t('categoriesPage.start_quiz')}
           </button>
         </div>
 
-        {/* Search Bar */}
         <div className="relative mb-6">
           <Search className={`absolute top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${isRTL ? 'right-4' : 'left-4'}`} />
-          <input 
+          <input
             type="text"
-            placeholder="Search categories..."
+            placeholder={t('categoriesPage.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full py-3.5 rounded-2xl border border-gray-100 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 transition shadow-sm text-[15px] font-medium placeholder:text-gray-400 ${isRTL ? 'pr-12 pl-4 text-right' : 'pl-12 pr-4'}`}
           />
         </div>
 
-        {/* Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar mb-6">
           {FILTERS.map((filter) => (
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
               className={`flex items-center gap-2 px-5 py-2 rounded-full whitespace-nowrap text-[13px] font-bold transition-all border ${
-                activeFilter === filter.id 
-                  ? 'bg-violet-600 text-white border-violet-600' 
+                activeFilter === filter.id
+                  ? 'bg-violet-600 text-white border-violet-600'
                   : 'bg-white text-gray-500 border-gray-100 hover:border-gray-200'
               }`}
             >
-              {filter.icon && <filter.icon className={`w-3.5 h-3.5 ${activeFilter === filter.id ? 'text-white' : 'text-orange-500'}`} />}
-              {filter.label}
+              {filter.icon ? (
+                <filter.icon className={`w-3.5 h-3.5 ${activeFilter === filter.id ? 'text-white' : 'text-orange-500'}`} />
+              ) : null}
+              {t(`categoriesPage.${filter.key}`)}
             </button>
           ))}
         </div>
 
-        {/* Category Grid */}
         {categoriesLoading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[...Array(10)].map((_, i) => (
@@ -162,7 +159,7 @@ function CategoriesContent() {
             {filteredCategories.map((category) => {
               const IconComp = ICON_MAP[category.name_en] || Gamepad2;
               const borderColor = COLOR_MAP[category.name_en] || 'border-t-gray-300';
-              
+
               return (
                 <button
                   key={category.id}
@@ -173,7 +170,7 @@ function CategoriesContent() {
                     <IconComp className="w-7 h-7 text-gray-700" />
                   </div>
                   <h3 className="text-[15px] font-black text-gray-900 mb-1">{getLocalizedCategoryName(category, selectedLang)}</h3>
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">10 questions</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{t('categoriesPage.questions')}</p>
                 </button>
               );
             })}

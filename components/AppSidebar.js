@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from '@/lib/i18n';
 import { logoutUser } from '@/store/slices/authSlice';
 import { isRtlLanguage } from '@/lib/languages';
 import {
@@ -24,33 +25,37 @@ import {
 
 const NAV_SECTIONS = [
   {
+    key: 'play',
     title: 'PLAY',
     items: [
-      { icon: Play, label: 'Active Quiz', href: '/categories', activePrefix: '/play/' },
-      { icon: LayoutGrid, label: 'Game Categories', href: '/categories' },
-      { icon: BarChart2, label: 'Leaderboard', href: '/leaderboard' },
+      { icon: Play, label: 'Active Quiz', labelKey: 'active_quiz', href: '/categories', activePrefix: '/play/' },
+      { icon: LayoutGrid, label: 'Game Categories', labelKey: 'game_categories', href: '/categories' },
+      { icon: BarChart2, label: 'Leaderboard', labelKey: 'leaderboard', href: '/leaderboard' },
     ],
   },
   {
+    key: 'account',
     title: 'ACCOUNT',
     items: [
-      { icon: User, label: 'My Profile', href: '/profile' },
-      { icon: History, label: 'Game History', href: '/profile#history' },
-      { icon: ShoppingBag, label: 'The Shop', href: '/shop', badge: 'New', badgeColor: 'bg-green-500' },
+      { icon: User, label: 'My Profile', labelKey: 'my_profile', href: '/profile' },
+      { icon: History, label: 'Game History', labelKey: 'game_history', href: '/profile#history' },
+      { icon: ShoppingBag, label: 'The Shop', labelKey: 'the_shop', href: '/shop', badge: 'New', badgeColor: 'bg-green-500' },
     ],
   },
   {
+    key: 'social',
     title: 'SOCIAL',
     items: [
-      { icon: Users, label: 'Friends', href: '#', badge: '3', badgeColor: 'bg-blue-500', comingSoon: true },
-      { icon: Trophy, label: 'Tournament', href: '#', badge: 'Live', badgeColor: 'bg-red-500', comingSoon: true },
+      { icon: Users, label: 'Friends', labelKey: 'friends', href: '#', badge: '3', badgeColor: 'bg-blue-500', comingSoon: true },
+      { icon: Trophy, label: 'Tournament', labelKey: 'tournament', href: '#', badge: 'Live', badgeColor: 'bg-red-500', comingSoon: true },
     ],
   },
   {
+    key: 'settings',
     title: 'SETTINGS',
     items: [
-      { icon: Bell, label: 'Notifications', href: '#', badge: '5', badgeColor: 'bg-purple-500', comingSoon: true },
-      { icon: Settings, label: 'Settings', href: '#', comingSoon: true },
+      { icon: Bell, label: 'Notifications', labelKey: 'notifications', href: '#', badge: '5', badgeColor: 'bg-purple-500', comingSoon: true },
+      { icon: Settings, label: 'Settings', labelKey: 'settings_item', href: '#', comingSoon: true },
     ],
   },
 ];
@@ -63,6 +68,7 @@ export default function AppSidebar() {
   const { user } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const isRTL = isRtlLanguage(selectedLang);
+  const { t } = useI18n();
 
   const qeemBalance = user?.qeemBalance ?? user?.qeem_balance ?? 0;
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'UN';
@@ -147,11 +153,11 @@ export default function AppSidebar() {
 
         {/* Qeem Balance */}
         <div className="mx-3 mt-4 mb-2 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 p-3">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-violet-400 mb-0.5">QEEM BALANCE</p>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-violet-400 mb-0.5">{t('common.qeem_balance')}</p>
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-2xl font-black text-gray-900 leading-tight">{qeemBalance}</span>
-              <p className="text-[9px] text-gray-400">Available coins</p>
+              <p className="text-[9px] text-gray-400">{t('common.available_coins')}</p>
             </div>
             <div className="flex flex-col items-center gap-2">
               <div className="w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center text-[10px] shadow-sm">🪙</div>
@@ -160,7 +166,7 @@ export default function AppSidebar() {
                 className="flex items-center gap-0.5 bg-violet-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg hover:bg-violet-700 transition"
               >
                 <Plus className="w-2.5 h-2.5" />
-                Buy
+                {t('common.buy')}
               </Link>
             </div>
           </div>
@@ -171,7 +177,7 @@ export default function AppSidebar() {
           {NAV_SECTIONS.map((section) => (
             <div key={section.title} className="mb-3">
               <p className="px-2 mb-1 text-[9px] font-black uppercase tracking-[0.12em] text-gray-400">
-                {section.title}
+                {t(`sidebar.${section.key}`)}
               </p>
               {section.items.map((item) => {
                 const active = isActive(item.href, item.activePrefix);
@@ -199,12 +205,12 @@ export default function AppSidebar() {
                         className={`w-4 h-4 shrink-0 ${active ? 'text-violet-600' : 'text-gray-400 group-hover:text-gray-600'}`}
                       />
                       <span className={`text-[12px] font-semibold ${active ? 'font-bold' : ''}`}>
-                        {item.label}
+                        {t(`sidebar.${item.labelKey}`)}
                       </span>
                     </div>
                     {item.badge && (
                       <span className={`text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full ${item.badgeColor}`}>
-                        {item.badge}
+                        {item.badge === 'New' ? t('sidebar.new') : item.badge === 'Live' ? t('sidebar.live') : item.badge}
                       </span>
                     )}
                     {active && <div className={`w-1 h-4 rounded-full bg-violet-600 absolute ${isRTL ? 'left-0' : 'right-0'}`} />}

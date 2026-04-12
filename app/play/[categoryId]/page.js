@@ -18,6 +18,7 @@ import {
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import api from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
 import { getLocalizedCategoryName, normalizeLanguageCode } from '@/lib/languages';
 import {
   eliminateOptions,
@@ -129,6 +130,7 @@ function ActiveQuizContent() {
   const { categoryId } = useParams();
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const lang = normalizeLanguageCode(searchParams.get('lang') || selectedLang);
+  const { t } = useI18n();
 
   const { user } = useSelector((state) => state.auth);
   const {
@@ -241,13 +243,13 @@ function ActiveQuizContent() {
         dispatch(selectAnswer(data.selected));
       } catch (requestError) {
         window.alert(
-          requestError.response?.data?.message || 'Failed to validate the answer. Please try again.',
+          requestError.response?.data?.message || t('quiz.answer_check_failed'),
         );
       } finally {
         setIsCheckingAnswer(false);
       }
     },
-    [currentQuestion, dispatch, isCheckingAnswer, quizStatus, selectedOption, sessionId],
+    [currentQuestion, dispatch, isCheckingAnswer, quizStatus, selectedOption, sessionId, t],
   );
 
   useEffect(() => {
@@ -349,14 +351,14 @@ function ActiveQuizContent() {
   }, [answers, currentIndex, dispatch, questions.length, quizStatus, sessionId]);
 
   const handleQuit = useCallback(() => {
-    const shouldQuit = window.confirm('Leave this quiz? Your current progress will be lost.');
+      const shouldQuit = window.confirm(t('quiz.leave_quiz_confirm'));
     if (!shouldQuit) {
       return;
     }
 
     dispatch(resetQuiz());
     router.push('/categories');
-  }, [dispatch, router]);
+  }, [dispatch, router, t]);
 
   const handleJoker = useCallback(
     async (type) => {
@@ -373,7 +375,7 @@ function ActiveQuizContent() {
 
       if (!data.success) {
         if (data.message === 'insufficient_balance') {
-          const shouldRedirect = window.confirm('Not enough Qeem. Go to the shop?');
+          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
           if (shouldRedirect) {
             router.push('/shop');
           }
@@ -405,7 +407,7 @@ function ActiveQuizContent() {
         );
         const suggestedOption = availableOptions[0];
         if (suggestedOption) {
-          window.alert(`Hint: pay close attention to option ${suggestedOption}.`);
+            window.alert(t('quiz.hint_option', { option: suggestedOption }));
         }
       }
     },
@@ -418,6 +420,7 @@ function ActiveQuizContent() {
       quizStatus,
       router,
       selectedOption,
+      t,
     ],
   );
 
@@ -447,15 +450,15 @@ function ActiveQuizContent() {
   return (
     <div className="min-h-screen bg-[#eef2ff]">
       <PageHeader
-        pageName="Active Quiz"
-        breadcrumbs={[{ label: 'Category Grid', href: '/categories' }]}
+        pageName={t('quiz.page_title')}
+        breadcrumbs={[{ label: t('categoriesPage.title'), href: '/categories' }]}
       />
 
       <div className="mx-auto max-w-[1440px] px-4 pb-20 pt-4 lg:px-8 lg:pb-10 lg:pt-2">
         {loadingView ? (
           <div className="flex min-h-[65vh] flex-col items-center justify-center rounded-[32px] border border-white/70 bg-white/70 text-center shadow-sm">
             <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-violet-200 border-t-violet-600" />
-            <p className="text-lg font-bold text-slate-700">Loading quiz arena...</p>
+            <p className="text-lg font-bold text-slate-700">{t('common.loading')}</p>
             <p className="mt-2 text-sm text-slate-500">Fetching the latest questions for {categoryName}.</p>
           </div>
         ) : (
@@ -470,14 +473,14 @@ function ActiveQuizContent() {
                     </span>
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold text-slate-500">
-                        Question {currentIndex + 1} of {questions.length}
+                         {t('quiz.question_progress', { current: currentIndex + 1, total: questions.length })}
                       </span>
                       <button
                         type="button"
                         onClick={handleQuit}
                         className="text-sm font-semibold text-slate-400 transition hover:text-slate-700"
                       >
-                        Quit
+                         {t('quiz.quit')}
                       </button>
                     </div>
                   </div>
@@ -496,30 +499,30 @@ function ActiveQuizContent() {
                         <span className="text-lg font-black text-amber-600">{timeLeft}</span>
                       </div>
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Time Left</p>
+                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.time_left')}</p>
                         <p className="text-2xl font-black text-slate-900">{timeLeft}s</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="rounded-[24px] border border-white/80 bg-white p-4 text-center shadow-sm">
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Score</p>
+                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.score')}</p>
                     <p className="mt-2 text-4xl font-black text-slate-900">{stats.score}</p>
                   </div>
 
                   <div className="rounded-[24px] border border-white/80 bg-white p-4 text-center shadow-sm">
-                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Correct</p>
+                     <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.correct')}</p>
                     <p className="mt-2 text-4xl font-black text-emerald-500">{stats.correctCount}</p>
                   </div>
 
                   <div className="rounded-[24px] border border-white/80 bg-white p-4 text-center shadow-sm">
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Wrong</p>
+                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.wrong')}</p>
                         <p className="mt-2 text-3xl font-black text-rose-500">{stats.wrongCount}</p>
                       </div>
                       <div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Streak</p>
+                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.streak')}</p>
                         <p className="mt-2 flex items-center justify-center gap-1 text-3xl font-black text-amber-500">
                           <Flame className="h-5 w-5" />
                           {stats.streak}
@@ -531,7 +534,7 @@ function ActiveQuizContent() {
 
                 <div className="rounded-[30px] border border-white/80 bg-white px-6 py-10 text-center shadow-sm lg:px-10">
                   <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.2em] text-violet-600">
-                    Question {String(currentIndex + 1).padStart(2, '0')}
+                     {t('quiz.question_label', { number: String(currentIndex + 1).padStart(2, '0') })}
                   </span>
                   <h2 className="mx-auto mt-6 max-w-3xl text-2xl font-black leading-[1.45] text-slate-900 lg:text-[32px]">
                     {currentQuestion.questionText}
@@ -631,7 +634,7 @@ function ActiveQuizContent() {
                           : 'bg-white/10 text-white/35'
                       }`}
                     >
-                      {currentIndex + 1 >= questions.length ? 'Finish Quiz' : 'Next'}
+                          {currentIndex + 1 >= questions.length ? t('quiz.finish_quiz') : t('quiz.next')}
                       <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
@@ -643,7 +646,7 @@ function ActiveQuizContent() {
               <div className="flex flex-col gap-5">
                 <div className="rounded-[28px] border border-white/80 bg-white p-4 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Question Map</p>
+                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.question_map')}</p>
                     <span className="text-xs font-semibold text-slate-500">
                       {currentIndex + 1}/{questions.length}
                     </span>
@@ -675,10 +678,10 @@ function ActiveQuizContent() {
 
                 <div className="rounded-[28px] border border-white/80 bg-white p-4 shadow-sm">
                   <div className="mb-4 flex items-center justify-between">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Live Ranking</p>
+                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('quiz.live_ranking')}</p>
                     <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-[0.18em] text-rose-500">
                       <span className="h-2 w-2 rounded-full bg-rose-500" />
-                      Live
+                       {t('common.live')}
                     </span>
                   </div>
 
@@ -714,7 +717,7 @@ function ActiveQuizContent() {
                   <div className="mb-4 flex items-center gap-2">
                     <Trophy className="h-3.5 w-3.5 text-violet-500" />
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                      Joker Inventory
+                       {t('quiz.joker_inventory')}
                     </p>
                   </div>
 
@@ -746,7 +749,7 @@ function ActiveQuizContent() {
                     className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-[12px] font-black text-violet-700 transition hover:bg-violet-100"
                   >
                     <Eye className="h-4 w-4" />
-                    Buy More Jokers
+                     {t('common.buy_more_jokers')}
                   </button>
                 </div>
               </div>

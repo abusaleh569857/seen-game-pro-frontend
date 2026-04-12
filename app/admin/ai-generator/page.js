@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { SUPPORTED_LANGUAGES } from '@/lib/languages';
 import { clearGenerateResult, generateQuestions } from '@/store/slices/adminSlice';
 import { fetchCategories } from '@/store/slices/quizSlice';
@@ -25,6 +26,7 @@ function AIGeneratorContent() {
   const { generateLoading, generateResult } = useSelector((state) => state.admin);
   const [form, setForm] = useState({ categoryId: '', language: 'ar', count: 10 });
   const selectedCategoryId = form.categoryId || categories[0]?.id || '';
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -50,7 +52,7 @@ function AIGeneratorContent() {
             className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            {t('admin.back_to_dashboard')}
           </Link>
 
           {/* Header */}
@@ -59,8 +61,8 @@ function AIGeneratorContent() {
               <Sparkles className="w-8 h-8 text-pink-500" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">AI Question Generator</h1>
-              <p className="text-gray-400 mt-1">Harness Gemini AI to create high-quality quiz content</p>
+              <h1 className="text-3xl font-extrabold tracking-tight">{t('admin.ai_generator')}</h1>
+              <p className="text-gray-400 mt-1">{t('admin.ai_generator_subtitle')}</p>
             </div>
           </div>
 
@@ -69,7 +71,7 @@ function AIGeneratorContent() {
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
                 <Settings2 className="w-4 h-4" />
-                Select Category
+                {t('admin.select_category')}
               </label>
               <select
                 value={selectedCategoryId}
@@ -88,7 +90,7 @@ function AIGeneratorContent() {
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
                 <Languages className="w-4 h-4" />
-                Target Language
+                {t('admin.target_language')}
               </label>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {SUPPORTED_LANGUAGES.map((lang) => (
@@ -111,7 +113,7 @@ function AIGeneratorContent() {
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
                 <ListOrdered className="w-4 h-4" />
-                Question Count
+                {t('admin.question_count')}
               </label>
               <div className="relative">
                 <input
@@ -125,7 +127,7 @@ function AIGeneratorContent() {
                   className="w-full rounded-2xl border border-gray-700 bg-gray-800/50 px-5 py-4 text-lg transition focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/10"
                 />
                 <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 font-medium">
-                  questions
+                  {t('admin.questions')}
                 </span>
               </div>
             </div>
@@ -141,12 +143,12 @@ function AIGeneratorContent() {
                 {generateLoading ? (
                   <>
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    <span>AI is Thinking...</span>
+                     <span>{t('admin.thinking')}</span>
                   </>
                 ) : (
                   <>
                     <BrainCircuit className="w-5 h-5" />
-                    <span>Generate Now</span>
+                     <span>{t('admin.generate_now')}</span>
                   </>
                 )}
               </div>
@@ -167,7 +169,7 @@ function AIGeneratorContent() {
                   <AlertCircle className="w-6 h-6 shrink-0" />
                 )}
                 <div>
-                  <p className="font-bold">{generateResult.success ? 'Success!' : 'Generation Failed'}</p>
+                  <p className="font-bold">{generateResult.success ? t('admin.success') : t('admin.failed')}</p>
                   <p className="text-sm opacity-80">{generateResult.message}</p>
                 </div>
               </div>
@@ -175,7 +177,7 @@ function AIGeneratorContent() {
           </div>
           
           <p className="mt-8 text-center text-sm text-gray-500">
-            Note: Process may take 30-60 seconds depending on API response.
+            {t('admin.note')}
           </p>
         </main>
       </div>

@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import { useI18n } from '@/lib/i18n';
 import { getLanguageByCode, SUPPORTED_LANGUAGES } from '@/lib/languages';
 import { logoutUser } from '@/store/slices/authSlice';
 import { setSelectedLang } from '@/store/slices/quizSlice';
@@ -14,6 +16,7 @@ export default function Navbar() {
   const { user, isLoggedIn } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const activeLanguage = getLanguageByCode(selectedLang);
+  const { t } = useI18n();
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -46,10 +49,10 @@ export default function Navbar() {
           </div>
           <div className="hidden sm:flex flex-col">
             <h1 className="text-[17px] font-black uppercase leading-none tracking-tight text-white mb-1">
-              Seen Game Pro
+              {t('nav.brand_name')}
             </h1>
             <p className="text-[9px] lg:text-[10px] font-bold uppercase tracking-[1.5px] leading-none text-white/50">
-              Quiz Platform
+              {t('nav.quiz_platform')}
             </p>
           </div>
         </Link>
@@ -69,8 +72,8 @@ export default function Navbar() {
                     : 'bg-transparent border-white/10 text-white/50 hover:bg-white/5 hover:text-white/80 hover:border-white/20'
                 }`}
               >
-                <div className="h-[9px] w-[13px] overflow-hidden rounded-[1.5px] shadow-sm">
-                  <img src={lang.flag} alt={lang.englishLabel} className="h-full w-full object-cover" />
+                <div className="relative h-[9px] w-[13px] overflow-hidden rounded-[1.5px] shadow-sm">
+                  <Image src={lang.flag} alt={lang.englishLabel} fill className="object-cover" />
                 </div>
                 <span>{lang.shortLabel}</span>
               </button>
@@ -84,7 +87,7 @@ export default function Navbar() {
               href="/shop"
               className="flex items-center justify-center px-4 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
             >
-              <span className="text-white/80 text-[12px] font-bold mr-1.5">Qeem Balance:</span>
+              <span className="text-white/80 text-[12px] font-bold mr-1.5">{t('nav.qeem_balance')}</span>
               <span className="text-[#FFD700] text-[13px] font-black">{user?.qeemBalance ?? user?.qeem_balance ?? 0}</span>
             </Link>
 
@@ -100,7 +103,7 @@ export default function Navbar() {
                 href="/admin"
                 className="hidden sm:flex items-center justify-center px-3 h-[34px] rounded-lg border border-[#6248FF]/50 bg-[#6248FF]/10 text-[#A78BFA] text-[12px] font-bold hover:bg-[#6248FF]/20 transition"
               >
-                Admin Panel
+                {t('nav.admin_panel')}
               </Link>
             )}
 
@@ -108,14 +111,14 @@ export default function Navbar() {
               onClick={handleLogout}
               className="flex items-center justify-center px-4 h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[13px] font-semibold hover:bg-white/5 transition"
             >
-              Logout
+              {t('nav.logout')}
             </button>
           </div>
         ) : (
           <div className="flex items-center gap-2 lg:gap-3">
             <Link href="/login">
               <button className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[12px] lg:text-[13px] font-semibold hover:bg-white/5 transition">
-                Login
+                {t('nav.login')}
               </button>
             </Link>
             <Link href="/register">
@@ -123,7 +126,7 @@ export default function Navbar() {
                 className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg text-white text-[12px] lg:text-[13px] font-bold tracking-wide hover:brightness-110 transition shadow-lg shadow-[#4E5BFF]/20"
                 style={{ background: 'linear-gradient(90deg, #6248FF 0%, #486CFF 100%)' }}
               >
-                Sign Up Free
+                {t('nav.sign_up_free')}
               </button>
             </Link>
           </div>

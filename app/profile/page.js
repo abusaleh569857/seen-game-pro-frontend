@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { fetchHistory, fetchJokerInventory } from '@/store/slices/quizSlice';
 
 // ─── Helper: Avatar Circle ───────────────────────────────────────────────────
@@ -91,6 +92,7 @@ function ProfileContent() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { history, inventory } = useSelector((state) => state.quiz);
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchHistory());
@@ -109,13 +111,13 @@ function ProfileContent() {
 
   const memberSince = user?.created_at
     ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(user.created_at))
-    : 'Recently';
+      : '-';
 
   const ACHIEVEMENTS = [
-    { emoji: '🧠', label: 'Quiz Master', color: 'bg-purple-100 text-purple-700' },
-    { emoji: '⚡', label: 'Fast Learner', color: 'bg-yellow-100 text-yellow-700' },
-    { emoji: '🔥', label: '15-Day Streak', color: 'bg-orange-100 text-orange-700' },
-    { emoji: '🌍', label: 'Geography Expert', color: 'bg-green-100 text-green-700' },
+    { emoji: '🧠', label: t('profile.total_points'), color: 'bg-purple-100 text-purple-700' },
+    { emoji: '⚡', label: t('profile.avg_accuracy'), color: 'bg-yellow-100 text-yellow-700' },
+    { emoji: '🔥', label: t('profile.day_streak'), color: 'bg-orange-100 text-orange-700' },
+    { emoji: '🌍', label: t('profile.global_rank'), color: 'bg-green-100 text-green-700' },
   ];
 
   const JOKERS = [
@@ -131,7 +133,7 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <PageHeader pageName="My Profile" />
+      <PageHeader pageName={t('profile.page_title')} />
 
       <div className="px-4 lg:px-8 pb-8 max-w-[1440px] mx-auto">
         {/* ── Hero Banner ── */}
@@ -162,14 +164,14 @@ function ProfileContent() {
                       {user?.username}
                     </h2>
                     <p className="text-[11px] lg:text-[13px] text-white/60 mt-0.5 font-medium">
-                      Member since {memberSince} · Rank #5
+                      {t('profile.member_since', { date: memberSince, rank: 5 })}
                     </p>
                   </div>
                   
                   {/* Edit Button - Consistent with Screenshot */}
                   <button className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white text-[12px] font-bold px-5 py-2 rounded-xl transition w-fit backdrop-blur-sm">
                     <Pencil className="w-3.5 h-3.5" />
-                    Edit Profile
+                    {t('profile.edit_profile')}
                   </button>
                 </div>
               </div>
@@ -197,28 +199,28 @@ function ProfileContent() {
             icon={Star}
             iconColor="text-violet-600"
             value={points.toLocaleString()}
-            label="Total Points"
+              label={t('profile.total_points')}
             borderColor="border-violet-400"
           />
           <StatCard
             icon={Gamepad2}
             iconColor="text-green-600"
             value={gamesPlayed}
-            label="Games Played"
+              label={t('profile.games_played')}
             borderColor="border-green-400"
           />
           <StatCard
             icon={Target}
             iconColor="text-teal-600"
             value={`${avgAccuracy}%`}
-            label="Avg Accuracy"
+              label={t('profile.avg_accuracy')}
             borderColor="border-teal-400"
           />
           <StatCard
             icon={Flame}
             iconColor="text-orange-500"
             value="15"
-            label="Day Streak"
+              label={t('profile.day_streak')}
             borderColor="border-orange-400"
           />
           <div className="col-span-2 lg:col-span-1">
@@ -226,7 +228,7 @@ function ProfileContent() {
               icon={BarChart2}
               iconColor="text-red-500"
               value="#5"
-              label="Global Rank"
+               label={t('profile.global_rank')}
               borderColor="border-red-400"
             />
           </div>
@@ -238,8 +240,8 @@ function ProfileContent() {
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
               <div>
-                <h2 className="text-[15px] font-black text-gray-900">Game History</h2>
-                <p className="text-[11px] text-gray-400">Last {Math.min(history.length, 6)} sessions</p>
+                <h2 className="text-[15px] font-black text-gray-900">{t('profile.game_history')}</h2>
+                <p className="text-[11px] text-gray-400">{t('profile.last_sessions', { count: Math.min(history.length, 6) })}</p>
               </div>
             </div>
 
@@ -248,7 +250,7 @@ function ProfileContent() {
                 <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                   <Gamepad2 className="w-6 h-6 text-gray-400" />
                 </div>
-                <p className="text-[13px] text-gray-500 font-medium">No games played yet</p>
+                <p className="text-[13px] text-gray-500 font-medium">{t('profile.no_games')}</p>
                 <Link
                   href="/play"
                   className="mt-3 text-[12px] text-violet-600 font-bold hover:underline"
@@ -347,12 +349,12 @@ function ProfileContent() {
           {/* Joker Inventory */}
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5 pb-4 lg:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[15px] font-black text-gray-900">Joker Inventory</h2>
+              <h2 className="text-[15px] font-black text-gray-900">{t('profile.joker_inventory')}</h2>
               <Link
                 href="/shop"
                 className="text-[11px] font-bold text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full hover:bg-violet-100 transition"
               >
-                Buy Jokers
+                {t('common.buy')}
               </Link>
             </div>
 
@@ -378,7 +380,7 @@ function ProfileContent() {
               className="mt-2 lg:mt-4 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-[13px] font-bold py-3 rounded-2xl hover:brightness-110 transition shadow-lg shadow-violet-500/20"
             >
               <ShoppingBag className="w-4 h-4" />
-              Go to Shop
+              {t('shop.title')}
             </Link>
           </div>
         </div>

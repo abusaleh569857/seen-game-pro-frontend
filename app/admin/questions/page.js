@@ -16,18 +16,20 @@ import {
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { deleteQuestion, fetchAdminQuestions } from '@/store/slices/adminSlice';
 
 function QuestionsContent() {
   const dispatch = useDispatch();
   const { questions, questionsLoading } = useSelector((state) => state.admin);
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchAdminQuestions());
   }, [dispatch]);
 
   const handleDelete = (id) => {
-    const shouldDelete = window.confirm('Are you sure you want to delete this question?');
+    const shouldDelete = window.confirm(t('admin.delete_confirm'));
     if (shouldDelete) {
       dispatch(deleteQuestion(id));
     }
@@ -45,8 +47,10 @@ function QuestionsContent() {
                 <BookOpen className="w-8 h-8 text-purple-500" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold tracking-tight">Questions ({questions.length})</h1>
-                <p className="text-gray-400 mt-1">Review and manage your quiz database</p>
+                <h1 className="text-3xl font-extrabold tracking-tight">
+                  {t('admin.questions_heading', { count: questions.length })}
+                </h1>
+                <p className="text-gray-400 mt-1">{t('admin.questions_subtitle')}</p>
               </div>
             </div>
             
@@ -55,7 +59,7 @@ function QuestionsContent() {
               className="inline-flex items-center justify-center gap-2 rounded-2xl bg-purple-600 px-6 py-3 font-bold transition hover:bg-purple-500 active:scale-95"
             >
               <Layers className="w-5 h-5" />
-              Generate More
+              {t('admin.generate_more')}
             </Link>
           </div>
 
@@ -71,13 +75,13 @@ function QuestionsContent() {
               <div className="bg-gray-800/50 p-6 rounded-full mb-6">
                 <Inbox className="w-12 h-12 text-gray-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-400">No questions found</h3>
-              <p className="mt-2 text-gray-500 max-w-xs">Use the AI Generator to populate your database with new questions.</p>
+              <h3 className="text-xl font-bold text-gray-400">{t('admin.no_questions_found')}</h3>
+              <p className="mt-2 text-gray-500 max-w-xs">{t('admin.no_questions_desc')}</p>
               <Link 
                 href="/admin/ai-generator" 
                 className="mt-8 text-purple-400 font-bold hover:underline"
               >
-                Go to AI Generator →
+                {t('admin.go_to_ai_generator')}
               </Link>
             </div>
           ) : (
@@ -109,7 +113,7 @@ function QuestionsContent() {
                       className="inline-flex items-center gap-2 rounded-xl bg-red-600/10 px-3 py-2 text-sm font-bold text-red-500 transition hover:bg-red-600/20 hover:text-red-400 active:scale-90"
                     >
                       <Trash2 className="w-4 h-4" />
-                      Delete
+                      {t('admin.delete')}
                     </button>
                   </div>
 
@@ -158,3 +162,4 @@ export default function QuestionsPage() {
     </ProtectedRoute>
   );
 }
+

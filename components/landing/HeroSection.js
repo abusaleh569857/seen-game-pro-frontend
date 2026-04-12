@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
+import { useI18n } from '@/lib/i18n';
 
 export default function HeroSection() {
   const router = useRouter();
+  const { t } = useI18n();
 
   const handleStartPlay = () => {
     router.push('/login');
@@ -36,7 +38,7 @@ export default function HeroSection() {
         >
           <span className="text-[14px] leading-none text-[#A78BFA]">✦</span>
           <span className="text-[10px] lg:text-[11px] font-bold text-white/70 uppercase tracking-widest">
-            Multilingual Quiz Platform • Arabic (Default) • EN • FR • ES
+            {t('landing.top_badge')}
           </span>
         </motion.div>
 
@@ -46,8 +48,8 @@ export default function HeroSection() {
           transition={{ delay: 0.1 }}
           className="text-[42px] sm:text-[56px] lg:text-[72px] font-black leading-[1.05] tracking-tight text-white mb-6"
         >
-          Compete. Learn.<br className="hidden sm:block" />
-          Rise to <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4E5BFF] to-[#34D399]">#1.</span>
+          {t('landing.hero_title_line1')}<br className="hidden sm:block" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4E5BFF] to-[#34D399]">{t('landing.hero_title_line2')}</span>
         </motion.h1>
 
         <motion.p
@@ -56,7 +58,7 @@ export default function HeroSection() {
           transition={{ delay: 0.2 }}
           className="max-w-[700px] text-[14px] lg:text-[16px] font-medium leading-relaxed text-blue-100/60 mb-10"
         >
-          15 quiz categories. Live tournaments. 1v1 wagers. Qeem coin prizes. Play in Arabic, English, French or Spanish — all in one platform.
+          {t('landing.hero_subtitle')}
         </motion.p>
 
         <motion.div
@@ -69,25 +71,25 @@ export default function HeroSection() {
             <div className="h-[10px] w-[14px] overflow-hidden rounded-[1.5px] shadow-sm">
               <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/GB.svg" alt="EN" className="h-full w-full object-cover" />
             </div>
-            Play in English
+            {t('landing.play_in_english')}
           </div>
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-[#4E5BFF]/30 bg-[#4E5BFF]/10 text-[12px] font-bold text-white shadow-[0_0_15px_rgba(78,91,255,0.2)]">
             <div className="h-[10px] w-[14px] overflow-hidden rounded-[1.5px] shadow-sm">
               <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/KW.svg" alt="AR" className="h-full w-full object-cover" />
             </div>
-            العب بالعربية
+            {t('landing.play_in_arabic')}
           </div>
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold text-white/60 hover:bg-white/5 transition">
             <div className="h-[10px] w-[14px] overflow-hidden rounded-[1.5px] shadow-sm">
               <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/FR.svg" alt="FR" className="h-full w-full object-cover" />
             </div>
-            Jouer en français
+            {t('landing.play_in_french')}
           </div>
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-full border border-white/10 text-[12px] font-bold text-white/60 hover:bg-white/5 transition">
             <div className="h-[10px] w-[14px] overflow-hidden rounded-[1.5px] shadow-sm">
               <img src="https://purecatamphetamine.github.io/country-flag-icons/3x2/ES.svg" alt="ES" className="h-full w-full object-cover" />
             </div>
-            Jugar en español
+            {t('landing.play_in_spanish')}
           </div>
         </motion.div>
 
@@ -99,7 +101,7 @@ export default function HeroSection() {
           className="group flex items-center gap-3 px-8 lg:px-10 py-4 rounded-[16px] text-white font-black tracking-wide bg-gradient-to-r from-[#6248FF] to-[#486CFF] shadow-hero hover:shadow-[0_8px_40px_rgba(98,72,255,0.6)] transition-all hover:-translate-y-1"
         >
           <Play fill="currentColor" size={16} />
-          Start Playing — Free
+          {t('landing.start_playing')}
         </motion.button>
       </div>
 
@@ -111,14 +113,14 @@ export default function HeroSection() {
       >
         <div className="flex flex-col items-center justify-center flex-1 text-center px-1 sm:px-2 py-4 sm:py-6">
           <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">15</p>
-          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">Categories</p>
+          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">{t('landing.categories')}</p>
         </div>
 
         <div className="w-[1px] bg-white/10 block" />
 
         <div className="flex flex-col items-center justify-center flex-1 text-center px-1 sm:px-2 py-4 sm:py-6">
-          <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">4</p>
-          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">Languages</p>
+          <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">{t('common.language_count')}</p>
+          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">{t('landing.languages')}</p>
         </div>
 
         <div className="w-[1px] bg-white/10 hidden sm:block" />
@@ -126,7 +128,7 @@ export default function HeroSection() {
         <div className="flex flex-col items-center justify-center flex-1 text-center px-1 sm:px-2 py-4 sm:py-6 hidden sm:flex">
           <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">10</p>
           <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40 mt-0.5 leading-tight">
-            Questions /<br/>Round
+            {t('common.questions_per_round')}
           </p>
         </div>
 
@@ -134,14 +136,14 @@ export default function HeroSection() {
 
         <div className="flex flex-col items-center justify-center flex-1 text-center px-1 sm:px-2 py-4 sm:py-6 hidden lg:flex">
           <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">∞</p>
-          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">AI Questions</p>
+          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">{t('common.ai_questions')}</p>
         </div>
 
         <div className="w-[1px] bg-white/10 block" />
 
         <div className="flex flex-col items-center justify-center flex-1 text-center px-1 sm:px-2 py-4 sm:py-6">
           <p className="text-[20px] lg:text-[34px] font-black text-white leading-none mb-1.5">KWD</p>
-          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">Prizes via Tap</p>
+          <p className="text-[8px] lg:text-[10px] tracking-widest font-bold uppercase text-white/40">{t('common.prizes_via_tap')}</p>
         </div>
       </motion.div>
     </section>

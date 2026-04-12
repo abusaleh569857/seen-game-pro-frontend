@@ -17,12 +17,14 @@ import {
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useI18n } from '@/lib/i18n';
 import { fetchAdminUsers, toggleBanUser } from '@/store/slices/adminSlice';
 
 function UsersContent() {
   const dispatch = useDispatch();
   const { users, usersLoading } = useSelector((state) => state.admin);
   const [search, setSearch] = useState('');
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchAdminUsers(''));
@@ -48,8 +50,8 @@ function UsersContent() {
                 <Users className="w-8 h-8 text-blue-500" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold tracking-tight">User Management</h1>
-                <p className="text-gray-400 mt-1">Search, monitor and manage platform members</p>
+                <h1 className="text-3xl font-extrabold tracking-tight">{t('admin.users_heading')}</h1>
+                <p className="text-gray-400 mt-1">{t('admin.users_subtitle')}</p>
               </div>
             </div>
           </div>
@@ -60,7 +62,7 @@ function UsersContent() {
               <Search className="w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
             </div>
             <input
-              placeholder="Search by username or email..."
+              placeholder={t('admin.search_placeholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
@@ -71,7 +73,7 @@ function UsersContent() {
               onClick={handleSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-purple-600 px-8 py-3 font-bold transition hover:bg-purple-500 active:scale-95 shadow-xl shadow-purple-500/20"
             >
-              Search
+              {t('admin.search')}
             </button>
           </div>
 
@@ -106,12 +108,12 @@ function UsersContent() {
                         {user.role === 'admin' && (
                           <span className="flex items-center gap-1 rounded-full bg-red-600/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-500/30">
                             <ShieldCheck className="w-3 h-3" />
-                            Admin
+                            {t('admin.admin_badge')}
                           </span>
                         )}
                         {user.is_banned && (
                           <span className="flex items-center gap-1 rounded-full bg-red-900/50 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-300 border border-red-800">
-                             Banned
+                             {t('admin.banned_badge')}
                           </span>
                         )}
                       </div>
@@ -124,7 +126,7 @@ function UsersContent() {
                       <div className="mt-3 flex items-center gap-4">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-yellow-500/80">
                           <Trophy className="w-3.5 h-3.5" />
-                          {user.points} pts
+                           {user.points} {t('admin.points_unit')}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs font-bold text-blue-500/80">
                           <Coins className="w-3.5 h-3.5" />
@@ -148,12 +150,12 @@ function UsersContent() {
                       {user.is_banned ? (
                         <>
                           <UserPlus className="w-4 h-4" />
-                          Unban
+                           {t('admin.unban')}
                         </>
                       ) : (
                         <>
                           <UserMinus className="w-4 h-4" />
-                          Ban
+                           {t('admin.ban')}
                         </>
                       )}
                     </button>

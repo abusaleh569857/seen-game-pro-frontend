@@ -4,13 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { fetchCategories } from '@/store/slices/quizSlice';
 import { motion } from 'framer-motion';
+import { useI18n } from '@/lib/i18n';
 import { getLocalizedCategoryName, isRtlLanguage } from '@/lib/languages';
 
-// For visual consistency with the design if actual DB is empty or lacks icons, 
-// we normally fall back to these styles. The design has colored top borders.
 const TOP_COLORS = [
-  '#ef4444', '#f59e0b', '#3b82f6', '#eab308', '#8b5cf6', 
-  '#ec4899', '#10b981', '#14b8a6', '#6366f1', '#f43f5e'
+  '#ef4444', '#f59e0b', '#3b82f6', '#eab308', '#8b5cf6',
+  '#ec4899', '#10b981', '#14b8a6', '#6366f1', '#f43f5e',
 ];
 
 export default function CategoriesSection() {
@@ -19,6 +18,7 @@ export default function CategoriesSection() {
   const { categories, categoriesLoading, selectedLang } = useSelector((state) => state.quiz);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const isRTL = isRtlLanguage(selectedLang);
+  const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -32,23 +32,21 @@ export default function CategoriesSection() {
     router.push(`/play/${categoryId}?lang=${selectedLang}`);
   };
 
-  // Mock categories for skeleton/design purposes if none are loaded
   const displayCats = categories && categories.length > 0 ? categories : [];
 
   return (
     <section className="relative w-full pt-20 pb-12 px-4 lg:px-10">
       <div className={`w-full max-w-6xl mx-auto flex flex-col items-center ${isRTL ? 'lg:items-end text-center lg:text-right' : 'lg:items-start text-center lg:text-left'}`}>
-        
         <p className="text-[12px] font-bold tracking-[2px] uppercase text-white/50 mb-3">
-          15 Categories
+          {t('landing.fifteen_categories')}
         </p>
-        
+
         <h2 className="text-[32px] sm:text-[40px] lg:text-[46px] font-black tracking-tight text-white mb-4 leading-[1.1]">
-          What will you master?
+          {t('landing.what_will_you_master')}
         </h2>
-        
+
         <p className="text-[14px] lg:text-[15px] font-medium text-white/60 max-w-[600px] mb-12">
-          Every category is powered by AI-generated questions — always fresh, always culturally appropriate, never repetitive.
+          {t('landing.categories_subtitle')}
         </p>
 
         {categoriesLoading ? (
@@ -72,16 +70,15 @@ export default function CategoriesSection() {
                   className="group relative flex flex-col items-center justify-center p-5 rounded-2xl border border-white/10 bg-gray-900 hover:bg-[#150D3A] transition-colors focus:outline-none focus:ring-2 focus:ring-[#A78BFA] overflow-hidden"
                   style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.2)' }}
                 >
-                  {/* Colored top border line defined in Figma */}
-                  <div 
-                    className="absolute top-0 left-0 right-0 h-[3px] opacity-70 group-hover:opacity-100 transition-opacity" 
-                    style={{ backgroundColor: topColor }} 
+                  <div
+                    className="absolute top-0 left-0 right-0 h-[3px] opacity-70 group-hover:opacity-100 transition-opacity"
+                    style={{ backgroundColor: topColor }}
                   />
-                  
+
                   <span className="text-[32px] lg:text-[38px] mb-3 drop-shadow-md group-hover:scale-110 transition-transform">
                     {cat.icon || '🎯'}
                   </span>
-                  
+
                   <span className="text-[13px] font-bold text-white tracking-wide mb-1 transition-colors group-hover:text-white">
                     {getLocalizedCategoryName(cat, selectedLang)}
                   </span>
@@ -94,7 +91,7 @@ export default function CategoriesSection() {
           </div>
         ) : (
           <div className="w-full p-8 text-center rounded-2xl border border-white/10 bg-white/5 text-white/60">
-            No categories available yet. Please add them from the admin panel.
+            {t('landing.no_categories')}
           </div>
         )}
       </div>
