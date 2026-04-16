@@ -1,458 +1,636 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, Scissors, SkipForward, Eye, ShieldAlert, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import { useDispatch, useSelector } from 'react-redux';
+import { Check, ChevronRight, Clock3, Lightbulb, Scissors, SkipForward, X } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { fetchCategories, fetchLeaderboard, startQuiz } from '@/store/slices/quizSlice';
+import api from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
+import { getLocalizedCategoryName, normalizeLanguageCode } from '@/lib/languages';
+import {
+  eliminateOptions,
+  fetchCategories,
+  fetchJokerInventory,
+  fetchLeaderboard,
+  nextQuestion,
+  resetQuiz,
+  selectAnswer,
+  startQuiz,
+  submitQuiz,
+  useJoker as triggerJokerAction,
+} from '@/store/slices/quizSlice';
 
-function ActiveQuizContent() {
-  const router = useRouter();
+const BASE_TIME_SECONDS = 17;
+const EXTRA_TIME_SECONDS = 15;
+
+const JOKER_ITEMS = [
+  {
+    type: 'fifty_fifty',
+    label: '50/50',
+    subtitleKey: 'quiz.remove_wrong_answers',
+    icon: Scissors,
+    cost: 1,
+    cardClass: 'from-violet-500/35 via-violet-500/20 to-violet-900/30 border-violet-300/30',
+  },
+  {
+    type: 'skip',
+    labelKey: 'shop.skip_label',
+    subtitleKey: 'quiz.jump_next_question',
+    icon: SkipForward,
+    cost: 1,
+    cardClass: 'from-blue-500/30 via-blue-500/20 to-blue-900/30 border-blue-300/30',
+  },
+  {
+    type: 'time',
+    labelKey: 'shop.time_label',
+    subtitleKey: 'quiz.add_extra_time',
+    icon: Clock3,
+    cost: 2,
+    cardClass: 'from-amber-500/30 via-orange-500/20 to-orange-900/30 border-orange-300/30',
+  },
+  {
+    type: 'reveal',
+    labelKey: 'shop.reveal_label',
+    subtitleKey: 'quiz.show_correct_answer',
+    icon: Lightbulb,
+    cost: 3,
+    cardClass: 'from-emerald-500/30 via-emerald-500/15 to-emerald-900/30 border-emerald-300/30',
+  },
+];
+
+const LIVE_COLORS = ['bg-amber-500', 'bg-violet-500', 'bg-cyan-500', 'bg-emerald-500', 'bg-rose-500'];
+
+function jokerTitle(item, t) {
+  return item.labelKey ? t(item.labelKey) : item.label;
+}
+
+function ActiveJokerDockPage() {
   const dispatch = useDispatch();
-  
+  const router = useRouter();
+  const { t } = useI18n();
+
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const lang = normalizeLanguageCode(selectedLang);
+  const isRTL = lang === 'ar';
+
   const { user } = useSelector((state) => state.auth);
-  const { 
-    questions = [], 
-    currentIndex = 0,
-    answers = [],
-    categories = [],
-    leaderboard = [],
-    inventory 
+  const {
+    sessionId,
+    questions,
+    currentIndex,
+    answers,
+    selectedOption,
+    eliminatedOptions,
+    quizStatus,
+    result,
+    error,
+    inventory,
+    categories,
+    leaderboard,
   } = useSelector((state) => state.quiz);
 
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(BASE_TIME_SECONDS);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
+  const [answerMetaByQuestionId, setAnswerMetaByQuestionId] = useState({});
+  const [jokerSource, setJokerSource] = useState(null);
+
+  const currentQuestion = questions[currentIndex] || null;
+  const currentQuestionMeta = currentQuestion ? answerMetaByQuestionId[currentQuestion.id] || null : null;
+
+  const currentCategory = useMemo(
+    () => categories.find((item) => String(item.id) === String(activeCategoryId)),
+    [categories, activeCategoryId],
+  );
+  const categoryName = getLocalizedCategoryName(currentCategory, lang);
+  const totalQuestions = questions.length;
+  const currentQuestionNumber = totalQuestions ? currentIndex + 1 : 0;
+  const progressPercent = totalQuestions ? (currentQuestionNumber / totalQuestions) * 100 : 0;
+  const totalBalance = Number(user?.qeemBalance ?? user?.qeem_balance ?? 0);
+
   useEffect(() => {
-    // Fetch leaderboard if not loaded
-    if (leaderboard.length === 0) {
-      dispatch(fetchLeaderboard());
+    dispatch(fetchCategories());
+    dispatch(fetchLeaderboard());
+    dispatch(fetchJokerInventory());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (!categories.length || activeCategoryId) {
+      return;
     }
-    // Fetch categories if missing
-    if (categories.length === 0) {
-      dispatch(fetchCategories());
+
+    const fromUrl =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('categoryId')
+        : null;
+    const fromStorage =
+      typeof window !== 'undefined' ? window.localStorage.getItem('lastPlayedCategoryId') : null;
+
+    const categoryFromQuery = categories.find((cat) => String(cat.id) === String(fromUrl));
+    const categoryFromStorage = categories.find((cat) => String(cat.id) === String(fromStorage));
+    const fallbackCategory = categoryFromQuery || categoryFromStorage || categories[0];
+
+    if (fallbackCategory?.id) {
+      setActiveCategoryId(fallbackCategory.id);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('lastPlayedCategoryId', String(fallbackCategory.id));
+      }
     }
-  }, [dispatch, leaderboard.length, categories.length]);
+  }, [activeCategoryId, categories]);
 
-  const currentQues = questions[currentIndex] || {};
-  const totalQuestions = questions.length || 10;
-  const currentQNumber = currentIndex + 1;
+  useEffect(() => {
+    if (!activeCategoryId) {
+      return;
+    }
 
-  // Get dynamic category name based on the current question's category_id
-  const currentCategoryObj = categories.find(c => c.id == currentQues.category_id);
-  const currentCategoryName = currentCategoryObj ? currentCategoryObj.name_en : 'Quiz';
+    dispatch(resetQuiz());
+    setAnswerMetaByQuestionId({});
+    setElapsedSeconds(0);
+    setJokerSource(null);
+    dispatch(startQuiz({ categoryId: activeCategoryId, lang }));
+  }, [activeCategoryId, dispatch, lang]);
 
-  // Local State for interactive gameplay mechanics (Real-time)
-  const [timeLeft, setTimeLeft] = useState(18);
-  const [score, setScore] = useState(300);
-  const [correctCount, setCorrectCount] = useState(3);
-  const [wrongCount, setWrongCount] = useState(0);
-  const [streak, setStreak] = useState(3);
-  const [selectedOption, setSelectedOption] = useState(null);
-  const [liveRankings, setLiveRankings] = useState([]);
-  
-  // Array to hold status of each question index: 'correct', 'wrong', 'pending'
-  const [questionMapStatus, setQuestionMapStatus] = useState(
-    Array(totalQuestions).fill('pending').map((_, i) => i < 3 ? 'correct' : 'pending')
+  useEffect(() => {
+    setTimeLeft(BASE_TIME_SECONDS);
+    setIsCheckingAnswer(false);
+  }, [currentQuestion?.id]);
+
+  useEffect(() => {
+    if (quizStatus !== 'playing' || !currentQuestion || isCheckingAnswer) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      setElapsedSeconds((value) => value + 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentQuestion, isCheckingAnswer, quizStatus, timeLeft]);
+
+  useEffect(() => {
+    if (quizStatus !== 'playing' || !currentQuestion || isCheckingAnswer || timeLeft <= 0) {
+      return undefined;
+    }
+
+    const timer = setTimeout(() => {
+      setTimeLeft((value) => value - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentQuestion, isCheckingAnswer, quizStatus, timeLeft]);
+
+  const handleAnswerSelect = useCallback(
+    async (optionKey) => {
+      if (!currentQuestion || quizStatus !== 'playing' || isCheckingAnswer || selectedOption) {
+        return;
+      }
+
+      setIsCheckingAnswer(true);
+      try {
+        const normalizedSelected = String(optionKey).toUpperCase();
+        const { data } = await api.post('/quiz/answer-check', {
+          sessionId,
+          questionId: currentQuestion.id,
+          selected: normalizedSelected,
+        });
+
+        setAnswerMetaByQuestionId((current) => ({
+          ...current,
+          [currentQuestion.id]: data,
+        }));
+        dispatch(selectAnswer(data.selected));
+      } catch (requestError) {
+        window.alert(requestError.response?.data?.message || t('quiz.answer_check_failed'));
+      } finally {
+        setIsCheckingAnswer(false);
+      }
+    },
+    [currentQuestion, dispatch, isCheckingAnswer, quizStatus, selectedOption, sessionId, t],
   );
 
-  // Transform API leaderboard data and inject current user's simulated progress
   useEffect(() => {
-    if (leaderboard.length > 0) {
-      const dbPlayers = leaderboard.slice(0, 5).map((l, i) => ({
-        id: `db-${l.id}`,
-        name: l.username,
-        points: parseInt(l.points) || 0,
-        initial: l.username?.charAt(0).toUpperCase() || 'U',
-        color: ['bg-orange-500', 'bg-blue-600', 'bg-teal-500', 'bg-pink-600', 'bg-gray-800'][i % 5],
-        isYou: l.username === user?.username
-      }));
-
-      // If user isn't in top 5 natively, push them to the end of the array to animate their climb
-      const hasUser = dbPlayers.some(p => p.isYou);
-      if (!hasUser && user) {
-        dbPlayers.push({
-          id: 'you-local',
-          name: user.username,
-          points: score, // use local dynamic score
-          initial: user.username?.charAt(0).toUpperCase() || 'U',
-          color: 'bg-violet-600',
-          isYou: true
-        });
-      } else if (hasUser) {
-        // Update user's score if they are already in the array
-        const userObj = dbPlayers.find(p => p.isYou);
-        if (userObj) userObj.points = score;
-      }
-
-      setLiveRankings(dbPlayers.sort((a, b) => b.points - a.points).slice(0, 5));
+    if (timeLeft === 0 && quizStatus === 'playing' && currentQuestion && !isCheckingAnswer) {
+      handleAnswerSelect('TIMEOUT');
     }
-  }, [leaderboard, score, user]);
+  }, [currentQuestion, handleAnswerSelect, isCheckingAnswer, quizStatus, timeLeft]);
 
   useEffect(() => {
-    setQuestionMapStatus((current) => {
-      if (current.length === totalQuestions) {
-        return current;
+    if (error && quizStatus === 'idle') {
+      window.alert(error);
+      router.push('/categories');
+    }
+  }, [error, quizStatus, router]);
+
+  const stats = useMemo(() => {
+    const orderedResults = questions
+      .map((question) => answerMetaByQuestionId[question.id])
+      .filter(Boolean);
+
+    const correctCount = orderedResults.filter((item) => item.isCorrect).length;
+    const wrongCount = orderedResults.filter((item) => !item.isCorrect).length;
+    let streak = 0;
+    let rollingStreak = 0;
+
+    orderedResults.forEach((item) => {
+      if (item.isCorrect) {
+        rollingStreak += 1;
+      } else {
+        rollingStreak = 0;
       }
-
-      return Array(totalQuestions)
-        .fill('pending')
-        .map((_, i) => current[i] || (i < 3 ? 'correct' : 'pending'));
+      streak = rollingStreak;
     });
-  }, [totalQuestions]);
 
-  if (!questions || questions.length === 0) {
-    return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mb-4" />
-        <p className="text-gray-500 font-bold">Loading Quiz Arena...</p>
-        <button 
-          onClick={() => router.push('/categories')}
-          className="mt-6 text-violet-600 font-semibold underline text-sm"
-        >
-          Return to Categories
-        </button>
-      </div>
-    );
-  }
+    return {
+      correctCount,
+      wrongCount,
+      streak,
+      score: correctCount * 10,
+    };
+  }, [answerMetaByQuestionId, questions]);
 
-  // Handle User Answer
-  const handleAnswerSelect = (optionKey) => {
-    if (selectedOption) return; // Prevent double click
-    
-    setSelectedOption(optionKey);
-    // Determine if correct. Assuming currentQues.correct_answer holds 'A', 'B', etc.
-    const isCorrect = optionKey.toUpperCase() === currentQues.correct_answer;
+  useEffect(() => {
+    if (quizStatus === 'finished' && result) {
+      router.push(
+        `/result?score=${result.score}&total=${result.total}&points=${result.earnedPoints}&category=${encodeURIComponent(categoryName)}&time=${elapsedSeconds}&streak=${stats.streak}`,
+      );
+    }
+  }, [categoryName, elapsedSeconds, quizStatus, result, router, stats.streak]);
 
-    if (isCorrect) {
-      setScore(prev => prev + 100); // Dynamic score increase
-      setCorrectCount(prev => prev + 1);
-      setStreak(prev => prev + 1);
-      updateQuestionMap(currentIndex, 'correct');
+  const questionStatuses = useMemo(
+    () =>
+      questions.map((question, index) => {
+        const resultForQuestion = answerMetaByQuestionId[question.id];
+        if (resultForQuestion) {
+          return resultForQuestion.isCorrect ? 'correct' : 'wrong';
+        }
+        if (index === currentIndex && quizStatus !== 'finished') {
+          return 'active';
+        }
+        return 'pending';
+      }),
+    [answerMetaByQuestionId, currentIndex, questions, quizStatus],
+  );
+
+  const liveRankings = useMemo(() => {
+    const meName = user?.username || t('common.you');
+    const list = (leaderboard || []).slice(0, 8).map((entry, index) => ({
+      id: entry.id,
+      name: entry.username,
+      points: Number(entry.points || 0),
+      isYou: entry.username === meName,
+      color: LIVE_COLORS[index % LIVE_COLORS.length],
+    }));
+
+    if (!list.some((entry) => entry.isYou) && user) {
+      list.push({
+        id: 'you-local',
+        name: meName,
+        points: stats.score,
+        isYou: true,
+        color: 'bg-violet-600',
+      });
     } else {
-      setWrongCount(prev => prev + 1);
-      setStreak(0); // Reset streak
-      updateQuestionMap(currentIndex, 'wrong');
+      list.forEach((entry) => {
+        if (entry.isYou) {
+          entry.points = Math.max(entry.points, stats.score);
+        }
+      });
     }
-  };
 
-  const updateQuestionMap = (index, status) => {
-    setQuestionMapStatus(prev => {
-      const newMap = [...prev];
-      newMap[index] = status;
-      return newMap;
-    });
-  };
+    return list
+      .sort((left, right) => right.points - left.points)
+      .slice(0, 5)
+      .map((entry, index) => ({
+        ...entry,
+        rank: index + 1,
+        initials: entry.name?.slice(0, 1).toUpperCase() || 'U',
+      }));
+  }, [leaderboard, stats.score, t, user]);
 
-  const handleNext = () => {
-    // Dispatch next question logic here later
-    setSelectedOption(null);
-    setTimeLeft(20);
-  };
-
-  // UI Helper: Get dynamic style for an option box
-  const getOptionStyle = (optionKey) => {
-    const isSelected = selectedOption === optionKey;
-    if (!isSelected) {
-      return "bg-white border-gray-100 hover:border-violet-300 hover:bg-violet-50 text-gray-700";
+  const handleNext = useCallback(() => {
+    if (quizStatus !== 'answered') {
+      return;
     }
-    return "bg-[#F3E8FF] border-violet-400 text-gray-900"; // Selected/Active styling
-  };
+
+    setTimeLeft(BASE_TIME_SECONDS);
+    setJokerSource(null);
+
+    const isLastQuestion = currentIndex + 1 >= questions.length;
+    if (isLastQuestion) {
+      dispatch(submitQuiz({ sessionId, answers }));
+      return;
+    }
+    dispatch(nextQuestion());
+  }, [answers, currentIndex, dispatch, questions.length, quizStatus, sessionId]);
+
+  const applyJokerEffect = useCallback(
+    (type) => {
+      if (type === 'time') {
+        setTimeLeft((current) => current + EXTRA_TIME_SECONDS);
+        return;
+      }
+
+      if (type === 'skip') {
+        handleAnswerSelect('SKIP');
+        return;
+      }
+
+      if (type === 'fifty_fifty') {
+        const optionKeys = Object.keys(currentQuestion.options || {}).filter(
+          (key) => !eliminatedOptions.includes(key) && key !== selectedOption,
+        );
+        dispatch(eliminateOptions(optionKeys.slice(0, 2)));
+        return;
+      }
+
+      if (type === 'reveal') {
+        const availableOptions = Object.keys(currentQuestion.options || {}).filter(
+          (key) => !eliminatedOptions.includes(key),
+        );
+        const suggestedOption = availableOptions[0];
+        if (suggestedOption) {
+          window.alert(t('quiz.hint_option', { option: suggestedOption }));
+        }
+      }
+    },
+    [currentQuestion, dispatch, eliminatedOptions, handleAnswerSelect, selectedOption, t],
+  );
+
+  const handleJoker = useCallback(
+    async (type) => {
+      if (!currentQuestion || quizStatus !== 'playing' || isCheckingAnswer) {
+        return;
+      }
+
+      const action = await dispatch(triggerJokerAction(type));
+      if (!triggerJokerAction.fulfilled.match(action)) {
+        setJokerSource('insufficient');
+        return;
+      }
+
+      const { data } = action.payload;
+      if (!data.success) {
+        setJokerSource('insufficient');
+        if (data.message === 'insufficient_balance') {
+          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+          if (shouldRedirect) {
+            router.push('/shop');
+          }
+        }
+        return;
+      }
+
+      setJokerSource(data.source === 'inventory' ? 'inventory' : 'balance');
+      applyJokerEffect(type);
+    },
+    [applyJokerEffect, currentQuestion, dispatch, isCheckingAnswer, quizStatus, router, t],
+  );
+
+  const getOptionStyle = useCallback(
+    (optionKey) => {
+      if (!currentQuestionMeta) {
+        return selectedOption === optionKey
+          ? 'border-violet-400 bg-violet-500/20 text-white'
+          : 'border-white/15 bg-white/[0.06] text-white/90 hover:border-violet-300 hover:bg-violet-500/10';
+      }
+
+      if (currentQuestionMeta.correct === optionKey) {
+        return 'border-emerald-300 bg-emerald-500/20 text-emerald-100';
+      }
+
+      if (currentQuestionMeta.selected === optionKey && !currentQuestionMeta.isCorrect) {
+        return 'border-rose-300 bg-rose-500/20 text-rose-100';
+      }
+
+      return 'border-white/10 bg-white/[0.04] text-white/40';
+    },
+    [currentQuestionMeta, selectedOption],
+  );
+
+  const loadingView = !currentQuestion || quizStatus === 'loading' || !activeCategoryId;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-      <PageHeader 
-        pageName="Active Quiz" 
-        breadcrumbs={[ { label: 'Category Grid', href: '/categories' } ]} 
+    <div className="min-h-screen bg-[#050426]">
+      <PageHeader
+        pageName={t('quiz.page_title')}
+        breadcrumbs={[{ label: `${t('quiz.page_title')} - ${t('quiz.joker_dock')}`, href: '/play/active' }]}
       />
 
-      <div className="max-w-[1440px] mx-auto px-4 lg:px-8 pb-12 mt-4 lg:mt-8">
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-          
-          {/* ────── LEFT MAIN COLUMN (Quiz Engine) ────── */}
-          <div className="lg:col-span-8 flex flex-col gap-5">
-            
-            {/* Top Info Bar: Category Pill & Progression */}
-            <div className="flex flex-col gap-3 px-1">
-              <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100/50 text-violet-700 text-[12px] font-bold border border-violet-200">
-                  <div className="w-4 h-4 rounded-full bg-violet-500/20 flex items-center justify-center">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-600" />
-                  </div>
-                  {currentCategoryName}
+      <div className="mx-auto max-w-[1440px] px-4 pb-10 pt-2 lg:px-8">
+        {loadingView ? (
+          <div className="flex min-h-[72vh] flex-col items-center justify-center rounded-[28px] border border-white/10 bg-white/[0.03]">
+            <div className="mb-4 h-11 w-11 animate-spin rounded-full border-4 border-violet-300/20 border-t-violet-400" />
+            <p className="text-sm font-bold text-white/70">{t('common.loading')}</p>
+          </div>
+        ) : (
+          <div className="rounded-[30px] border border-white/10 bg-gradient-to-br from-[#08063c] via-[#0b0a52] to-[#09062a] p-4 shadow-[0_30px_80px_rgba(10,12,50,0.55)] lg:p-6">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white">
+                  {categoryName}
                 </span>
-                <span className="text-[14px] font-bold text-gray-800">
-                  Question <span className="text-gray-900 font-black">{currentQNumber}</span> of {totalQuestions}
+                <span className="text-sm font-semibold text-white/75">
+                  {t('quiz.question_progress', { current: currentQuestionNumber, total: totalQuestions })}
                 </span>
               </div>
-              
-              {/* Progress Bar */}
-              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-violet-500 to-indigo-500 rounded-full transition-all duration-500"
-                  style={{ width: `${(currentQNumber / totalQuestions) * 100}%` }}
-                />
+              <div className="flex items-center gap-2">
+                <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-black text-white">
+                  {t('quiz.score')} {stats.score}
+                </span>
+                <span className="rounded-2xl border border-amber-300/40 bg-amber-500/10 px-3 py-1.5 text-sm font-black text-amber-300">
+                  {timeLeft} {t('quiz.seconds_short')}
+                </span>
               </div>
             </div>
 
-            {/* Top Stats Cards Row */}
-            <div className="grid grid-cols-4 gap-3 lg:gap-4">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 lg:p-4 flex items-center gap-3">
-                <div className="relative w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center">
-                  {/* SVG Timer Ring */}
-                  <svg className="absolute inset-0 w-full h-full -rotate-90">
-                    <circle cx="50%" cy="50%" r="45%" className="fill-none stroke-orange-100 stroke-[3]" />
-                    <circle cx="50%" cy="50%" r="45%" className="fill-none stroke-orange-500 stroke-[3] transition-all" strokeDasharray="100" strokeDashoffset="20" />
-                  </svg>
-                  <span className="text-[13px] lg:text-[15px] font-black text-orange-600">{timeLeft}</span>
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase tracking-wider font-bold text-gray-400">Time Left</p>
-                  <p className="text-[18px] lg:text-[22px] font-black text-gray-900 leading-none mt-0.5">{timeLeft}</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex flex-col justify-center items-center text-center">
-                <p className="text-[9px] uppercase tracking-wider font-bold text-gray-400">Score</p>
-                <p className="text-[20px] lg:text-[26px] font-black text-gray-900 mt-0.5 transition-all">{score}</p>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex flex-col justify-center items-center text-center">
-                <p className="text-[9px] uppercase tracking-wider font-bold text-gray-400">Correct</p>
-                <p className="text-[20px] lg:text-[26px] font-black text-green-500 mt-0.5 transition-all">{correctCount}</p>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 flex flex-col justify-center items-center text-center">
-                <p className="text-[9px] uppercase tracking-wider font-bold text-gray-400">Wrong</p>
-                <p className="text-[20px] lg:text-[26px] font-black text-red-500 mt-0.5 transition-all">{wrongCount}</p>
-              </div>
+            <div className="mb-7 h-1.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500 transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
 
-            {/* STREAK */}
-            <div className="flex justify-end -mt-1 px-1">
-               <div className="flex items-center gap-1.5 text-[14px]">
-                 <span className="font-bold text-gray-400 text-[11px] uppercase tracking-widest">Streak</span>
-                 <span className="font-black text-orange-500 flex items-center gap-1">🔥 {streak}</span>
-               </div>
-            </div>
-
-            {/* Question Card & Area */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 pt-8 pb-6 px-6 lg:px-10 flex flex-col items-center">
-              <span className="inline-block px-3 py-1 bg-violet-50 text-violet-600 text-[10px] font-black uppercase tracking-widest rounded-full mb-6">
-                Question 0{currentQNumber}
-              </span>
-              <h2 className="text-[20px] lg:text-[24px] font-black text-gray-900 text-center leading-[1.4] max-w-2xl mb-8">
-                {currentQues.question_text}
+            <section className="mx-auto max-w-[920px]">
+              <p className="mx-auto mb-3 w-fit rounded-full border border-white/15 bg-white/10 px-4 py-1 text-xs font-bold text-white/85">
+                {categoryName} - {t('quiz.question_progress', { current: currentQuestionNumber, total: totalQuestions })}
+              </p>
+              <h2 className="mb-6 text-center text-2xl font-black leading-[1.4] text-white lg:text-[38px]">
+                {currentQuestion.questionText}
               </h2>
 
-              {/* Options Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                {['a', 'b', 'c', 'd'].map((optKey) => {
-                  const val = currentQues[`option_${optKey}`];
-                  const label = optKey.toUpperCase();
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                {Object.entries(currentQuestion.options || {}).map(([key, value]) => {
+                  if (eliminatedOptions.includes(key)) {
+                    return null;
+                  }
                   return (
                     <button
-                      key={optKey}
-                      onClick={() => handleAnswerSelect(optKey)}
-                      className={`flex items-center p-4 rounded-2xl border-2 transition-all ${getOptionStyle(optKey)}`}
-                      disabled={!!selectedOption}
+                      key={key}
+                      type="button"
+                      onClick={() => handleAnswerSelect(key)}
+                      disabled={quizStatus !== 'playing' || isCheckingAnswer}
+                      className={`flex items-center gap-3 rounded-2xl border px-4 py-4 transition ${getOptionStyle(key)}`}
                     >
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black mr-4 text-[15px] transition-colors ${
-                        selectedOption === optKey ? 'bg-violet-500 text-white shadow-sm shadow-violet-500/30' : 'bg-gray-100 text-gray-500'
-                      }`}>
-                        {label}
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-xs font-black text-white/80">
+                        {key}
                       </div>
-                      <span className="text-[15px] font-bold text-left">{val}</span>
+                      <span className={`flex-1 text-sm font-bold ${isRTL ? 'text-right' : 'text-left'}`}>{value}</span>
+                      {currentQuestionMeta?.correct === key ? <Check className="h-4 w-4 text-emerald-300" /> : null}
+                      {currentQuestionMeta?.selected === key && !currentQuestionMeta?.isCorrect ? (
+                        <X className="h-4 w-4 text-rose-300" />
+                      ) : null}
                     </button>
                   );
                 })}
               </div>
-            </div>
 
-            {/* Joker Dock Bottom Bar */}
-            <div className="mt-2 w-full rounded-3xl bg-gradient-to-r from-[#1E1260] via-[#241768] to-[#120B3B] p-5 lg:p-6 flex flex-col lg:flex-row items-center justify-between gap-6 relative overflow-hidden shadow-xl shadow-indigo-900/10">
-              
-              <div className="flex flex-col z-10 text-center lg:text-left">
-                <div className="flex items-center gap-2 mb-1 justify-center lg:justify-start">
-                   <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[10px]">🪙</div>
-                   <span className="text-[#FCD34D] font-black text-sm">{user?.qeemBalance || 24}</span>
-                </div>
-                <h3 className="text-white text-lg font-black tracking-wide">POWER-UPS</h3>
-                <p className="text-white/50 text-[12px] font-medium">Use wisely</p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-2 text-[11px] font-semibold">
+                <span className={`rounded-full border px-3 py-1 ${jokerSource === 'inventory' ? 'border-emerald-300/70 bg-emerald-400/15 text-emerald-200' : 'border-white/20 bg-white/5 text-white/65'}`}>
+                  * {t('quiz.deducted_inventory')}
+                </span>
+                <span className={`rounded-full border px-3 py-1 ${jokerSource === 'balance' ? 'border-amber-300/70 bg-amber-400/15 text-amber-200' : 'border-white/20 bg-white/5 text-white/65'}`}>
+                  * {t('quiz.deducted_balance')}
+                </span>
+                <span className={`rounded-full border px-3 py-1 ${jokerSource === 'insufficient' ? 'border-rose-300/70 bg-rose-400/15 text-rose-200' : 'border-white/20 bg-white/5 text-white/65'}`}>
+                  * {t('quiz.insufficient')}
+                </span>
               </div>
+            </section>
 
-              {/* Joker Pills */}
-              <div className="flex items-center gap-3 lg:gap-4 z-10 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
-                
-                {/* 50/50 */}
-                <button className="relative flex flex-col items-center justify-center w-20 lg:w-[90px] h-[100px] rounded-[20px] bg-indigo-500/20 border border-indigo-400/30 hover:bg-indigo-500/30 transition group">
-                   <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#8B5CF6] border-2 border-[#1E1260] flex items-center justify-center text-white text-[10px] font-black shadow-md">2</div>
-                   <Scissors className="w-5 h-5 text-indigo-300 mb-2 group-hover:scale-110 transition" />
-                   <span className="text-white text-[12px] font-bold">50 / 50</span>
-                   <span className="text-indigo-200/50 text-[9px] block text-center leading-tight mx-2 mt-1">Remove 2 wrong answers</span>
-                </button>
+            <section className="mt-7 rounded-[24px] border border-white/15 bg-white/[0.04] p-4">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <div className="grid flex-1 grid-cols-2 gap-3 lg:grid-cols-5">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-white/80">
+                    <p className="text-[11px] font-black uppercase tracking-[0.18em]">{t('quiz.jokers')}</p>
+                    <p className="mt-2 text-xs text-white/50">{t('quiz.tap_to_activate')}</p>
+                  </div>
 
-                {/* Skip */}
-                <button className="relative flex flex-col items-center justify-center w-20 lg:w-[90px] h-[100px] rounded-[20px] bg-cyan-500/10 border border-cyan-400/30 hover:bg-cyan-500/20 transition group">
-                   <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#3B82F6] border-2 border-[#1E1260] flex items-center justify-center text-white text-[10px] font-black shadow-md">1</div>
-                   <SkipForward className="w-5 h-5 text-cyan-300 mb-2 group-hover:scale-110 transition" />
-                   <span className="text-white text-[12px] font-bold">Skip</span>
-                   <span className="text-cyan-200/50 text-[9px] block text-center leading-tight mx-2 mt-1">Jump to the next question</span>
-                </button>
-
-                {/* Time */}
-                <button className="relative flex flex-col items-center justify-center w-20 lg:w-[90px] h-[100px] rounded-[20px] bg-green-500/10 border border-green-400/30 hover:bg-green-500/20 transition group">
-                   <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-[#10B981] border-2 border-[#1E1260] flex items-center justify-center text-white text-[10px] font-black shadow-md">1</div>
-                   <Clock className="w-5 h-5 text-green-400 mb-2 group-hover:scale-110 transition" />
-                   <span className="text-white text-[12px] font-bold">+10 Sec</span>
-                   <span className="text-green-200/50 text-[9px] block text-center leading-tight mx-2 mt-1">Add extra time to clock</span>
-                </button>
-
-                {/* Reveal (Empty State) */}
-                <button className="relative flex flex-col items-center justify-center w-20 lg:w-[90px] h-[100px] rounded-[20px] bg-red-500/5 border border-red-500/20 transition group opacity-60">
-                   <div className="absolute -top-2 -right-2 px-1.5 py-0.5 rounded-full bg-[#EF4444] border-2 border-[#1E1260] flex items-center justify-center text-white text-[8px] font-black max-w-[40px]">EMPTY</div>
-                   <Eye className="w-5 h-5 text-red-400 mb-2" />
-                   <span className="text-white/60 text-[12px] font-bold">Reveal</span>
-                   <span className="text-red-200/30 text-[9px] block text-center leading-tight mx-2 mt-1">Show correct answer</span>
-                </button>
-              </div>
-
-              {/* Next Button */}
-              <button 
-                onClick={handleNext}
-                disabled={!selectedOption}
-                className={`z-10 flex items-center justify-center gap-1.5 px-6 py-3.5 rounded-2xl font-bold text-[14px] transition-all ml-auto ${
-                  selectedOption 
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-600/30' 
-                    : 'bg-white/5 text-white/30 cursor-not-allowed'
-                }`}
-              >
-                Next <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-            
-          </div>
-
-          {/* ────── RIGHT WIDGETS COLUMN ────── */}
-          <div className="lg:col-span-4 flex flex-col gap-6">
-            
-            {/* 1. Question Map Grid */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 relative">
-               <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">QUESTION MAP</h3>
-               <div className="grid grid-cols-5 gap-2 lg:gap-3">
-                 {questionMapStatus.map((status, idx) => {
-                    const num = idx + 1;
-                    const isActive = currentIndex === idx;
-                    
-                    let blockStyle = "bg-gray-50 border-gray-100 text-gray-400"; // default pending
-                    let content = num;
-
-                    if (status === 'correct') {
-                      blockStyle = "bg-green-50 border-green-200 text-green-500";
-                      content = "✓";
-                    } else if (status === 'wrong') {
-                      blockStyle = "bg-red-50 border-red-200 text-red-500";
-                      content = "✕";
-                    }
-
-                    if (isActive) {
-                      blockStyle = "bg-violet-50 border-violet-400 text-violet-600 ring-2 ring-violet-100 shadow-sm";
-                    }
-
+                  {JOKER_ITEMS.map((joker) => {
+                    const Icon = joker.icon;
+                    const qty = Number(inventory?.[joker.type] || 0);
+                    const empty = qty <= 0;
                     return (
-                      <div 
-                        key={idx}
-                        className={`aspect-square rounded-xl border flex items-center justify-center text-[14px] font-black transition-colors ${blockStyle}`}
+                      <button
+                        key={joker.type}
+                        type="button"
+                        onClick={() => handleJoker(joker.type)}
+                        disabled={quizStatus !== 'playing' || isCheckingAnswer}
+                        className={`relative rounded-2xl border bg-gradient-to-b p-3 text-white transition hover:-translate-y-0.5 disabled:opacity-60 ${joker.cardClass}`}
                       >
-                        {content}
-                      </div>
+                        <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} rounded-full border-2 border-[#100b3b] bg-violet-600 px-2 py-0.5 text-[10px] font-black`}>
+                          {empty ? t('shop.empty_short') : `x${qty}`}
+                        </div>
+                        <Icon className="mx-auto mb-2 h-5 w-5" />
+                        <p className="text-sm font-black">{jokerTitle(joker, t)}</p>
+                        <p className="mt-1 min-h-[30px] text-[10px] text-white/60">
+                          {joker.subtitleKey ? t(joker.subtitleKey) : ''}
+                        </p>
+                        <p className="mt-2 rounded-full bg-black/20 px-2 py-1 text-[10px] font-black text-amber-200">
+                          {empty ? t('quiz.from_balance_cost', { cost: joker.cost }) : t('quiz.from_inventory')}
+                        </p>
+                      </button>
                     );
-                 })}
-               </div>
-            </div>
+                  })}
+                </div>
 
-            {/* 2. Live Ranking */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col h-full min-h-[300px]">
-               <div className="flex items-center justify-between mb-5">
-                 <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">LIVE RANKING</h3>
-                 <span className="flex items-center gap-1 text-[10px] font-bold text-red-500">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" /> LIVE
-                 </span>
-               </div>
-               
-               <div className="flex flex-col relative w-full h-[250px]">
-                 {liveRankings.map((player, idx) => {
-                   // Calculate vertical position (absolute positioning for smooth visual reorder)
-                   const topPosition = idx * 52; // 52px height + gap per item
-                   
-                   return (
-                     <div 
-                       key={player.id}
-                       className="absolute left-0 right-0 h-10 flex items-center justify-between transition-all duration-500 ease-in-out"
-                       style={{ top: `${topPosition}px` }}
-                     >
-                       <div className="flex items-center gap-3">
-                         <span className="text-[12px] font-bold text-gray-400 w-3 text-center">{idx + 1}</span>
-                         <div className={`w-8 h-8 rounded-full ${player.color} flex items-center justify-center text-white text-[11px] font-black`}>
-                           {player.initial}
-                         </div>
-                         <span className={`text-[13px] font-bold ${player.isYou ? 'text-violet-600' : 'text-gray-800'}`}>
-                           {player.name} {player.isYou && '(You)'}
-                         </span>
-                       </div>
-                       <span className={`text-[14px] font-black ${player.isYou ? 'text-violet-600' : 'text-gray-900'}`}>
-                         {player.points}
-                       </span>
-                     </div>
-                   );
-                 })}
-               </div>
-            </div>
-
-            {/* 3. Joker Inventory */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-              <h3 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">JOKER INVENTORY</h3>
-              <div className="flex flex-col gap-3">
-                 <div className="flex justify-between items-center text-[12px] font-semibold text-gray-700">
-                   <div className="flex items-center gap-2">
-                     <Scissors className="w-3.5 h-3.5 text-gray-400" /> 50/50
-                   </div>
-                   <span className="font-bold text-gray-900">× 2</span>
-                 </div>
-                 <div className="flex justify-between items-center text-[12px] font-semibold text-gray-700">
-                   <div className="flex items-center gap-2">
-                     <SkipForward className="w-3.5 h-3.5 text-gray-400" /> Skip
-                   </div>
-                   <span className="font-bold text-gray-900">× 1</span>
-                 </div>
-                 <div className="flex justify-between items-center text-[12px] font-semibold text-gray-700">
-                   <div className="flex items-center gap-2">
-                     <Clock className="w-3.5 h-3.5 text-gray-400" /> +10s Time
-                   </div>
-                   <span className="font-bold text-gray-900">× 1</span>
-                 </div>
-                 <div className="flex justify-between items-center text-[12px] font-semibold text-red-500">
-                   <div className="flex items-center gap-2">
-                     <Eye className="w-3.5 h-3.5" /> Reveal
-                   </div>
-                   <span className="font-bold text-red-500">× 0</span>
-                 </div>
+                <div className="flex flex-col gap-3 xl:w-[220px]">
+                  <div className="rounded-xl border border-amber-300/30 bg-amber-500/10 px-4 py-3 text-center">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-200">{t('common.qeem')}</p>
+                    <p className="mt-1 text-2xl font-black text-amber-300">{totalBalance}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={quizStatus !== 'answered'}
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black transition ${
+                      quizStatus === 'answered'
+                        ? 'bg-violet-600 text-white hover:bg-violet-500'
+                        : 'bg-white/10 text-white/40'
+                    }`}
+                  >
+                    {currentQuestionNumber >= totalQuestions ? t('quiz.finish_quiz') : t('quiz.next')}
+                    <ChevronRight className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
               </div>
-              <button className="w-full mt-5 py-2.5 rounded-xl border-2 border-violet-100 text-violet-600 text-[12px] font-bold hover:bg-violet-50 transition flex items-center justify-center gap-2">
-                🪙 Buy More Jokers
-              </button>
-            </div>
+            </section>
 
+            <section className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 lg:col-span-1">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">{t('quiz.question_map')}</p>
+                  <span className="text-xs font-bold text-white/60">
+                    {t('quiz.question_progress', { current: currentQuestionNumber, total: totalQuestions })}
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-2">
+                  {questionStatuses.map((status, index) => (
+                    <div
+                      key={questions[index]?.id || index}
+                      className={`flex aspect-square items-center justify-center rounded-xl border text-xs font-black ${
+                        status === 'correct'
+                          ? 'border-emerald-300/70 bg-emerald-500/20 text-emerald-200'
+                          : status === 'wrong'
+                          ? 'border-rose-300/70 bg-rose-500/20 text-rose-200'
+                          : status === 'active'
+                          ? 'border-violet-300/80 bg-violet-500/25 text-violet-100'
+                          : 'border-white/15 bg-white/[0.03] text-white/45'
+                      }`}
+                    >
+                      {status === 'correct' ? 'OK' : status === 'wrong' ? 'X' : index + 1}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/15 bg-white/[0.04] p-4 lg:col-span-2">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/70">{t('quiz.live_ranking')}</p>
+                  <span className="text-[10px] font-black uppercase tracking-[0.18em] text-rose-300">
+                    * {t('common.live')}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {liveRankings.map((player) => (
+                    <div
+                      key={player.id}
+                      className={`flex items-center justify-between rounded-xl border px-3 py-2 ${
+                        player.isYou
+                          ? 'border-violet-300/50 bg-violet-500/15'
+                          : 'border-white/10 bg-white/[0.03]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-4 text-xs font-black text-white/45">{player.rank}</span>
+                        <div className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-black text-white ${player.color}`}>
+                          {player.initials}
+                        </div>
+                        <p className={`text-sm font-bold ${player.isYou ? 'text-violet-200' : 'text-white/90'}`}>
+                          {player.name} {player.isYou ? `(${t('common.you')})` : ''}
+                        </p>
+                      </div>
+                      <p className={`text-sm font-black ${player.isYou ? 'text-violet-200' : 'text-white/85'}`}>
+                        {player.points}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-
 export default function ActiveQuizPage() {
   return (
     <ProtectedRoute>
-      <ActiveQuizContent />
+      <ActiveJokerDockPage />
     </ProtectedRoute>
   );
 }

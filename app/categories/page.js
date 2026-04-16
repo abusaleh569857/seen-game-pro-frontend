@@ -104,18 +104,11 @@ function CategoriesContent() {
       <PageHeader pageName={t('categoriesPage.page_title')} />
 
       <div className={`max-w-[1440px] mx-auto px-4 lg:px-8 mt-6 ${isRTL ? 'text-right' : ''}`}>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+        <div className="mb-6">
           <div>
             <h2 className="text-2xl font-black text-gray-900">{t('categoriesPage.title')}</h2>
             <p className="text-[13px] text-gray-400 font-medium">{t('categoriesPage.subtitle')}</p>
           </div>
-          <button
-            className="flex items-center justify-center gap-2 bg-violet-600 text-white px-6 py-2.5 rounded-2xl font-bold hover:bg-violet-700 transition shadow-lg shadow-violet-500/20 w-fit"
-            onClick={() => filteredCategories[0] && handleStartQuiz(filteredCategories[0].id)}
-          >
-            <Play className="w-4 h-4 fill-white" />
-            {t('categoriesPage.start_quiz')}
-          </button>
         </div>
 
         <div className="relative mb-6">
@@ -149,13 +142,13 @@ function CategoriesContent() {
         </div>
 
         {categoriesLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[...Array(10)].map((_, i) => (
               <div key={i} className="aspect-square bg-gray-100 rounded-3xl animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+          <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
             {filteredCategories.map((category) => {
               const IconComp = ICON_MAP[category.name_en] || Gamepad2;
               const borderColor = COLOR_MAP[category.name_en] || 'border-t-gray-300';

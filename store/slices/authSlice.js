@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '@/lib/api';
-import { clearAuth, getRefreshToken, getUserFromCookie, saveAuth } from '@/lib/auth';
+import { clearAuth, getAccessToken, getRefreshToken, getUserFromCookie, saveAuth } from '@/lib/auth';
 
 export const loginUser = createAsyncThunk(
   'auth/login',
@@ -68,9 +68,14 @@ const authSlice = createSlice({
   reducers: {
     initAuth(state) {
       const user = getUserFromCookie();
-      if (user) {
+      const accessToken = getAccessToken();
+      if (user && accessToken) {
         state.user = user;
         state.isLoggedIn = true;
+      } else {
+        clearAuth();
+        state.user = null;
+        state.isLoggedIn = false;
       }
       state.initialized = true;
     },

@@ -1,14 +1,19 @@
 ﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useI18n } from '@/lib/i18n';
 
 export default function TimerBar({ duration = 30, onExpire, paused = false }) {
   const [timeLeft, setTimeLeft] = useState(duration);
   const expiredRef = useRef(false);
+  const { t } = useI18n();
 
   useEffect(() => {
-    setTimeLeft(duration);
+    const resetTimer = setTimeout(() => {
+      setTimeLeft(duration);
+    }, 0);
     expiredRef.current = false;
+    return () => clearTimeout(resetTimer);
   }, [duration]);
 
   useEffect(() => {
@@ -41,7 +46,7 @@ export default function TimerBar({ duration = 30, onExpire, paused = false }) {
   return (
     <div className="mb-4 w-full">
       <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="text-gray-500">Time remaining</span>
+        <span className="text-gray-500">{t('quiz.time_left')}</span>
         <span className={`text-sm font-bold ${textColor} ${timeLeft <= 7 ? 'animate-pulse' : ''}`}>
           {timeLeft}s
         </span>

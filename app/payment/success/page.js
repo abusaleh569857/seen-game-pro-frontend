@@ -53,8 +53,18 @@ function PaymentSuccessContent() {
 
 export default function PaymentSuccessPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-gray-950 text-white">Loading...</div>}>
+    <Suspense fallback={<PaymentSuccessFallback />}>
       <PaymentSuccessContent />
     </Suspense>
+  );
+}
+
+function PaymentSuccessFallback() {
+  const { t } = useI18n();
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-950 text-white">
+      {t('common.loading')}
+    </div>
   );
 }

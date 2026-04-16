@@ -1,13 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from '@/lib/i18n';
 import { logoutUser } from '@/store/slices/authSlice';
 import { isRtlLanguage } from '@/lib/languages';
+import { stripLocaleFromPathname } from '@/lib/i18n-settings';
 import {
   Play,
   LayoutGrid,
@@ -21,6 +21,7 @@ import {
   Settings,
   Plus,
   ChevronDown,
+  CircleDot,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -28,7 +29,7 @@ const NAV_SECTIONS = [
     key: 'play',
     title: 'PLAY',
     items: [
-      { icon: Play, label: 'Active Quiz', labelKey: 'active_quiz', href: '/categories', activePrefix: '/play/' },
+      { icon: Play, label: 'Active Quiz', labelKey: 'active_quiz', href: '/play/active', activePrefix: '/play/' },
       { icon: LayoutGrid, label: 'Game Categories', labelKey: 'game_categories', href: '/categories' },
       { icon: BarChart2, label: 'Leaderboard', labelKey: 'leaderboard', href: '/leaderboard' },
     ],
@@ -46,7 +47,7 @@ const NAV_SECTIONS = [
     key: 'social',
     title: 'SOCIAL',
     items: [
-      { icon: Users, label: 'Friends', labelKey: 'friends', href: '#', badge: '3', badgeColor: 'bg-blue-500', comingSoon: true },
+      { icon: Users, label: 'Friends', labelKey: 'friends', href: '#', badge: '0', badgeColor: 'bg-blue-500', comingSoon: true },
       { icon: Trophy, label: 'Tournament', labelKey: 'tournament', href: '#', badge: 'Live', badgeColor: 'bg-red-500', comingSoon: true },
     ],
   },
@@ -54,7 +55,7 @@ const NAV_SECTIONS = [
     key: 'settings',
     title: 'SETTINGS',
     items: [
-      { icon: Bell, label: 'Notifications', labelKey: 'notifications', href: '#', badge: '5', badgeColor: 'bg-purple-500', comingSoon: true },
+      { icon: Bell, label: 'Notifications', labelKey: 'notifications', href: '#', badge: '0', badgeColor: 'bg-purple-500', comingSoon: true },
       { icon: Settings, label: 'Settings', labelKey: 'settings_item', href: '#', comingSoon: true },
     ],
   },
@@ -62,6 +63,7 @@ const NAV_SECTIONS = [
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const normalizedPathname = stripLocaleFromPathname(pathname || '/');
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -72,6 +74,7 @@ export default function AppSidebar() {
 
   const qeemBalance = user?.qeemBalance ?? user?.qeem_balance ?? 0;
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'UN';
+  const comingSoonMessage = 'This section is currently in building process. It is not built yet.';
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -79,9 +82,12 @@ export default function AppSidebar() {
   };
 
   const isActive = (href, activePrefix) => {
-    if (activePrefix && pathname.startsWith(activePrefix)) return true;
-    if (href === '/play' && pathname === '/play') return true;
-    if (href !== '/play' && pathname.startsWith(href) && href !== '#') return true;
+    const cleanHref = href.split('#')[0];
+    const cleanActivePrefix = activePrefix ? activePrefix.split('#')[0] : '';
+
+    if (cleanActivePrefix && normalizedPathname.startsWith(cleanActivePrefix)) return true;
+    if (cleanHref === '/play' && normalizedPathname === '/play') return true;
+    if (cleanHref && cleanHref !== '/play' && cleanHref !== '#' && normalizedPathname.startsWith(cleanHref)) return true;
     return false;
   };
 
@@ -93,20 +99,6 @@ export default function AppSidebar() {
 
   return (
     <>
-      {/* Mobile Menu Trigger (Top Left) */}
-      {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className={`lg:hidden fixed top-3 z-[45] w-10 h-10 rounded-xl bg-white border border-gray-100 shadow-sm flex items-center justify-center text-gray-500 hover:text-violet-600 transition-colors ${isRTL ? 'right-4' : 'left-4'}`}
-        >
-          <div className="flex flex-col gap-1 items-start">
-            <span className="w-5 h-0.5 bg-current rounded-full" />
-            <span className="w-5 h-0.5 bg-current rounded-full" />
-            <span className="w-3 h-0.5 bg-current rounded-full" />
-          </div>
-        </button>
-      )}
-
       {/* Backdrop (Mobile Only) */}
       {isOpen && (
         <div
@@ -133,20 +125,13 @@ export default function AppSidebar() {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-gray-100">
-          <div className="relative w-9 h-9 shrink-0">
-            <Image
-              src="/icons/logo.svg"
-              alt="Seen Game Pro"
-              width={36}
-              height={36}
-              className="w-9 h-9"
-              onError={(e) => {
-                e.target.style.display = 'none';
-              }}
-            />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#6248FF] to-[#486CFF] border border-white/10 shadow-md">
+            <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white/80">
+              <CircleDot className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+            </div>
           </div>
           <div>
-            <p className="text-[13px] font-black text-gray-900 leading-none">Seen Game</p>
+            <p className="text-[13px] font-black text-gray-900 leading-none">{t('nav.brand_name')}</p>
             <span className="text-[9px] font-bold text-violet-600 bg-violet-100 px-1.5 py-0.5 rounded-sm mt-0.5 inline-block tracking-wide">PRO</span>
           </div>
         </div>
@@ -182,10 +167,10 @@ export default function AppSidebar() {
               {section.items.map((item) => {
                 const active = isActive(item.href, item.activePrefix);
                 return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                     className={`flex items-center justify-between px-3 py-2 rounded-lg mb-0.5 group transition-all ${
+                    <Link
+                     key={item.label}
+                     href={item.href}
+                     className={`relative flex items-center justify-between px-3 py-2 rounded-lg mb-0.5 group transition-all ${isRTL ? 'flex-row-reverse' : ''} ${
                         active
                           ? 'bg-violet-50 text-violet-700'
                           : item.comingSoon
@@ -194,13 +179,16 @@ export default function AppSidebar() {
                      }`}
                      onClick={
                        item.comingSoon
-                         ? (e) => e.preventDefault()
-                         : () => {
-                             setIsOpen(false);
-                           }
+                          ? (e) => {
+                              e.preventDefault();
+                              window.alert(comingSoonMessage);
+                            }
+                          : () => {
+                              setIsOpen(false);
+                            }
                      }
                    >
-                    <div className="flex items-center gap-2.5">
+                    <div className={`flex items-center gap-2.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <item.icon
                         className={`w-4 h-4 shrink-0 ${active ? 'text-violet-600' : 'text-gray-400 group-hover:text-gray-600'}`}
                       />
@@ -225,13 +213,13 @@ export default function AppSidebar() {
         <div className="border-t border-gray-100 p-3">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-gray-50 transition group"
+            className={`w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-gray-50 transition group ${isRTL ? 'flex-row-reverse' : ''}`}
           >
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
                 {initials}
               </div>
-              <div className="text-left">
+              <div className={isRTL ? 'text-right' : 'text-left'}>
                 <p className="text-[12px] font-bold text-gray-800 leading-none truncate max-w-[90px]">
                   {user?.username}
                 </p>

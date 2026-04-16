@@ -1,9 +1,13 @@
 import Link from 'next/link';
 import { CircleDot } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useSelector } from 'react-redux';
+import { isRtlLanguage } from '@/lib/languages';
 
 export default function Footer() {
   const { t } = useI18n();
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const isRTL = isRtlLanguage(selectedLang);
 
   return (
     <footer className="w-full px-4 py-8 lg:px-10 lg:py-12 border-t border-white/5">
@@ -14,7 +18,7 @@ export default function Footer() {
               <CircleDot className="h-2 w-2 text-white" strokeWidth={3} />
             </div>
           </div>
-          <span className="text-[14px] font-black uppercase text-white tracking-tight">Seen Game Pro</span>
+          <span className="text-[14px] font-black uppercase text-white tracking-tight">{t('nav.brand_name')}</span>
         </div>
 
         <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 text-[12px] font-medium text-white/50">
@@ -24,7 +28,7 @@ export default function Footer() {
           <Link href="/admin" className="hover:text-[#A78BFA] transition-colors">{t('landing.footer_admin')}</Link>
         </div>
 
-        <div className="text-[11px] font-medium text-white/30 text-center md:text-right flex items-center justify-center md:justify-end gap-1">
+        <div className={`text-[11px] font-medium text-white/30 text-center flex items-center justify-center gap-1 ${isRTL ? 'md:text-left md:justify-start' : 'md:text-right md:justify-end'}`}>
           <span>{t('landing.footer_copy')}</span>
           <span className="hidden sm:inline">{t('landing.footer_secure')}</span>
         </div>

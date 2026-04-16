@@ -1,56 +1,79 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import Cookies from 'js-cookie';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   DEFAULT_LANGUAGE,
-  LANGUAGE_STORAGE_KEY,
-  isRtlLanguage,
-  normalizeLanguageCode,
-} from '@/lib/languages';
+  buildLocalizedPath,
+  extractLocaleFromPathname,
+  isRtlLocale,
+  LOCALE_COOKIE_NAME,
+  normalizeLocale,
+} from '@/lib/i18n-settings';
 import { detectBrowserLanguage } from '@/lib/i18n';
+import i18n from '@/lib/i18n-client';
 import { setSelectedLang } from '@/store/slices/quizSlice';
 
-export default function LanguageSync() {
+export default function LanguageSync({ initialLanguage = DEFAULT_LANGUAGE }) {
   const dispatch = useDispatch();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const hasHydrated = useRef(false);
+  const lastUrlRef = useRef('');
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const nextLanguage = storedLanguage
-      ? normalizeLanguageCode(storedLanguage)
-      : detectBrowserLanguage();
+    const localeFromPath = typeof window !== 'undefined'
+      ? extractLocaleFromPathname(window.location.pathname)
+      : null;
+    const storedLanguage = Cookies.get(LOCALE_COOKIE_NAME);
+    const nextLanguage = normalizeLocale(
+      localeFromPath || storedLanguage || initialLanguage || detectBrowserLanguage(),
+    );
 
     if (nextLanguage !== selectedLang) {
       dispatch(setSelectedLang(nextLanguage));
     }
 
+    i18n.changeLanguage(nextLanguage);
     hasHydrated.current = true;
-  }, [dispatch]);
+  }, [dispatch, initialLanguage, pathname]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
     if (!hasHydrated.current) {
       return;
     }
 
-    const normalizedLanguage = normalizeLanguageCode(selectedLang);
-    const rtl = isRtlLanguage(normalizedLanguage);
+    const normalizedLanguage = normalizeLocale(selectedLang);
+    const rtl = isRtlLocale(normalizedLanguage);
+    const search = searchParams?.toString();
+    const nextPath = buildLocalizedPath(pathname || '/', normalizedLanguage);
+    const nextUrl = `${nextPath}${search ? `?${search}` : ''}`;
 
-    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, normalizedLanguage);
+    Cookies.set(LOCALE_COOKIE_NAME, normalizedLanguage, {
+      expires: 365,
+      sameSite: 'lax',
+    });
+    i18n.changeLanguage(normalizedLanguage);
     document.documentElement.lang = normalizedLanguage;
     document.documentElement.dir = rtl ? 'rtl' : 'ltr';
     document.body.dir = rtl ? 'rtl' : 'ltr';
     document.body.classList.toggle('rtl', rtl);
-  }, [selectedLang]);
+
+    if (typeof window !== 'undefined') {
+      const currentUrl = `${window.location.pathname}${window.location.search}`;
+      if (currentUrl !== nextUrl && lastUrlRef.current !== nextUrl) {
+        lastUrlRef.current = nextUrl;
+        router.replace(nextUrl);
+        return;
+      }
+    }
+
+    lastUrlRef.current = nextUrl;
+  }, [pathname, router, searchParams, selectedLang]);
 
   return null;
 }

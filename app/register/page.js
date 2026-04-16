@@ -10,7 +10,7 @@ import { Check, Eye, EyeOff, Lock, Mail, UserCircle, CheckCircle2 } from "lucide
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import RegisterVisualPanel from "@/components/auth/RegisterVisualPanel";
 import { useI18n } from "@/lib/i18n";
-import { normalizeLanguageCode } from "@/lib/languages";
+import { isRtlLanguage, normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken } from "@/lib/socialAuth";
 import {
   clearError,
@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const { t } = useI18n();
 
   const [lang, setLang] = useState(selectedLang);
+  const isRTL = isRtlLanguage(lang);
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [socialLoading, setSocialLoading] = useState("");
@@ -219,12 +220,12 @@ export default function RegisterPage() {
                       value={form.password}
                       onChange={(event) => setForm({ ...form, password: event.target.value })}
                       placeholder={t("auth.min_six_chars")}
-                      className="pr-14"
+                      className={isRTL ? "pl-14" : "pr-14"}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand"
+                      className={`absolute top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand ${isRTL ? "left-4" : "right-4"}`}
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
@@ -242,7 +243,7 @@ export default function RegisterPage() {
                       value={form.confirmPassword}
                       onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
                       placeholder={t("auth.reenter_password")}
-                      className={`pr-14 ${
+                      className={`${isRTL ? "pl-14" : "pr-14"} ${
                         !!form.confirmPassword && !passwordsMatch
                           ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10"
                           : ""
@@ -251,7 +252,7 @@ export default function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand"
+                      className={`absolute top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand ${isRTL ? "left-4" : "right-4"}`}
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>

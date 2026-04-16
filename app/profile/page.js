@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Star,
   Gamepad2,
@@ -11,14 +10,9 @@ import {
   Flame,
   BarChart2,
   Pencil,
-  Globe,
-  Bell,
-  ChevronDown as ChevronDownIcon,
   Trophy as TrophyIcon,
   ShoppingBag,
   ChevronRight,
-  Home,
-  Zap,
   Clock,
   Eye,
   Divide,
@@ -26,7 +20,8 @@ import {
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useI18n } from '@/lib/i18n';
-import { fetchHistory, fetchJokerInventory } from '@/store/slices/quizSlice';
+import { getLocalizedCategoryName, isRtlLanguage, normalizeLanguageCode } from '@/lib/languages';
+import { fetchHistory, fetchJokerInventory, fetchUserStats } from '@/store/slices/quizSlice';
 
 // ─── Helper: Avatar Circle ───────────────────────────────────────────────────
 function Avatar({ username, size = 'lg' }) {
@@ -47,7 +42,7 @@ function StatCard({ icon: Icon, iconColor, value, label, borderColor }) {
     <div className={`bg-white rounded-2xl border-t-2 ${borderColor} p-4 flex flex-col items-center gap-2 shadow-sm`}>
       <Icon className={`w-6 h-6 ${iconColor}`} />
       <p className={`text-2xl font-black ${iconColor}`}>{value}</p>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</p>
+      <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-gray-400 whitespace-nowrap">{label}</p>
     </div>
   );
 }
@@ -56,7 +51,7 @@ function StatCard({ icon: Icon, iconColor, value, label, borderColor }) {
 function AchievementBadge({ emoji, label, color, isMobile }) {
   if (isMobile) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap bg-white/10 text-white/90 border border-white/10 backdrop-blur-sm">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-bold whitespace-nowrap leading-none bg-white/10 text-white/90 border border-white/10 backdrop-blur-sm">
         <span>{emoji}</span>
         {label}
       </span>
@@ -91,26 +86,38 @@ function JokerRow({ icon: Icon, iconBg, label, count, isEmpty }) {
 function ProfileContent() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { history, inventory } = useSelector((state) => state.quiz);
+  const {
+    history = [],
+    inventory = {},
+    userStats,
+    leaderboard = [],
+  } = useSelector((state) => state.quiz);
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const activeLang = normalizeLanguageCode(selectedLang);
+  const isRTL = isRtlLanguage(activeLang);
   const { t } = useI18n();
 
   useEffect(() => {
     dispatch(fetchHistory());
     dispatch(fetchJokerInventory());
+    dispatch(fetchUserStats());
   }, [dispatch]);
 
   const qeemBalance = user?.qeemBalance ?? user?.qeem_balance ?? 0;
-  const points = user?.points ?? 0;
-  const gamesPlayed = history?.length ?? 0;
-  const avgAccuracy =
-    gamesPlayed > 0
-      ? Math.round(
-          (history.reduce((acc, g) => acc + g.score / (g.total_questions || 10), 0) / gamesPlayed) * 100
-        )
-      : 0;
+  const points = userStats?.totalPoints ?? user?.points ?? 0;
+  const gamesPlayed = userStats?.totalGames ?? history.length ?? 0;
+  const avgAccuracy = userStats?.avgAccuracy ?? 0;
+  const bestStreak = userStats?.bestStreak ?? 0;
+  const dayStreak = userStats?.dayStreak ?? 0;
+  const rankFromLeaderboard =
+    leaderboard.find((entry) => Number(entry.id) === Number(user?.id) || entry.username === user?.username)?.rank ?? '-';
+  const globalRank = userStats?.globalRank && userStats?.globalRank !== '-' ? userStats.globalRank : rankFromLeaderboard;
 
-  const memberSince = user?.created_at
-    ? new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(user.created_at))
+  const createdAtRaw = userStats?.memberSinceAt || user?.createdAt || user?.created_at || null;
+  const createdDate = createdAtRaw ? new Date(createdAtRaw) : null;
+  const memberSince =
+    createdDate && !Number.isNaN(createdDate.getTime())
+      ? new Intl.DateTimeFormat(activeLang, { month: 'long', year: 'numeric' }).format(createdDate)
       : '-';
 
   const ACHIEVEMENTS = [
@@ -122,17 +129,17 @@ function ProfileContent() {
 
   const JOKERS = [
     { icon: Divide, iconBg: 'bg-blue-500', label: '50/50', key: 'fifty_fifty' },
-    { icon: ChevronRight, iconBg: 'bg-indigo-500', label: 'Skip', key: 'skip' },
-    { icon: Clock, iconBg: 'bg-green-500', label: 'Time', key: 'time' },
-    { icon: Eye, iconBg: 'bg-red-500', label: 'Reveal', key: 'reveal' },
+    { icon: ChevronRight, iconBg: 'bg-indigo-500', label: t('shop.skip_label'), key: 'skip' },
+    { icon: Clock, iconBg: 'bg-green-500', label: t('shop.time_label'), key: 'time' },
+    { icon: Eye, iconBg: 'bg-red-500', label: t('shop.reveal_label'), key: 'reveal' },
   ];
 
   const getResultLabel = (score, total) => {
-    return score >= total * 0.5 ? 'Win' : 'Loss';
+    return score >= total * 0.5 ? t('profile.win') : t('profile.loss');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" dir={isRTL ? 'rtl' : 'ltr'}>
       <PageHeader pageName={t('profile.page_title')} />
 
       <div className="px-4 lg:px-8 pb-8 max-w-[1440px] mx-auto">
@@ -140,15 +147,15 @@ function ProfileContent() {
         <div className="rounded-3xl bg-gradient-to-br from-[#1E1260] via-[#2D1B8E] to-[#1A0F6B] p-6 mb-6 relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 right-8 w-32 h-32 rounded-full bg-white blur-3xl" />
-            <div className="absolute bottom-0 left-16 w-24 h-24 rounded-full bg-violet-300 blur-2xl" />
+            <div className={`absolute top-4 w-32 h-32 rounded-full bg-white blur-3xl ${isRTL ? 'left-8' : 'right-8'}`} />
+            <div className={`absolute bottom-0 w-24 h-24 rounded-full bg-violet-300 blur-2xl ${isRTL ? 'right-16' : 'left-16'}`} />
           </div>
 
-          <div className="relative flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          <div className={`relative flex flex-col lg:items-start lg:justify-between gap-6 ${isRTL ? 'lg:flex-row-reverse' : 'lg:flex-row'}`}>
             {/* Desktop & Mobile Combined Logic */}
             <div className="flex flex-col gap-6">
               {/* Profile Main Info */}
-              <div className="flex items-center gap-5">
+              <div className={`flex items-center gap-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 {/* Avatar */}
                 <div className="relative">
                   <Avatar username={user?.username} size="lg" />
@@ -158,13 +165,13 @@ function ProfileContent() {
                 </div>
 
                 {/* Name & Edit (Mobile: Stacked/Right) */}
-                <div className="flex flex-col gap-2 min-w-0 flex-1">
+                <div className={`flex flex-col gap-2 min-w-0 flex-1 ${isRTL ? 'text-right items-end' : ''}`}>
                   <div className="min-w-0">
                     <h2 className="text-xl lg:text-3xl font-black text-white break-words overflow-hidden leading-tight">
                       {user?.username}
                     </h2>
                     <p className="text-[11px] lg:text-[13px] text-white/60 mt-0.5 font-medium">
-                      {t('profile.member_since', { date: memberSince, rank: 5 })}
+                      {t('profile.member_since', { date: memberSince, rank: globalRank })}
                     </p>
                   </div>
                   
@@ -177,7 +184,7 @@ function ProfileContent() {
               </div>
 
               {/* Achievement Badges - Mobile Horizontal Scroll/Wrap */}
-              <div className="flex flex-wrap gap-2 lg:gap-3">
+              <div className={`flex flex-wrap gap-2 lg:gap-3 ${isRTL ? 'justify-end' : ''}`}>
                 {ACHIEVEMENTS.map((a) => (
                   <AchievementBadge key={a.label} {...a} isMobile />
                 ))}
@@ -186,9 +193,9 @@ function ProfileContent() {
 
             {/* Right Side: Qeem Balance - DESKTOP ONLY */}
             <div className="hidden lg:block bg-white/10 backdrop-blur-sm border border-white/20 rounded-3xl p-6 text-center min-w-[160px]">
-              <p className="text-[12px] font-bold uppercase tracking-widest text-white/50 mb-1">QEEM BALANCE</p>
+              <p className="text-[12px] font-bold uppercase tracking-widest text-white/50 mb-1">{t('common.qeem_balance')}</p>
               <p className="text-5xl font-black text-white">{qeemBalance}</p>
-              <p className="text-[12px] text-white/40 mt-1">Available coins</p>
+              <p className="text-[12px] text-white/40 mt-1">{t('common.available_coins')}</p>
             </div>
           </div>
         </div>
@@ -219,7 +226,7 @@ function ProfileContent() {
           <StatCard
             icon={Flame}
             iconColor="text-orange-500"
-            value="15"
+            value={dayStreak}
               label={t('profile.day_streak')}
             borderColor="border-orange-400"
           />
@@ -227,7 +234,7 @@ function ProfileContent() {
             <StatCard
               icon={BarChart2}
               iconColor="text-red-500"
-              value="#5"
+              value={`#${globalRank}`}
                label={t('profile.global_rank')}
               borderColor="border-red-400"
             />
@@ -255,30 +262,31 @@ function ProfileContent() {
                   href="/play"
                   className="mt-3 text-[12px] text-violet-600 font-bold hover:underline"
                 >
-                  Start Playing →
+                  {t('profile.start_playing')}
                 </Link>
               </div>
             ) : (
               <>
                 {/* Table Header */}
                 <div className="hidden lg:grid grid-cols-6 px-6 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 border-b border-gray-50">
-                  <span className="col-span-2">Category</span>
-                  <span>Score</span>
-                  <span>Correct</span>
-                  <span>Result</span>
-                  <span>Date</span>
+                  <span className="col-span-2">{t('profile.category')}</span>
+                  <span>{t('quiz.score')}</span>
+                  <span>{t('quiz.correct')}</span>
+                  <span>{t('profile.result')}</span>
+                  <span>{t('profile.date')}</span>
                 </div>
 
                 {/* Table Rows */}
                 <div className="divide-y divide-gray-50">
                   {history.slice(0, 6).map((game) => {
                     const result = getResultLabel(game.score, game.total_questions);
-                    const isWin = result === 'Win';
+                    const isWin = result === t('profile.win');
                     const date = new Date(game.created_at);
                     const isToday = new Date().toDateString() === date.toDateString();
                     const dateLabel = isToday
-                      ? 'Today'
-                      : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                      ? t('profile.today')
+                      : date.toLocaleDateString(activeLang, { month: 'short', day: 'numeric' });
+                    const localizedCategoryName = getLocalizedCategoryName(game, activeLang);
 
                     return (
                       <div key={game.id} className="px-6 py-3">
@@ -288,10 +296,10 @@ function ProfileContent() {
                             <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-sm">
                               {game.icon || '🎯'}
                             </div>
-                            <span className="text-[13px] font-semibold text-gray-800">{game.name_en}</span>
+                            <span className="text-[13px] font-semibold text-gray-800">{localizedCategoryName}</span>
                           </div>
                           <span className="text-[13px] font-black text-violet-600">
-                            {(game.score * 100).toLocaleString()}
+                            {(game.score * 10).toLocaleString()}
                           </span>
                           <span className="text-[13px] font-semibold text-gray-700">
                             {game.score}/{game.total_questions}
@@ -317,15 +325,15 @@ function ProfileContent() {
                               {game.icon || '🎯'}
                             </div>
                             <div>
-                              <p className="text-[13px] font-bold text-gray-800">{game.name_en}</p>
+                              <p className="text-[13px] font-bold text-gray-800">{localizedCategoryName}</p>
                               <p className="text-[11px] text-gray-400">
-                                {game.score}/{game.total_questions} correct · 🔥 streak
+                                {game.score}/{game.total_questions} {t('quiz.correct').toLowerCase()} · 🔥 {t('quiz.streak').toLowerCase()}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className={isRTL ? 'text-left' : 'text-right'}>
                             <p className="text-[14px] font-black text-gray-900">
-                              {(game.score * 100).toLocaleString()} pts
+                              {(game.score * 10).toLocaleString()} {t('admin.points_unit')}
                             </p>
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${

@@ -6,6 +6,7 @@ import Navbar from '@/components/Navbar';
 import AppSidebar from '@/components/AppSidebar';
 import AppBottomNav from '@/components/AppBottomNav';
 import { isRtlLanguage } from '@/lib/languages';
+import { stripLocaleFromPathname } from '@/lib/i18n-settings';
 
 // These pages never show any nav
 const NO_NAV_PATHS = new Set(['/login', '/register']);
@@ -18,13 +19,14 @@ const ADMIN_PREFIX = '/admin';
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
+  const normalizedPathname = stripLocaleFromPathname(pathname || '/');
   const { isLoggedIn, user } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const isRTL = isRtlLanguage(selectedLang);
 
-  const isNoNav = NO_NAV_PATHS.has(pathname);
-  const isLanding = pathname === LANDING_PATH;
-  const isAdmin = pathname.startsWith(ADMIN_PREFIX);
+  const isNoNav = NO_NAV_PATHS.has(normalizedPathname);
+  const isLanding = normalizedPathname === LANDING_PATH;
+  const isAdmin = normalizedPathname.startsWith(ADMIN_PREFIX);
   const isAdminUser = user?.role === 'admin';
 
   // 1. Login / Register: no nav at all

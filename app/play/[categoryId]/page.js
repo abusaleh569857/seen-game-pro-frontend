@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import {
+  AlertCircle,
   Check,
   ChevronRight,
   Clock3,
@@ -48,7 +49,7 @@ const POWER_UPS = [
   {
     type: 'fifty_fifty',
     title: '50 / 50',
-    subtitle: 'Remove 2 wrong answers',
+    subtitleKey: 'quiz.remove_wrong_answers',
     accent: 'from-violet-500/30 to-violet-700/20',
     border: 'border-violet-400/30',
     icon: Scissors,
@@ -56,8 +57,8 @@ const POWER_UPS = [
   },
   {
     type: 'skip',
-    title: 'Skip',
-    subtitle: 'Jump to the next question',
+    titleKey: 'shop.skip_label',
+    subtitleKey: 'quiz.jump_next_question',
     accent: 'from-sky-500/30 to-sky-700/20',
     border: 'border-sky-400/30',
     icon: SkipForward,
@@ -65,8 +66,8 @@ const POWER_UPS = [
   },
   {
     type: 'time',
-    title: '+10 Sec',
-    subtitle: 'Add extra time to clock',
+    titleKey: 'shop.time_label',
+    subtitleKey: 'quiz.add_extra_time',
     accent: 'from-emerald-500/30 to-emerald-700/20',
     border: 'border-emerald-400/30',
     icon: Clock3,
@@ -74,8 +75,8 @@ const POWER_UPS = [
   },
   {
     type: 'reveal',
-    title: 'Reveal',
-    subtitle: 'Show the correct answer',
+    titleKey: 'shop.reveal_label',
+    subtitleKey: 'quiz.show_correct_answer',
     accent: 'from-rose-500/20 to-rose-700/10',
     border: 'border-rose-400/20',
     icon: Lightbulb,
@@ -83,9 +84,9 @@ const POWER_UPS = [
   },
 ];
 
-function buildLiveRanking(leaderboard, user, score) {
+function buildLiveRanking(leaderboard, user, score, youLabel) {
   const userBasePoints = Number(user?.points || 0);
-  const youName = user?.username || 'You';
+  const youName = user?.username || youLabel;
   const rows = (leaderboard || []).slice(0, 8).map((entry, index) => ({
     id: entry.id,
     name: entry.username,
@@ -123,6 +124,171 @@ function buildLiveRanking(leaderboard, user, score) {
     }));
 }
 
+function getPowerUpTitle(powerUp, t) {
+  return powerUp.titleKey ? t(powerUp.titleKey) : powerUp.title;
+}
+
+function JokerPurchaseModal({
+  open,
+  powerUps,
+  inventory,
+  selectedType,
+  onSelectType,
+  onClose,
+  onGoToShop,
+  onConfirm,
+  isPurchasing,
+  t,
+  userBalance,
+  isRTL,
+}) {
+  if (!open) {
+    return null;
+  }
+
+  const selectedPowerUp = powerUps.find((item) => item.type === selectedType) || powerUps[0];
+  const cost = selectedPowerUp?.qeemCost || 0;
+  const remainingBalance = Math.max(0, userBalance - cost);
+  const hasEnoughBalance = userBalance >= cost;
+  const cardThemes = {
+    fifty_fifty: 'from-[#5f47bd] to-[#4b3aa2] border-[#765de0]',
+    skip: 'from-[#2d5f9d] to-[#234c80] border-[#5e8cc7]',
+    time: 'from-[#3f6d18] to-[#2f5411] border-[#5f9830]',
+    reveal: 'from-[#8f5317] to-[#6b3c0f] border-[#b67431]',
+  };
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-900/60 p-3 sm:p-5">
+      <div className="relative w-full max-w-[760px] overflow-hidden rounded-[22px] border border-white/20 bg-[#f7f8fc] shadow-[0_35px_80px_rgba(15,23,42,0.42)]">
+        <div className="bg-gradient-to-r from-[#20125f] via-[#251866] to-[#1b2f66] px-4 py-3 text-white sm:px-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className={`absolute top-3 text-white/75 transition hover:text-white ${isRTL ? 'left-3' : 'right-3'}`}
+            aria-label={t('quiz.quit')}
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10">
+                <Lightbulb className="h-4.5 w-4.5 text-amber-300" />
+              </div>
+              <div>
+                <h3 className="text-[22px] font-black leading-none sm:text-[24px]">{t('quiz.modal_title')}</h3>
+                <p className="mt-1 text-[11px] text-white/70 sm:text-xs">
+                  {t('quiz.modal_subtitle')}
+                </p>
+              </div>
+            </div>
+            <div className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-black">
+              {t('quiz.modal_qeem_balance')}: <span className="text-amber-300">{userBalance}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className={`flex items-center gap-2 border-b border-rose-100 bg-rose-50 px-4 py-2 text-[11px] font-semibold text-rose-600 sm:px-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <AlertCircle className="h-3.5 w-3.5" />
+          <span>{t('quiz.modal_out_of_joker_notice', { joker: getPowerUpTitle(selectedPowerUp, t) })}</span>
+        </div>
+
+        <div className="space-y-3 p-4 sm:p-5">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {powerUps.map((powerUp) => {
+              const Icon = powerUp.icon;
+              const isSelected = selectedType === powerUp.type;
+              const quantity = inventory?.[powerUp.type] ?? 0;
+              const theme = cardThemes[powerUp.type] || 'from-[#3b4a7a] to-[#263763] border-[#5b6a9a]';
+              return (
+                <button
+                  key={powerUp.type}
+                  type="button"
+                  onClick={() => onSelectType(powerUp.type)}
+                  className={`relative rounded-[14px] border bg-gradient-to-b ${theme} px-3 py-3 text-center text-white transition ${
+                    isSelected
+                      ? 'shadow-[0_0_0_2px_rgba(251,191,36,0.55)]'
+                      : 'hover:-translate-y-0.5'
+                  }`}
+                >
+                  {isSelected ? (
+                    <span className={`absolute top-1.5 ${isRTL ? 'left-1.5' : 'right-1.5'} inline-flex h-4 w-4 items-center justify-center rounded-full border border-amber-300 bg-amber-100 text-amber-700`}>
+                      <Check className="h-2.5 w-2.5" />
+                    </span>
+                  ) : null}
+                  <Icon className="mx-auto mb-1.5 h-4.5 w-4.5" />
+                  <p className="text-[13px] font-black">{getPowerUpTitle(powerUp, t)}</p>
+                  <p className="mt-0.5 text-[11px] text-white/75">x {quantity}</p>
+                  <p className="mt-1 text-[11px] font-black text-amber-300">
+                    {powerUp.qeemCost} {t('common.qeem')}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="rounded-[14px] border border-slate-200 bg-white p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+              {t('quiz.modal_inventory_title')}
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[12px] text-slate-700 sm:grid-cols-4">
+              {powerUps.map((powerUp) => (
+                <div key={powerUp.type} className="flex items-center gap-1.5 rounded-xl bg-slate-50 px-2.5 py-2">
+                  <span className="font-semibold">{getPowerUpTitle(powerUp, t)}</span>
+                  <span className="font-black text-slate-900">x {inventory?.[powerUp.type] ?? 0}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-[14px] border border-violet-100 bg-violet-50 px-3.5 py-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[13px]">
+              <span className="font-semibold text-slate-700">
+                {t('quiz.modal_selected_label')}: <span className="font-black">{getPowerUpTitle(selectedPowerUp, t)}</span>
+              </span>
+              <span className="font-semibold text-slate-700">
+                {t('quiz.modal_cost_label')}: <span className="font-black text-amber-600">{cost} {t('common.qeem')}</span>
+              </span>
+              <span className="font-semibold text-slate-500">
+                {t('quiz.modal_balance_after_label')}{' '}
+                <span className="font-black text-emerald-600">{remainingBalance} {t('common.qeem')}</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-[14px] border border-slate-200 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50"
+            >
+              {t('quiz.modal_cancel')}
+            </button>
+            <button
+              type="button"
+              onClick={onGoToShop}
+              className="rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-black text-amber-700 transition hover:bg-amber-100"
+            >
+              {t('quiz.modal_go_to_shop')}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              disabled={isPurchasing || !hasEnoughBalance}
+              className={`rounded-[14px] px-4 py-3 text-sm font-black text-white transition ${
+                isPurchasing || !hasEnoughBalance
+                  ? 'cursor-not-allowed bg-indigo-300'
+                  : 'bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400'
+              }`}
+            >
+              {isPurchasing ? t('common.loading') : t('quiz.modal_confirm_purchase')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ActiveQuizContent() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -130,6 +296,7 @@ function ActiveQuizContent() {
   const { categoryId } = useParams();
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const lang = normalizeLanguageCode(searchParams.get('lang') || selectedLang);
+  const isRTL = lang === 'ar';
   const { t } = useI18n();
 
   const { user } = useSelector((state) => state.auth);
@@ -152,6 +319,9 @@ function ActiveQuizContent() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
   const [answerMetaByQuestionId, setAnswerMetaByQuestionId] = useState({});
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
+  const [selectedPurchaseType, setSelectedPurchaseType] = useState(POWER_UPS[0].type);
+  const [isPurchasingJoker, setIsPurchasingJoker] = useState(false);
 
   const currentQuestion = questions[currentIndex] || null;
   const currentQuestionMeta = currentQuestion
@@ -329,8 +499,8 @@ function ActiveQuizContent() {
   );
 
   const liveRankings = useMemo(
-    () => buildLiveRanking(leaderboard, user, stats.score),
-    [leaderboard, stats.score, user],
+    () => buildLiveRanking(leaderboard, user, stats.score, t('common.you')),
+    [leaderboard, stats.score, t, user],
   );
 
   const handleNext = useCallback(() => {
@@ -360,29 +530,8 @@ function ActiveQuizContent() {
     router.push('/categories');
   }, [dispatch, router, t]);
 
-  const handleJoker = useCallback(
-    async (type) => {
-      if (!currentQuestion || quizStatus !== 'playing' || isCheckingAnswer) {
-        return;
-      }
-
-      const action = await dispatch(triggerJokerAction(type));
-      if (!triggerJokerAction.fulfilled.match(action)) {
-        return;
-      }
-
-      const { data } = action.payload;
-
-      if (!data.success) {
-        if (data.message === 'insufficient_balance') {
-          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
-          if (shouldRedirect) {
-            router.push('/shop');
-          }
-        }
-        return;
-      }
-
+  const applyJokerEffect = useCallback(
+    (type) => {
       if (type === 'time') {
         setTimeLeft((current) => current + 10);
         return;
@@ -407,21 +556,77 @@ function ActiveQuizContent() {
         );
         const suggestedOption = availableOptions[0];
         if (suggestedOption) {
-            window.alert(t('quiz.hint_option', { option: suggestedOption }));
+          window.alert(t('quiz.hint_option', { option: suggestedOption }));
         }
       }
     },
-    [
-      currentQuestion,
-      dispatch,
-      eliminatedOptions,
-      handleAnswerSelect,
-      isCheckingAnswer,
-      quizStatus,
-      router,
-      selectedOption,
-      t,
-    ],
+    [currentQuestion, dispatch, eliminatedOptions, handleAnswerSelect, selectedOption, t],
+  );
+
+  const performJokerAction = useCallback(
+    async (type, { allowShopRedirect = true } = {}) => {
+      const action = await dispatch(triggerJokerAction(type));
+      if (!triggerJokerAction.fulfilled.match(action)) {
+        return { success: false, reason: 'request_failed' };
+      }
+
+      const { data } = action.payload;
+
+      if (!data.success) {
+        if (data.message === 'insufficient_balance' && allowShopRedirect) {
+          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+          if (shouldRedirect) {
+            router.push('/shop');
+          }
+        }
+        return { success: false, reason: data.message || 'failed' };
+      }
+
+      applyJokerEffect(type);
+      return { success: true, source: data.source };
+    },
+    [applyJokerEffect, dispatch, router, t],
+  );
+
+  const handleConfirmPurchase = useCallback(async () => {
+    if (!selectedPurchaseType || isPurchasingJoker) {
+      return;
+    }
+
+    setIsPurchasingJoker(true);
+    const resultInfo = await performJokerAction(selectedPurchaseType, { allowShopRedirect: false });
+    setIsPurchasingJoker(false);
+
+    if (resultInfo.success) {
+      setIsPurchaseModalOpen(false);
+      return;
+    }
+
+    if (resultInfo.reason === 'insufficient_balance') {
+      const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+      if (shouldRedirect) {
+        setIsPurchaseModalOpen(false);
+        router.push('/shop');
+      }
+    }
+  }, [isPurchasingJoker, performJokerAction, router, selectedPurchaseType, t]);
+
+  const handleJoker = useCallback(
+    async (type) => {
+      if (!currentQuestion || quizStatus !== 'playing' || isCheckingAnswer) {
+        return;
+      }
+
+      const quantity = Number(inventory?.[type] || 0);
+      if (quantity <= 0) {
+        setSelectedPurchaseType(type);
+        setIsPurchaseModalOpen(true);
+        return;
+      }
+
+      await performJokerAction(type);
+    },
+    [currentQuestion, inventory, isCheckingAnswer, performJokerAction, quizStatus],
   );
 
   const getOptionStyle = useCallback(
@@ -459,7 +664,7 @@ function ActiveQuizContent() {
           <div className="flex min-h-[65vh] flex-col items-center justify-center rounded-[32px] border border-white/70 bg-white/70 text-center shadow-sm">
             <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-violet-200 border-t-violet-600" />
             <p className="text-lg font-bold text-slate-700">{t('common.loading')}</p>
-            <p className="mt-2 text-sm text-slate-500">Fetching the latest questions for {categoryName}.</p>
+            <p className="mt-2 text-sm text-slate-500">{t('quiz.fetching_latest_questions', { category: categoryName })}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
@@ -556,7 +761,7 @@ function ActiveQuizContent() {
                         type="button"
                         onClick={() => handleAnswerSelect(key)}
                         disabled={quizStatus !== 'playing' || isCheckingAnswer}
-                        className={`flex items-center gap-4 rounded-[22px] border-2 px-5 py-4 text-left transition-all ${optionStyle}`}
+                        className={`flex items-center gap-4 rounded-[22px] border-2 px-5 py-4 ${isRTL ? 'text-right' : 'text-left'} transition-all ${optionStyle}`}
                       >
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-sm font-black text-slate-600">
                           {key}
@@ -589,8 +794,8 @@ function ActiveQuizContent() {
                         </span>
                       </div>
                       <div>
-                        <p className="text-lg font-black tracking-wide">POWER-UPS</p>
-                        <p className="mt-0.5 text-xs text-white/55">Use wisely</p>
+                        <p className="text-lg font-black tracking-wide">{t('quiz.power_ups')}</p>
+                        <p className="mt-0.5 text-xs text-white/55">{t('quiz.use_wisely')}</p>
                       </div>
                     </div>
 
@@ -606,18 +811,18 @@ function ActiveQuizContent() {
                             type="button"
                             onClick={() => handleJoker(powerUp.type)}
                             disabled={quizStatus !== 'playing' || isCheckingAnswer}
-                            className={`relative min-h-[120px] rounded-[20px] border bg-gradient-to-b ${powerUp.accent} ${powerUp.border} px-3 py-3 text-left transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`relative min-h-[120px] rounded-[20px] border bg-gradient-to-b ${powerUp.accent} ${powerUp.border} px-3 py-3 ${isRTL ? 'text-right' : 'text-left'} transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60`}
                           >
-                            <span className="absolute -right-2 -top-2 rounded-full border-2 border-[#1c1350] bg-violet-500 px-2 py-0.5 text-[10px] font-black text-white">
-                              {isEmpty ? 'EMPTY' : quantity}
+                            <span className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} rounded-full border-2 border-[#1c1350] bg-violet-500 px-2 py-0.5 text-[10px] font-black text-white`}>
+                              {isEmpty ? t('shop.empty_short') : quantity}
                             </span>
                             <Icon className="mb-3 h-5 w-5 text-white/85" />
-                            <p className="text-[13px] font-black">{powerUp.title}</p>
+                            <p className="text-[13px] font-black">{getPowerUpTitle(powerUp, t)}</p>
                             <p className="mt-1 min-h-[34px] text-[10px] leading-4 text-white/55">
-                              {powerUp.subtitle}
+                              {powerUp.subtitleKey ? t(powerUp.subtitleKey) : ''}
                             </p>
                             <p className="mt-3 text-[11px] font-black uppercase tracking-[0.18em] text-amber-300">
-                              {quantity > 0 ? `x ${quantity}` : `${powerUp.qeemCost} Qeem`}
+                              {quantity > 0 ? `x ${quantity}` : `${powerUp.qeemCost} ${t('common.qeem')}`}
                             </p>
                           </button>
                         );
@@ -635,7 +840,7 @@ function ActiveQuizContent() {
                       }`}
                     >
                           {currentIndex + 1 >= questions.length ? t('quiz.finish_quiz') : t('quiz.next')}
-                      <ChevronRight className="h-4 w-4" />
+                      <ChevronRight className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
                     </button>
                   </div>
                 </div>
@@ -702,7 +907,7 @@ function ActiveQuizContent() {
                           </div>
                           <p className={`text-[12px] font-bold ${player.isYou ? 'text-violet-700' : 'text-slate-800'}`}>
                             {player.name}
-                            {player.isYou ? ' (You)' : ''}
+                            {player.isYou ? ` (${t('common.you')})` : ''}
                           </p>
                         </div>
                         <p className={`text-[12px] font-black ${player.isYou ? 'text-violet-700' : 'text-slate-900'}`}>
@@ -735,7 +940,7 @@ function ActiveQuizContent() {
                         >
                           <div className="flex items-center gap-3">
                             <Icon className="h-3.5 w-3.5" />
-                            <span className="text-[12px] font-semibold">{powerUp.title}</span>
+                            <span className="text-[12px] font-semibold">{getPowerUpTitle(powerUp, t)}</span>
                           </div>
                           <span className="text-[12px] font-black">x {quantity}</span>
                         </div>
@@ -757,6 +962,24 @@ function ActiveQuizContent() {
           </div>
         )}
       </div>
+
+      <JokerPurchaseModal
+        open={isPurchaseModalOpen}
+        powerUps={POWER_UPS}
+        inventory={inventory}
+        selectedType={selectedPurchaseType}
+        onSelectType={setSelectedPurchaseType}
+        onClose={() => setIsPurchaseModalOpen(false)}
+        onGoToShop={() => {
+          setIsPurchaseModalOpen(false);
+          router.push('/shop');
+        }}
+        onConfirm={handleConfirmPurchase}
+        isPurchasing={isPurchasingJoker}
+        t={t}
+        userBalance={Number(user?.qeemBalance ?? user?.qeem_balance ?? 0)}
+        isRTL={isRTL}
+      />
     </div>
   );
 }
