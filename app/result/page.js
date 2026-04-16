@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -183,7 +183,7 @@ function ResultContent() {
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-4 lg:gap-6">
               <div className="flex h-[92px] w-[92px] shrink-0 items-center justify-center rounded-[24px] border border-amber-300/20 bg-white/10 text-5xl shadow-inner shadow-amber-200/10">
-                🏆
+                <Trophy className="h-11 w-11 text-amber-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[12px] font-black uppercase tracking-[0.24em] text-white/55">
@@ -228,59 +228,69 @@ function ResultContent() {
           <section className="lg:col-span-8">
             <div className="flex flex-col gap-5">
 
-              <div className="grid grid-cols-2 gap-3 rounded-[28px] border border-white/80 bg-white p-4 shadow-sm md:grid-cols-5">
-                <div className="rounded-[22px] border border-emerald-100 bg-emerald-50 px-4 py-4 text-center">
-                  <Check className="mx-auto h-5 w-5 text-emerald-500" />
-                  <p className="mt-2 text-3xl font-black text-emerald-600">{score}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.correct')}</p>
+              <div className="grid grid-cols-5 gap-2 rounded-[20px] border border-white/80 bg-white p-2.5 shadow-sm md:gap-3 md:rounded-[28px] md:p-4">
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50 px-1.5 py-2 text-center md:rounded-[22px] md:px-4 md:py-4">
+                  <div className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100 md:h-6 md:w-6">
+                    <Check className="h-3.5 w-3.5 text-emerald-600 md:h-4 md:w-4" />
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-emerald-700 md:mt-2 md:text-3xl md:text-emerald-600">{score}</p>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500 md:text-[11px] md:tracking-[0.18em]">{t('quiz.correct')}</p>
                 </div>
-                <div className="rounded-[22px] border border-rose-100 bg-rose-50 px-4 py-4 text-center">
-                  <X className="mx-auto h-5 w-5 text-rose-500" />
-                  <p className="mt-2 text-3xl font-black text-rose-600">{wrongAnswers}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.wrong')}</p>
+                <div className="rounded-xl border border-rose-100 bg-rose-50 px-1.5 py-2 text-center md:rounded-[22px] md:px-4 md:py-4">
+                  <div className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 md:h-6 md:w-6">
+                    <X className="h-3.5 w-3.5 text-rose-600 md:h-4 md:w-4" />
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-rose-700 md:mt-2 md:text-3xl md:text-rose-600">{wrongAnswers}</p>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500 md:text-[11px] md:tracking-[0.18em]">{t('quiz.wrong')}</p>
                 </div>
-                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-4 text-center">
-                  <Flame className="mx-auto h-5 w-5 text-amber-500" />
-                  <p className="mt-2 text-3xl font-black text-amber-600">{bestStreak}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('quiz.streak')}</p>
+                <div className="rounded-xl border border-amber-100 bg-amber-50 px-1.5 py-2 text-center md:rounded-[22px] md:px-4 md:py-4">
+                  <div className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 md:h-6 md:w-6">
+                    <Flame className="h-3.5 w-3.5 text-amber-600 md:h-4 md:w-4" />
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-amber-700 md:mt-2 md:text-3xl md:text-amber-600">{bestStreak}</p>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500 md:text-[11px] md:tracking-[0.18em]">{t('quiz.streak')}</p>
                 </div>
-                <div className="rounded-[22px] border border-violet-100 bg-violet-50 px-4 py-4 text-center">
-                  <Target className="mx-auto h-5 w-5 text-violet-500" />
-                  <p className="mt-2 text-3xl font-black text-violet-600">{accuracy}%</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('result.accuracy')}</p>
+                <div className="rounded-xl border border-violet-100 bg-violet-50 px-1.5 py-2 text-center md:rounded-[22px] md:px-4 md:py-4">
+                  <div className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-violet-100 md:h-6 md:w-6">
+                    <Target className="h-3.5 w-3.5 text-violet-600 md:h-4 md:w-4" />
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-violet-700 md:mt-2 md:text-3xl md:text-violet-600">{accuracy}%</p>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500 md:text-[11px] md:tracking-[0.18em]">{t('result.accuracy')}</p>
                 </div>
-                <div className="rounded-[22px] border border-cyan-100 bg-cyan-50 px-4 py-4 text-center">
-                  <Clock3 className="mx-auto h-5 w-5 text-cyan-500" />
-                  <p className="mt-2 text-3xl font-black text-cyan-600">{formatTime(timeSpent)}</p>
-                  <p className="mt-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">{t('result.time')}</p>
+                <div className="rounded-xl border border-cyan-100 bg-cyan-50 px-1.5 py-2 text-center md:rounded-[22px] md:px-4 md:py-4">
+                  <div className="mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-cyan-100 md:h-6 md:w-6">
+                    <Clock3 className="h-3.5 w-3.5 text-cyan-600 md:h-4 md:w-4" />
+                  </div>
+                  <p className="mt-1 text-[13px] font-black text-cyan-700 md:mt-2 md:text-3xl md:text-cyan-600">{formatTime(timeSpent)}</p>
+                  <p className="mt-1 text-[9px] font-black uppercase tracking-[0.08em] text-slate-500 md:text-[11px] md:tracking-[0.18em]">{t('result.time')}</p>
                 </div>
               </div>
 
-              <div className="rounded-[30px] border border-white/80 bg-white p-5 shadow-sm lg:p-6">
+              <div className="rounded-[24px] border border-white/80 bg-white p-4 shadow-sm lg:rounded-[30px] lg:p-6">
                 <div className="mb-4">
-                  <h2 className="text-2xl font-black text-slate-900">{t('result.points_earned')}</h2>
-                  <p className="mt-1 text-sm text-slate-500">{t('result.points_subtitle')}</p>
+                  <h2 className="text-xl font-black text-slate-900 lg:text-2xl">{t('result.points_earned')}</h2>
+                  <p className="mt-1 text-xs text-slate-500 lg:text-sm">{t('result.points_subtitle')}</p>
                 </div>
 
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {summaryRows.map((row) => {
                     const Icon = row.icon;
                     return (
                       <div
                         key={row.label}
-                        className="flex items-center justify-between rounded-[22px] border border-slate-100 px-4 py-3"
+                        className="flex items-center justify-between rounded-2xl border border-slate-100 px-3 py-2.5 lg:rounded-[22px] lg:px-4 lg:py-3"
                       >
-                        <div className="flex items-center gap-4">
-                          <div className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${row.tone}`}>
-                            <Icon className="h-4 w-4" />
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-9 w-9 items-center justify-center rounded-xl border lg:h-11 lg:w-11 lg:rounded-2xl ${row.tone}`}>
+                            <Icon className="h-4 w-4 lg:h-4 lg:w-4" />
                           </div>
                           <div>
-                            <p className="text-sm font-black text-slate-900">{row.label}</p>
-                            <p className="mt-1 text-xs text-slate-500">{row.detail}</p>
+                            <p className="text-[13px] font-black text-slate-900 lg:text-sm">{row.label}</p>
+                            <p className="mt-0.5 text-[11px] text-slate-500 lg:mt-1 lg:text-xs">{row.detail}</p>
                           </div>
                         </div>
                         <div
-                          className={`rounded-full px-4 py-2 text-sm font-black ${
+                          className={`rounded-full px-3 py-1.5 text-xs font-black lg:px-4 lg:py-2 lg:text-sm ${
                             row.key === 'wrong'
                               ? 'bg-rose-50 text-rose-600'
                               : 'bg-emerald-50 text-emerald-600'
@@ -296,7 +306,7 @@ function ResultContent() {
                 <button
                   type="button"
                   onClick={handlePlayAgain}
-                  className="mt-4 lg:mt-5 inline-flex w-full items-center justify-center gap-3 rounded-[20px] bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3.5 text-base font-black text-white shadow-[0_18px_45px_rgba(99,102,241,0.24)] transition hover:from-violet-500 hover:to-blue-400"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(99,102,241,0.24)] transition hover:from-violet-500 hover:to-blue-400 lg:mt-5 lg:rounded-[20px] lg:py-3.5 lg:text-base"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   {t('result.play_again')}
@@ -416,3 +426,4 @@ export default function ResultPage() {
     </ProtectedRoute>
   );
 }
+

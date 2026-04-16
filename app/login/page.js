@@ -10,7 +10,7 @@ import { Eye, EyeOff, Lock, Mail, Check } from "lucide-react";
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import LoginVisualPanel from "@/components/auth/LoginVisualPanel";
 import { useI18n } from "@/lib/i18n";
-import { normalizeLanguageCode } from "@/lib/languages";
+import { isRtlLanguage, normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken, getFacebookAccessToken } from "@/lib/socialAuth";
 import { clearError, loginUser, socialAuthUser } from "@/store/slices/authSlice";
 import { setSelectedLang } from "@/store/slices/quizSlice";
@@ -27,6 +27,7 @@ function LoginForm() {
   const { t } = useI18n();
 
   const [lang, setLang] = useState(selectedLang);
+  const isRTL = isRtlLanguage(lang);
   const [showPassword, setShowPassword] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
   const [form, setForm] = useState({
@@ -168,18 +169,9 @@ function LoginForm() {
                 </div>
 
                 <div className="space-y-1.5 lg:space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
-                      {t("auth.password")}
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="hidden text-[11px] font-medium text-brand hover:brightness-110 sm:text-[12px] lg:flex"
-                      tabIndex={-1}
-                    >
-                      {t("auth.forgot_password")}
-                    </Link>
-                  </div>
+                  <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
+                    {t("auth.password")}
+                  </label>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
@@ -187,17 +179,17 @@ function LoginForm() {
                       value={form.password}
                       onChange={(event) => setForm({ ...form, password: event.target.value })}
                       placeholder={t("auth.password")}
-                      className="pr-14"
+                      className={isRTL ? "pl-14" : "pr-14"}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((current) => !current)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand"
+                      className={`absolute top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand ${isRTL ? "left-4" : "right-4"}`}
                     >
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  <div className="mt-2 block text-right lg:hidden">
+                  <div className={`mt-2 block ${isRTL ? "text-left" : "text-right"}`}>
                     <Link href="/forgot-password" className="text-[13px] font-bold text-[#4E5BFF]">
                       {t("auth.forgot_password")}
                     </Link>

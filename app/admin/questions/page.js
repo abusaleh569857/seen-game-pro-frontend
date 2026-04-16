@@ -38,7 +38,7 @@ function QuestionsContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black pt-[76px] text-white">
         <main className="mx-auto max-w-5xl px-4 py-12">
           {/* Header */}
           <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

@@ -1,8 +1,15 @@
 import Script from "next/script";
+import { cookies } from "next/headers";
 import { Plus_Jakarta_Sans, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import ReduxProvider from "@/providers/ReduxProvider";
+import {
+  DEFAULT_LANGUAGE,
+  isRtlLocale,
+  LOCALE_COOKIE_NAME,
+  normalizeLocale,
+} from "@/lib/i18n-settings";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -28,9 +35,15 @@ export const metadata = {
     "Multilingual interactive quiz platform. Arabic, English, French, Spanish.",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = await cookies();
+  const initialLanguage = normalizeLocale(
+    cookieStore.get(LOCALE_COOKIE_NAME)?.value || DEFAULT_LANGUAGE
+  );
+  const dir = isRtlLocale(initialLanguage) ? "rtl" : "ltr";
+
   return (
-    <html lang="ar" suppressHydrationWarning>
+    <html lang={initialLanguage} dir={dir} suppressHydrationWarning>
       <body
         className={`min-h-screen bg-bg text-text-1 font-sans ${plusJakartaSans.variable} ${notoSansArabic.variable}`}
         suppressHydrationWarning
@@ -43,7 +56,7 @@ export default function RootLayout({ children }) {
           src="https://connect.facebook.net/en_US/sdk.js"
           strategy="afterInteractive"
         />
-        <ReduxProvider>
+        <ReduxProvider initialLanguage={initialLanguage}>
           <AppShell>{children}</AppShell>
         </ReduxProvider>
       </body>

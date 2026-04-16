@@ -2,54 +2,47 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { CircleDot } from "lucide-react";
+import { useSelector } from "react-redux";
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
+import { useI18n } from "@/lib/i18n";
+import { extractLocaleFromPathname, isRtlLocale } from "@/lib/i18n-settings";
 
 const FEATURE_ITEMS = [
   {
     icon: "/icons/earth.png",
-    title: "15 Quiz Categories",
-    description:
-      "Sports, History, Science, Geography, Arts, Technology & 9 more — all skill levels welcome",
+    titleKey: "auth.visual_feature_categories_title",
+    descriptionKey: "auth.visual_feature_categories_desc",
   },
   {
     icon: "/icons/coin.png",
-    title: "Qeem Coins & Prizes",
-    description:
-      "Earn coins, buy Jokers, challenge friends for Qeem wagers, and win tournament prizes in KWD",
+    titleKey: "auth.visual_feature_prizes_title",
+    descriptionKey: "auth.visual_feature_prizes_desc",
   },
   {
     icon: "/icons/bolt.png",
-    title: "1v1 Challenge System",
-    description:
-      "Send challenges, set wagers, climb the global leaderboard — Frozen Balance logic ensures fair play",
+    titleKey: "auth.visual_feature_challenge_title",
+    descriptionKey: "auth.visual_feature_challenge_desc",
   },
   {
     icon: "/icons/trophy.png",
-    title: "Live Tournaments",
-    description:
-      "Compete in scheduled group competitions across all 15 categories — free entry, real Qeem prizes",
+    titleKey: "landing.live_tournaments",
+    descriptionKey: "landing.live_tournaments_desc",
   },
   {
     icon: "/icons/globe.png",
-    title: "4 Languages",
-    description:
-      "Arabic (default), English, French, Spanish — full RTL support for Arabic players",
+    titleKey: "auth.visual_feature_languages_title",
+    descriptionKey: "auth.visual_feature_languages_desc",
   },
 ];
 
 const COMMUNITY = ["L", "G", "D", "M", "+"];
-const COMMUNITY_COLORS = [
-  "#F59E0B",
-  "#2DD4BF",
-  "#FB7185",
-  "#06B6D4",
-  "#64748B",
-];
+const COMMUNITY_COLORS = ["#F59E0B", "#2DD4BF", "#FB7185", "#06B6D4", "#64748B"];
 
 function BrandMark() {
   return (
-    <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-gradient-brand shadow-hero border border-white/10">
+    <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-white/10 bg-gradient-brand shadow-hero">
       <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white/60">
         <CircleDot className="h-4 w-4 text-white" strokeWidth={3} />
       </div>
@@ -58,10 +51,18 @@ function BrandMark() {
 }
 
 export default function RegisterVisualPanel() {
+  const { t, i18n } = useI18n();
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const pathname = usePathname();
+  const localeFromPath = extractLocaleFromPathname(pathname || "");
+  const activeLocale = String(i18n?.resolvedLanguage || i18n?.language || selectedLang || "en").split("-")[0];
+  const documentDir = typeof document !== "undefined" ? document.documentElement?.dir : "";
+  const isRTL = isRtlLocale(localeFromPath || activeLocale || selectedLang) || documentDir === "rtl";
+
   return (
-    <aside className="relative w-full flex-col overflow-hidden bg-dark-1 text-white flex lg:flex h-auto lg:h-full px-4 pt-8 pb-6 lg:px-10 lg:py-12 shrink-0">
+    <aside className="relative flex h-auto w-full shrink-0 flex-col overflow-hidden bg-dark-1 px-4 pb-6 pt-8 text-white lg:h-full lg:flex lg:px-10 lg:py-12">
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background: `
             radial-gradient(circle at bottom left, #240E6A 0%, transparent 60%),
@@ -74,86 +75,89 @@ export default function RegisterVisualPanel() {
 
       <AnimatedDotBackground opacityClass="opacity-15" />
 
-      <div className="relative z-10 flex h-full w-full max-w-[560px] mx-auto flex-col items-center lg:items-start text-center lg:text-left">
-        <Link href="/" className="hidden lg:flex items-center gap-4 shrink-0 w-full mb-6 lg:mb-0 hover:opacity-90 transition-opacity">
+      <div className={`relative z-10 mx-auto flex h-full w-full max-w-[560px] flex-col items-center text-center ${isRTL ? 'lg:ml-auto lg:mr-0 lg:items-end lg:text-right' : 'lg:mr-auto lg:ml-0 lg:items-start lg:text-left'}`}>
+        <Link href="/" className="mb-6 hidden w-full shrink-0 items-center gap-4 transition-opacity hover:opacity-90 lg:mb-0 lg:flex">
           <BrandMark />
           <div>
-            <h2 className="text-[18px] lg:text-[20px] xl:text-[22px] font-black uppercase leading-none tracking-tight text-white">
-              Seen Game Pro
+            <h2 className="text-[18px] font-black uppercase leading-none tracking-tight text-white lg:text-[20px] xl:text-[22px]">
+              {t("nav.brand_name")}
             </h2>
-            <p className="mt-0.5 lg:mt-1 text-[11px] lg:text-[12px] xl:text-[14px] font-[700] uppercase tracking-[1px] xl:tracking-[1.6px] leading-snug xl:leading-[21px] align-middle text-white/50">
-              Free to Join · Start Playing
+            <p className="mt-0.5 text-[11px] font-[700] uppercase leading-snug tracking-[1px] text-white/50 lg:mt-1 lg:text-[12px] xl:text-[14px] xl:leading-[21px] xl:tracking-[1.6px]">
+              {t("auth.visual_brand_subtitle")}
             </p>
           </div>
         </Link>
 
-        <Link href="/" className="flex items-center justify-center gap-3.5 lg:hidden mx-auto shrink-0 w-full mb-5 hover:opacity-90 transition-opacity">
-          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-[14px] bg-[#4E5BFF] shadow-hero border border-white/10 shrink-0">
+        <Link href="/" className="mx-auto mb-5 flex w-full shrink-0 items-center justify-center gap-3.5 transition-opacity hover:opacity-90 lg:hidden">
+          <div className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[14px] border border-white/10 bg-[#4E5BFF] shadow-hero">
             <div className="flex h-5 w-5 items-center justify-center rounded-full border-[2px] border-white/80">
               <CircleDot className="h-3 w-3 text-white" strokeWidth={3} />
             </div>
           </div>
           <div className="flex flex-col items-start justify-center">
-            <h2 className="text-[18px] font-black uppercase leading-tight tracking-tight text-white mb-0.5">
-              Seen Game Pro
+            <h2 className="mb-0.5 text-[18px] font-black uppercase leading-tight tracking-tight text-white">
+              {t("nav.brand_name")}
             </h2>
-            <p className="text-[10px] font-medium leading-none text-white/80">
-              Free to join - Start earning Qeem
-            </p>
+            <p className="text-[10px] font-medium leading-none text-white/80">{t("auth.visual_brand_subtitle_mobile")}</p>
           </div>
         </Link>
 
-        <div className="lg:hidden grid grid-cols-2 gap-2 w-full max-w-[300px] mx-auto">
+        <div className="mx-auto grid w-full max-w-[300px] grid-cols-2 gap-2 lg:hidden">
           <div className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
             <span className="text-[12px]">🌍</span>
-            <span className="text-[9px] font-bold text-white/90">15 Categories</span>
+            <span className="text-[9px] font-bold text-white/90">{t("auth.visual_feature_categories_title")}</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
             <span className="text-[12px]">💎</span>
-            <span className="text-[9px] font-bold text-white/90">Qeem Prizes</span>
+            <span className="text-[9px] font-bold text-white/90">{t("auth.visual_feature_prizes_title")}</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
             <span className="text-[12px]">⚡</span>
-            <span className="text-[9px] font-bold text-white/90">1v1 Challenges</span>
+            <span className="text-[9px] font-bold text-white/90">{t("auth.visual_feature_challenge_title")}</span>
           </div>
           <div className="flex items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-1.5">
             <span className="text-[12px]">🌐</span>
-            <span className="text-[9px] font-bold text-white/90">4 Languages</span>
+            <span className="text-[9px] font-bold text-white/90">{t("auth.visual_feature_languages_title")}</span>
           </div>
         </div>
 
-        <div className="relative z-10 hidden lg:flex flex-1 mt-16 flex-col space-y-8 xl:mt-20 xl:space-y-10">
-          {FEATURE_ITEMS.map((item, index) => (
-            <div key={index} className="flex gap-5 items-start">
-              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-[20px] border border-white/10 bg-white/5 shadow-sm overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all">
-                <Image
-                  src={item.icon}
-                  alt={item.title}
-                  width={32}
-                  height={32}
-                  className="relative z-10 drop-shadow-md object-contain"
-                />
+        <div className={`relative z-10 mt-16 hidden w-full flex-1 flex-col space-y-8 lg:flex xl:mt-20 xl:space-y-10 ${isRTL ? 'items-end pr-2' : 'items-start'}`}>
+          {FEATURE_ITEMS.map((item) => (
+            isRTL ? (
+              <div key={item.titleKey} className="flex w-full max-w-[420px] items-start justify-end gap-5 ml-auto [direction:ltr]">
+                <div className="w-full max-w-[300px] pt-1 text-right">
+                  <h3 className="text-[14px] font-black tracking-tight text-white xl:text-[16px]">{t(item.titleKey)}</h3>
+                  <p className="mt-1 text-[11px] font-medium leading-relaxed text-white/50 xl:mt-1.5 xl:text-[13px] xl:leading-[21px]">
+                    {t(item.descriptionKey)}
+                  </p>
+                </div>
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[20px] border border-white/10 bg-white/5 shadow-sm transition-all hover:border-white/20 hover:bg-white/10">
+                  <Image src={item.icon} alt={t(item.titleKey)} width={32} height={32} className="relative z-10 object-contain drop-shadow-md" />
+                </div>
               </div>
-
-              <div className="pt-1 w-full max-w-[240px] xl:max-w-[280px]">
-                <h3 className="text-[14px] xl:text-[16px] font-black text-white tracking-tight">
-                  {item.title}
-                </h3>
-                <p className="mt-1 xl:mt-1.5 text-[11px] xl:text-[13px] font-medium leading-relaxed xl:leading-[21px] text-white/50">
-                  {item.description}
-                </p>
+            ) : (
+              <div key={item.titleKey} className="flex w-full max-w-[360px] items-start gap-5">
+                <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[20px] border border-white/10 bg-white/5 shadow-sm transition-all hover:border-white/20 hover:bg-white/10">
+                  <Image src={item.icon} alt={t(item.titleKey)} width={32} height={32} className="relative z-10 object-contain drop-shadow-md" />
+                </div>
+                <div className="w-full max-w-[240px] pt-1 xl:max-w-[280px]">
+                  <h3 className="text-[14px] font-black tracking-tight text-white xl:text-[16px]">{t(item.titleKey)}</h3>
+                  <p className="mt-1 text-[11px] font-medium leading-relaxed text-white/50 xl:mt-1.5 xl:text-[13px] xl:leading-[21px]">
+                    {t(item.descriptionKey)}
+                  </p>
+                </div>
               </div>
-            </div>
+            )
           ))}
         </div>
 
-        <div className="relative z-10 hidden lg:block shrink-0 mt-10 border-t border-white/10 pt-8 w-full">
+        <div className="relative z-10 mt-10 hidden w-full shrink-0 border-t border-white/10 pt-8 lg:block">
           <div className="flex items-center gap-4">
             <div className="flex -space-x-3">
               {COMMUNITY.map((item, index) => (
                 <div
-                  key={index}
-                  className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dark-1 text-[12px] font-black text-white shadow-md relative z-10 hover:z-20 transition-transform hover:scale-110"
+                  key={item}
+                  className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-dark-1 text-[12px] font-black text-white shadow-md transition-transform hover:z-20 hover:scale-110"
                   style={{ backgroundColor: COMMUNITY_COLORS[index] }}
                 >
                   {item}
@@ -161,11 +165,11 @@ export default function RegisterVisualPanel() {
               ))}
             </div>
             <div className="min-w-0">
-              <p className="text-[12px] xl:text-[14px] font-[800] uppercase tracking-[1.2px] xl:tracking-[1.6px] leading-snug xl:leading-[21px] text-white whitespace-nowrap overflow-visible">
-                Join LearnMira, GrowthX & more
+              <p className="overflow-visible whitespace-nowrap text-[12px] font-[800] uppercase leading-snug tracking-[1.2px] text-white xl:text-[14px] xl:leading-[21px] xl:tracking-[1.6px]">
+                {t("auth.visual_community_title")}
               </p>
-              <p className="mt-0.5 xl:mt-1 text-[11px] xl:text-[13px] font-medium text-white/50 whitespace-nowrap overflow-visible">
-                Growing community · Kuwait · Free
+              <p className="mt-0.5 overflow-visible whitespace-nowrap text-[11px] font-medium text-white/50 xl:mt-1 xl:text-[13px]">
+                {t("auth.visual_community_subtitle")}
               </p>
             </div>
           </div>

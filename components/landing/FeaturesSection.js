@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion';
 import { Trophy, Zap, Coins, Layers, Globe, Shield, Crown, Bot } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
+import { useSelector } from 'react-redux';
+import { isRtlLanguage } from '@/lib/languages';
 
 const FEATURES = [
   {
@@ -57,11 +59,13 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   const { t } = useI18n();
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const isRTL = isRtlLanguage(selectedLang);
 
   return (
     <section className="w-full pb-12 pt-4 px-4 lg:px-10">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start sm:items-center">
-        <p className="mb-3 w-full text-left text-[11px] font-bold uppercase tracking-[2px] text-white/40 sm:w-auto sm:text-center">
+        <p className={`mb-3 w-full text-[11px] font-bold uppercase tracking-[2px] text-white/40 sm:w-auto sm:text-center ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('landing.everything_you_need')}
         </p>
 
@@ -72,10 +76,10 @@ export default function FeaturesSection() {
           {t('landing.built_for_competitive_players_subtitle')}
         </p>
 
-        <h2 className="mb-4 block w-full text-left text-[32px] font-black leading-[1.1] tracking-tight text-white sm:hidden">
+        <h2 className={`mb-4 block w-full text-[32px] font-black leading-[1.1] tracking-tight text-white sm:hidden ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('landing.built_to_win')}
         </h2>
-        <p className="mb-12 block w-full max-w-[600px] text-left text-[14px] font-medium leading-relaxed text-white/50 sm:hidden">
+        <p className={`mb-12 block w-full max-w-[600px] text-[14px] font-medium leading-relaxed text-white/50 sm:hidden ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('landing.built_to_win_subtitle')}
         </p>
 
@@ -83,7 +87,7 @@ export default function FeaturesSection() {
           {FEATURES.map((feature, index) => (
             <motion.div
               key={feature.titleKey}
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.4 }}

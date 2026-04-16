@@ -49,12 +49,37 @@ export const fetchHistory = createAsyncThunk(
   }
 );
 
-export const fetchLeaderboard = createAsyncThunk(
-  'quiz/fetchLeaderboard',
+export const fetchUserStats = createAsyncThunk(
+  'quiz/fetchUserStats',
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await api.get('/leaderboard');
-      return data.leaderboard;
+      const { data } = await api.get('/quiz/stats');
+      return data.stats;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to load user stats');
+    }
+  }
+);
+
+export const fetchLeaderboard = createAsyncThunk(
+  'quiz/fetchLeaderboard',
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const query = new URLSearchParams();
+      if (params?.period) {
+        query.set('period', params.period);
+      }
+      if (params?.lang) {
+        query.set('lang', params.lang);
+      }
+
+      const url = query.toString() ? `/leaderboard?${query.toString()}` : '/leaderboard';
+      const { data } = await api.get(url);
+
+      return {
+        leaderboard: data.leaderboard || [],
+        summary: data.summary || null,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to load leaderboard');
     }
@@ -102,10 +127,20 @@ const quizSlice = createSlice({
     quizStatus: 'idle',
     result: null,
     history: [],
+    userStats: null,
+    userStatsLoading: false,
     leaderboard: [],
+    leaderboardSummary: null,
     leaderboardLoading: false,
     inventory: initialInventory,
-    selectedLang: 'ar',
+    selectedLang: 'en',
+    stats: {
+      globalRank: '-',
+      totalPoints: 0,
+      totalGames: 0,
+      bestStreak: 0,
+      avgAccuracy: 0,
+    },
     error: null,
   },
   reducers: {
@@ -200,12 +235,24 @@ const quizSlice = createSlice({
       .addCase(fetchHistory.fulfilled, (state, action) => {
         state.history = action.payload;
       })
+      .addCase(fetchUserStats.pending, (state) => {
+        state.userStatsLoading = true;
+      })
+      .addCase(fetchUserStats.fulfilled, (state, action) => {
+        state.userStatsLoading = false;
+        state.userStats = action.payload;
+        state.stats = action.payload || state.stats;
+      })
+      .addCase(fetchUserStats.rejected, (state) => {
+        state.userStatsLoading = false;
+      })
       .addCase(fetchLeaderboard.pending, (state) => {
         state.leaderboardLoading = true;
       })
       .addCase(fetchLeaderboard.fulfilled, (state, action) => {
         state.leaderboardLoading = false;
-        state.leaderboard = action.payload;
+        state.leaderboard = action.payload?.leaderboard || [];
+        state.leaderboardSummary = action.payload?.summary || null;
       })
       .addCase(fetchLeaderboard.rejected, (state) => {
         state.leaderboardLoading = false;

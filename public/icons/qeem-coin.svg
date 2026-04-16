@@ -1,0 +1,37 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="coinBg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(92 84) rotate(49) scale(196 196)">
+      <stop offset="0" stop-color="#F8FAFC"/>
+      <stop offset="0.45" stop-color="#C4CBD4"/>
+      <stop offset="1" stop-color="#5A6675"/>
+    </radialGradient>
+    <linearGradient id="coinRing" x1="40" y1="40" x2="216" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2E8F0"/>
+      <stop offset="0.5" stop-color="#94A3B8"/>
+      <stop offset="1" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="eagle" x1="84" y1="88" x2="170" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#EEF2F7"/>
+      <stop offset="1" stop-color="#7D8A99"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="128" cy="128" r="120" fill="url(#coinRing)"/>
+  <circle cx="128" cy="128" r="112" fill="#D3DAE3"/>
+  <circle cx="128" cy="128" r="102" fill="url(#coinBg)"/>
+  <circle cx="128" cy="128" r="95" fill="none" stroke="#E2E8F0" stroke-opacity="0.8" stroke-width="3"/>
+
+  <path
+    d="M90 130C101 117 110 112 126 111C136 111 146 114 154 120L178 112L158 128L176 133L154 135C146 142 136 147 126 148C116 149 104 147 94 141L84 158L87 139L74 144L82 132L78 122L90 130Z"
+    fill="url(#eagle)"
+    fill-opacity="0.95"
+  />
+  <path d="M118 146L108 166L120 158L128 174L136 159L149 165L138 146" fill="#5E6B79" fill-opacity="0.55"/>
+
+  <text x="128" y="52" text-anchor="middle" fill="#6B7280" font-size="15" font-weight="700" font-family="Arial, sans-serif">
+    THE CRAZY ONES
+  </text>
+  <text x="184" y="165" text-anchor="middle" fill="#6B7280" font-size="24" font-weight="700" font-family="Arial, sans-serif">
+    2020
+  </text>
+</svg>

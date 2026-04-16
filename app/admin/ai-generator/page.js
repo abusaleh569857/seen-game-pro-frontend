@@ -16,13 +16,15 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useI18n } from '@/lib/i18n';
-import { SUPPORTED_LANGUAGES } from '@/lib/languages';
+import { SUPPORTED_LANGUAGES, isRtlLanguage, normalizeLanguageCode } from '@/lib/languages';
 import { clearGenerateResult, generateQuestions } from '@/store/slices/adminSlice';
 import { fetchCategories } from '@/store/slices/quizSlice';
 
 function AIGeneratorContent() {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.quiz);
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const isRTL = isRtlLanguage(normalizeLanguageCode(selectedLang));
   const { generateLoading, generateResult } = useSelector((state) => state.admin);
   const [form, setForm] = useState({ categoryId: '', language: 'ar', count: 10 });
   const selectedCategoryId = form.categoryId || categories[0]?.id || '';
@@ -44,14 +46,14 @@ function AIGeneratorContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black pt-[76px] text-white">
         <main className="mx-auto max-w-2xl px-4 py-12">
           {/* Breadcrumb / Back */}
           <Link 
             href="/admin" 
             className="mb-8 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-purple-400 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
             {t('admin.back_to_dashboard')}
           </Link>
 
@@ -69,7 +71,7 @@ function AIGeneratorContent() {
           <div className="space-y-8 rounded-[2.5rem] border border-gray-800 bg-gray-900/30 p-8 md:p-10 backdrop-blur-xl">
             {/* Category Select */}
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <label className={`flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ${isRTL ? 'mr-1' : 'ml-1'}`}>
                 <Settings2 className="w-4 h-4" />
                 {t('admin.select_category')}
               </label>
@@ -88,7 +90,7 @@ function AIGeneratorContent() {
 
             {/* Language Select */}
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <label className={`flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ${isRTL ? 'mr-1' : 'ml-1'}`}>
                 <Languages className="w-4 h-4" />
                 {t('admin.target_language')}
               </label>
@@ -111,7 +113,7 @@ function AIGeneratorContent() {
 
             {/* Count Input */}
             <div className="space-y-3">
-              <label className="flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
+              <label className={`flex items-center gap-2 text-sm font-bold text-gray-400 uppercase tracking-widest ${isRTL ? 'mr-1' : 'ml-1'}`}>
                 <ListOrdered className="w-4 h-4" />
                 {t('admin.question_count')}
               </label>
@@ -126,7 +128,7 @@ function AIGeneratorContent() {
                   }
                   className="w-full rounded-2xl border border-gray-700 bg-gray-800/50 px-5 py-4 text-lg transition focus:border-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/10"
                 />
-                <span className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-600 font-medium">
+                <span className={`absolute top-1/2 -translate-y-1/2 text-gray-600 font-medium ${isRTL ? 'left-5' : 'right-5'}`}>
                   {t('admin.questions')}
                 </span>
               </div>

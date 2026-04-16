@@ -18,11 +18,14 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useI18n } from '@/lib/i18n';
+import { isRtlLanguage, normalizeLanguageCode } from '@/lib/languages';
 import { fetchAdminUsers, toggleBanUser } from '@/store/slices/adminSlice';
 
 function UsersContent() {
   const dispatch = useDispatch();
   const { users, usersLoading } = useSelector((state) => state.admin);
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const isRTL = isRtlLanguage(normalizeLanguageCode(selectedLang));
   const [search, setSearch] = useState('');
   const { t } = useI18n();
 
@@ -41,7 +44,7 @@ function UsersContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black pt-[76px] text-white">
         <main className="mx-auto max-w-5xl px-4 py-12">
           {/* Header */}
           <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -58,7 +61,7 @@ function UsersContent() {
 
           {/* Search Box */}
           <div className="mb-10 relative group">
-            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+            <div className={`absolute inset-y-0 flex items-center pointer-events-none ${isRTL ? 'right-5' : 'left-5'}`}>
               <Search className="w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
             </div>
             <input
@@ -66,12 +69,12 @@ function UsersContent() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
-              className="w-full rounded-[2rem] border border-gray-800 bg-gray-900/50 pl-14 pr-32 py-5 text-lg transition focus:border-purple-500/50 focus:outline-none focus:ring-4 focus:ring-purple-500/5 backdrop-blur-xl"
+              className={`w-full rounded-[2rem] border border-gray-800 bg-gray-900/50 py-5 text-lg transition focus:border-purple-500/50 focus:outline-none focus:ring-4 focus:ring-purple-500/5 backdrop-blur-xl ${isRTL ? 'pr-14 pl-32 text-right' : 'pl-14 pr-32'}`}
             />
             <button
               type="button"
               onClick={handleSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-purple-600 px-8 py-3 font-bold transition hover:bg-purple-500 active:scale-95 shadow-xl shadow-purple-500/20"
+              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-purple-600 px-8 py-3 font-bold transition hover:bg-purple-500 active:scale-95 shadow-xl shadow-purple-500/20 ${isRTL ? 'left-3' : 'right-3'}`}
             >
               {t('admin.search')}
             </button>

@@ -17,6 +17,14 @@ export default function Navbar() {
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const activeLanguage = getLanguageByCode(selectedLang);
   const { t } = useI18n();
+  const compactSignUpLabel =
+    selectedLang === 'fr'
+      ? "S'inscrire"
+      : selectedLang === 'es'
+      ? 'Registrate'
+      : selectedLang === 'ar'
+      ? 'سجل'
+      : 'Sign Up';
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -47,11 +55,11 @@ export default function Navbar() {
               <CircleDot className="h-3 w-3 text-white" strokeWidth={3} />
             </div>
           </div>
-          <div className="hidden sm:flex flex-col">
-            <h1 className="text-[17px] font-black uppercase leading-none tracking-tight text-white mb-1">
+          <div className="flex flex-col min-w-0">
+            <h1 className="text-[12px] sm:text-[17px] font-black uppercase leading-none tracking-tight text-white sm:mb-1 whitespace-nowrap">
               {t('nav.brand_name')}
             </h1>
-            <p className="text-[9px] lg:text-[10px] font-bold uppercase tracking-[1.5px] leading-none text-white/50">
+            <p className="hidden sm:block text-[9px] lg:text-[10px] font-bold uppercase tracking-[1.5px] leading-none text-white/50">
               {t('nav.quiz_platform')}
             </p>
           </div>
@@ -115,18 +123,18 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2 lg:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
             <Link href="/login">
-              <button className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[12px] lg:text-[13px] font-semibold hover:bg-white/5 transition">
+              <button className="flex shrink-0 items-center justify-center whitespace-nowrap px-3 sm:px-4 lg:px-5 h-[36px] sm:h-[38px] rounded-lg border border-white/10 bg-transparent text-white text-[11px] sm:text-[12px] lg:text-[13px] font-semibold hover:bg-white/5 transition">
                 {t('nav.login')}
               </button>
             </Link>
             <Link href="/register">
               <button 
-                className="flex items-center justify-center px-4 lg:px-5 h-[38px] rounded-lg text-white text-[12px] lg:text-[13px] font-bold tracking-wide hover:brightness-110 transition shadow-lg shadow-[#4E5BFF]/20"
+                className="flex shrink-0 items-center justify-center whitespace-nowrap px-3 sm:px-4 lg:px-5 h-[36px] sm:h-[38px] rounded-lg text-white text-[11px] sm:text-[12px] lg:text-[13px] font-bold tracking-wide hover:brightness-110 transition shadow-lg shadow-[#4E5BFF]/20"
                 style={{ background: 'linear-gradient(90deg, #6248FF 0%, #486CFF 100%)' }}
               >
-                {t('nav.sign_up_free')}
+                {compactSignUpLabel}
               </button>
             </Link>
           </div>

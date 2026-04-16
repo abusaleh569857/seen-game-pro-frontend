@@ -17,8 +17,8 @@ export default function CategoriesSection() {
   const router = useRouter();
   const { categories, categoriesLoading, selectedLang } = useSelector((state) => state.quiz);
   const { isLoggedIn } = useSelector((state) => state.auth);
-  const isRTL = isRtlLanguage(selectedLang);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isRTL = isRtlLanguage(locale);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -36,18 +36,32 @@ export default function CategoriesSection() {
 
   return (
     <section className="relative w-full pt-20 pb-12 px-4 lg:px-10">
-      <div className={`w-full max-w-6xl mx-auto flex flex-col items-center ${isRTL ? 'lg:items-end text-center lg:text-right' : 'lg:items-start text-center lg:text-left'}`}>
-        <p className="text-[12px] font-bold tracking-[2px] uppercase text-white/50 mb-3">
-          {t('landing.fifteen_categories')}
-        </p>
+      <div
+        className={`w-full max-w-6xl mx-auto flex flex-col items-center ${
+          isRTL
+            ? 'text-center lg:text-right lg:items-end lg:[direction:rtl]'
+            : 'text-center lg:text-left lg:items-start lg:[direction:ltr]'
+        }`}
+      >
+        <div
+          className={`w-full ${
+            isRTL
+              ? 'lg:max-w-[600px] lg:ml-auto lg:mr-0 lg:text-right'
+              : 'lg:max-w-[600px] lg:mr-auto lg:ml-0 lg:text-left'
+          }`}
+        >
+          <p className="text-[12px] font-bold tracking-[2px] uppercase text-white/50 mb-3">
+            {t('landing.fifteen_categories')}
+          </p>
 
-        <h2 className="text-[32px] sm:text-[40px] lg:text-[46px] font-black tracking-tight text-white mb-4 leading-[1.1]">
-          {t('landing.what_will_you_master')}
-        </h2>
+          <h2 className="text-[32px] sm:text-[40px] lg:text-[46px] font-black tracking-tight text-white mb-4 leading-[1.1]">
+            {t('landing.what_will_you_master')}
+          </h2>
 
-        <p className="text-[14px] lg:text-[15px] font-medium text-white/60 max-w-[600px] mb-12">
-          {t('landing.categories_subtitle')}
-        </p>
+          <p className="text-[14px] lg:text-[15px] font-medium text-white/60 mb-12">
+            {t('landing.categories_subtitle')}
+          </p>
+        </div>
 
         {categoriesLoading ? (
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4 w-full">
@@ -59,10 +73,11 @@ export default function CategoriesSection() {
           <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 lg:gap-4 w-full">
             {displayCats.map((cat, i) => {
               const topColor = TOP_COLORS[i % TOP_COLORS.length];
+              const localizedName = getLocalizedCategoryName(cat, selectedLang);
               return (
                 <motion.button
                   key={cat.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={false}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05, duration: 0.4 }}
@@ -80,10 +95,7 @@ export default function CategoriesSection() {
                   </span>
 
                   <span className="text-[13px] font-bold text-white tracking-wide mb-1 transition-colors group-hover:text-white">
-                    {getLocalizedCategoryName(cat, selectedLang)}
-                  </span>
-                  <span className="text-[10px] font-medium text-white/40">
-                    {cat.name_en}
+                    {localizedName}
                   </span>
                 </motion.button>
               );

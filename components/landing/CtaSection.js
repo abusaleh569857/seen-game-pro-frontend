@@ -10,7 +10,7 @@ export default function CtaSection() {
   return (
     <section className="w-full pt-0 pb-16 px-4 lg:px-10">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={false}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}

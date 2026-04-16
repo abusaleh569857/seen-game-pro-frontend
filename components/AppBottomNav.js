@@ -3,17 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Play, ShoppingBag, BarChart2, LayoutGrid, User } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 const BOTTOM_NAV = [
-  { icon: Play, label: 'Play', href: '/play' },
-  { icon: ShoppingBag, label: 'Shop', href: '/shop' },
-  { icon: BarChart2, label: 'Rankings', href: '/leaderboard' },
-  { icon: LayoutGrid, label: 'Q Map', href: '/categories' },
-  { icon: User, label: 'Profile', href: '/profile' },
+  { icon: Play, labelKey: 'sidebar.active_quiz', href: '/play' },
+  { icon: ShoppingBag, labelKey: 'sidebar.the_shop', href: '/shop' },
+  { icon: BarChart2, labelKey: 'sidebar.leaderboard', href: '/leaderboard' },
+  { icon: LayoutGrid, labelKey: 'quiz.question_map', href: '/categories' },
+  { icon: User, labelKey: 'sidebar.my_profile', href: '/profile' },
 ];
 
 export default function AppBottomNav() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   const isActive = (href) => {
     if (href === '/play' && (pathname === '/play' || pathname.startsWith('/play/'))) return true;
@@ -28,7 +30,7 @@ export default function AppBottomNav() {
           const active = isActive(item.href);
           return (
             <Link
-              key={item.label}
+              key={item.labelKey}
               href={item.href}
               className="flex flex-col items-center gap-1 px-3 py-1 min-w-[52px]"
             >
@@ -52,7 +54,7 @@ export default function AppBottomNav() {
                   active ? 'text-violet-600' : 'text-gray-400'
                 }`}
               >
-                {item.label}
+                {t(item.labelKey)}
               </span>
             </Link>
           );

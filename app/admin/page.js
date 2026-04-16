@@ -14,11 +14,14 @@ import {
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useI18n } from '@/lib/i18n';
+import { isRtlLanguage, normalizeLanguageCode } from '@/lib/languages';
 import { fetchAdminStats } from '@/store/slices/adminSlice';
 
 function AdminContent() {
   const dispatch = useDispatch();
   const { stats, statsLoading } = useSelector((state) => state.admin);
+  const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const isRTL = isRtlLanguage(normalizeLanguageCode(selectedLang));
   const { t } = useI18n();
 
   useEffect(() => {
@@ -76,7 +79,7 @@ function AdminContent() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-black pt-[76px] text-white">
         <main className="mx-auto max-w-5xl px-4 py-12">
           {/* Header */}
           <div className="mb-12 flex items-center gap-4">
@@ -142,7 +145,7 @@ function AdminContent() {
                 </p>
                 
                 {/* Visual Accent */}
-                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
+                <div className={`absolute top-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity ${isRTL ? 'left-0' : 'right-0'}`}>
                   <Sparkles className="w-12 h-12 text-white" />
                 </div>
               </Link>
