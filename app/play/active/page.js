@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { Check, ChevronRight, Clock3, Lightbulb, Scissors, SkipForward, X } from 'lucide-react';
+import { toast } from 'react-toastify';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useConfirm } from '@/components/ConfirmProvider';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { getLocalizedCategoryName, normalizeLanguageCode } from '@/lib/languages';
@@ -69,6 +71,7 @@ function jokerTitle(item, t) {
 function ActiveJokerDockPage() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const confirm = useConfirm();
   const { t } = useI18n();
 
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
@@ -203,7 +206,7 @@ function ActiveJokerDockPage() {
         }));
         dispatch(selectAnswer(data.selected));
       } catch (requestError) {
-        window.alert(requestError.response?.data?.message || t('quiz.answer_check_failed'));
+        toast.error(requestError.response?.data?.message || t('quiz.answer_check_failed'));
       } finally {
         setIsCheckingAnswer(false);
       }
@@ -219,7 +222,7 @@ function ActiveJokerDockPage() {
 
   useEffect(() => {
     if (error && quizStatus === 'idle') {
-      window.alert(error);
+      toast.error(error);
       router.push('/categories');
     }
   }, [error, quizStatus, router]);
@@ -352,7 +355,7 @@ function ActiveJokerDockPage() {
         );
         const suggestedOption = availableOptions[0];
         if (suggestedOption) {
-          window.alert(t('quiz.hint_option', { option: suggestedOption }));
+          toast.info(t('quiz.hint_option', { option: suggestedOption }));
         }
       }
     },
@@ -375,7 +378,10 @@ function ActiveJokerDockPage() {
       if (!data.success) {
         setJokerSource('insufficient');
         if (data.message === 'insufficient_balance') {
-          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+          const shouldRedirect = await confirm({
+            message: t('quiz.not_enough_qeem'),
+            confirmLabel: t('common.go_to_shop'),
+          });
           if (shouldRedirect) {
             router.push('/shop');
           }
@@ -386,7 +392,7 @@ function ActiveJokerDockPage() {
       setJokerSource(data.source === 'inventory' ? 'inventory' : 'balance');
       applyJokerEffect(type);
     },
-    [applyJokerEffect, currentQuestion, dispatch, isCheckingAnswer, quizStatus, router, t],
+    [applyJokerEffect, confirm, currentQuestion, dispatch, isCheckingAnswer, quizStatus, router, t],
   );
 
   const getOptionStyle = useCallback(

@@ -20,6 +20,7 @@ import {
 import { buildLocalizedPath, normalizeLocale, stripLocaleFromPathname } from '@/lib/i18n-settings';
 import { useI18n } from '@/lib/i18n';
 import { setSelectedLang } from '@/store/slices/quizSlice';
+import { logoutUser } from '@/store/slices/authSlice';
 
 export default function PageHeader({ pageName, breadcrumbs = [] }) {
   const dispatch = useDispatch();
@@ -28,8 +29,11 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
   const { user } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const [showLangs, setShowLangs] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const mobileLangRef = useRef(null);
   const desktopLangRef = useRef(null);
+  const mobileProfileMenuRef = useRef(null);
+  const desktopProfileMenuRef = useRef(null);
   const currentLanguage = getLanguageByCode(selectedLang);
   const isRTL = isRtlLanguage(selectedLang);
   const { t } = useI18n();
@@ -38,8 +42,13 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
     const handleClickOutside = (event) => {
       const insideMobile = mobileLangRef.current?.contains(event.target);
       const insideDesktop = desktopLangRef.current?.contains(event.target);
+      const insideMobileProfileMenu = mobileProfileMenuRef.current?.contains(event.target);
+      const insideDesktopProfileMenu = desktopProfileMenuRef.current?.contains(event.target);
       if (!insideMobile && !insideDesktop) {
         setShowLangs(false);
+      }
+      if (!insideMobileProfileMenu && !insideDesktopProfileMenu) {
+        setShowProfileMenu(false);
       }
     };
 
@@ -78,6 +87,12 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
     if (nextUrl !== currentUrl) {
       router.replace(nextUrl);
     }
+  };
+
+  const handleLogout = async () => {
+    setShowProfileMenu(false);
+    await dispatch(logoutUser());
+    router.push('/login');
   };
 
   return (
@@ -139,8 +154,25 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
             <span className={`absolute top-2.5 h-2 w-2 rounded-full border-2 border-white bg-red-500 ${isRTL ? 'left-2.5' : 'right-2.5'}`} />
           </button>
 
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-violet-500 to-indigo-600 text-[11px] font-black text-white shadow-sm">
-            {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
+          <div className="relative" ref={mobileProfileMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowProfileMenu((prev) => !prev)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-violet-500 to-indigo-600 text-[11px] font-black text-white shadow-sm"
+            >
+              {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
+            </button>
+            {showProfileMenu ? (
+              <div className={`absolute top-[calc(100%-2px)] z-50 mt-0 min-w-[120px] rounded-xl border border-gray-100 bg-white p-1 shadow-lg ${isRTL ? 'left-0' : 'right-0'}`}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full rounded-lg px-3 py-2 text-left text-[12px] font-semibold text-red-600 transition hover:bg-red-50"
+                >
+                  {t('nav.logout')}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -202,8 +234,29 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
             <span className={`absolute -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500 ${isRTL ? '-left-0.5' : '-right-0.5'}`} />
           </button>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[12px] font-black text-white">
-            {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
+          <div
+            className="relative"
+            ref={desktopProfileMenuRef}
+            onMouseEnter={() => setShowProfileMenu(true)}
+            onMouseLeave={() => setShowProfileMenu(false)}
+          >
+            <button
+              type="button"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[12px] font-black text-white"
+            >
+              {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
+            </button>
+            {showProfileMenu ? (
+              <div className={`absolute top-[calc(100%-2px)] z-50 mt-0 min-w-[120px] rounded-xl border border-gray-100 bg-white p-1 shadow-lg ${isRTL ? 'left-0' : 'right-0'}`}>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full rounded-lg px-3 py-2 text-left text-[12px] font-semibold text-red-600 transition hover:bg-red-50"
+                >
+                  {t('nav.logout')}
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
         </div>

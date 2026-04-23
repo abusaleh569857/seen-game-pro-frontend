@@ -2,12 +2,13 @@
 
 import { useSelector } from 'react-redux';
 import { useI18n } from '@/lib/i18n';
+import { Clock3, Eye, Scissors, SkipForward } from 'lucide-react';
 
 const JOKERS = [
-  { type: 'fifty_fifty', label: '50/50', icon: '??', cost: 1 },
-  { type: 'skip', labelKey: 'shop.skip_label', icon: '??', cost: 1 },
-  { type: 'time', labelKey: 'shop.time_label', icon: '??', cost: 1 },
-  { type: 'reveal', labelKey: 'shop.reveal_label', icon: '??', cost: 2 },
+  { type: 'fifty_fifty', label: '50/50', icon: Scissors, cost: 1 },
+  { type: 'skip', labelKey: 'shop.skip_label', icon: SkipForward, cost: 1 },
+  { type: 'time', labelKey: 'shop.time_label', icon: Clock3, cost: 1 },
+  { type: 'reveal', labelKey: 'shop.reveal_label', icon: Eye, cost: 2 },
 ];
 
 export default function JokerDock({ onUse, disabled }) {
@@ -19,6 +20,7 @@ export default function JokerDock({ onUse, disabled }) {
       <div className="mx-auto flex max-w-xl justify-around gap-2">
         {JOKERS.map((joker) => {
           const quantity = inventory?.[joker.type] ?? 0;
+          const Icon = joker.icon;
 
           return (
             <button
@@ -28,7 +30,7 @@ export default function JokerDock({ onUse, disabled }) {
               disabled={disabled}
               className="flex min-w-[78px] flex-col items-center gap-1 rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 hover:border-purple-500"
             >
-              <span className="text-2xl">{joker.icon}</span>
+              <Icon className="h-5 w-5 text-gray-200" />
               <span className="text-xs font-medium text-gray-300">{joker.labelKey ? t(joker.labelKey) : joker.label}</span>
               <span className="text-xs font-bold">
                 {quantity > 0 ? (

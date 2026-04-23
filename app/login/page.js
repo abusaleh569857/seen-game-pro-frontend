@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Lock, Mail, Check } from "lucide-react";
@@ -30,6 +30,11 @@ function LoginForm() {
   const isRTL = isRtlLanguage(lang);
   const [showPassword, setShowPassword] = useState(false);
   const [socialLoading, setSocialLoading] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+  });
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -52,11 +57,43 @@ function LoginForm() {
     setLang(selectedLang);
   }, [selectedLang]);
 
+  const emailError = useMemo(() => {
+    const email = form.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return t("auth.invalid_email");
+    }
+    return "";
+  }, [form.email, t]);
+
+  const passwordError = useMemo(() => {
+    if (!form.password.trim()) {
+      return t("auth.password_required");
+    }
+    return "";
+  }, [form.password, t]);
+
+  const credentialError = useMemo(() => {
+    if (!error) return "";
+    const raw = String(error);
+    const lower = raw.toLowerCase();
+    if (
+      lower.includes("invalid") ||
+      lower.includes("incorrect") ||
+      lower.includes("credentials") ||
+      lower.includes("unauthorized")
+    ) {
+      return t("auth.invalid_credentials");
+    }
+    return raw;
+  }, [error, t]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setSubmitted(true);
+    dispatch(clearError());
 
-    if (!form.email || !form.password) {
-      window.alert(t("auth.please_fill_all"));
+    if (emailError || passwordError) {
       return;
     }
 
@@ -82,7 +119,7 @@ function LoginForm() {
         router.push("/");
       }
     } catch (socialError) {
-      window.alert(socialError.message || t("auth.google_login_failed"));
+      toast.error(socialError.message || t("auth.google_login_failed"));
     } finally {
       setSocialLoading("");
     }
@@ -98,7 +135,7 @@ function LoginForm() {
         router.push("/");
       }
     } catch (socialError) {
-      window.alert(socialError.message || t("auth.facebook_login_failed"));
+      toast.error(socialError.message || t("auth.facebook_login_failed"));
     } finally {
       setSocialLoading("");
     }
@@ -147,12 +184,6 @@ function LoginForm() {
                 </div>
               ) : null}
 
-              {error ? (
-                <div className="mt-4 rounded-[14px] border border-semantic-red-bg bg-semantic-red-bg/50 px-4 py-3 text-[12px] font-medium text-semantic-red shadow-sm sm:mt-5 sm:text-[13px]">
-                  {error}
-                </div>
-              ) : null}
-
               <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
                 <div className="space-y-1.5 lg:space-y-2">
                   <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
@@ -163,9 +194,17 @@ function LoginForm() {
                     type="email"
                     icon={Mail}
                     value={form.email}
-                    onChange={(event) => setForm({ ...form, email: event.target.value })}
-                    placeholder="your@email.com"
+                    onChange={(event) => {
+                      setForm({ ...form, email: event.target.value });
+                      if (error) dispatch(clearError());
+                    }}
+                    onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                    placeholder={t("auth.email_placeholder")}
+                    className={((touched.email || submitted) && emailError) ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10" : ""}
                   />
+                  {(touched.email || submitted) && emailError ? (
+                    <p className="text-[10px] text-semantic-red sm:text-[11px]">{emailError}</p>
+                  ) : null}
                 </div>
 
                 <div className="space-y-1.5 lg:space-y-2">
@@ -177,9 +216,17 @@ function LoginForm() {
                       type={showPassword ? "text" : "password"}
                       icon={Lock}
                       value={form.password}
-                      onChange={(event) => setForm({ ...form, password: event.target.value })}
+                      onChange={(event) => {
+                        setForm({ ...form, password: event.target.value });
+                        if (error) dispatch(clearError());
+                      }}
+                      onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
                       placeholder={t("auth.password")}
-                      className={isRTL ? "pl-14" : "pr-14"}
+                      className={`${isRTL ? "pl-14" : "pr-14"} ${
+                        ((touched.password || submitted) && passwordError)
+                          ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10"
+                          : ""
+                      }`}
                     />
                     <button
                       type="button"
@@ -189,6 +236,12 @@ function LoginForm() {
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
+                  {(touched.password || submitted) && passwordError ? (
+                    <p className="text-[10px] text-semantic-red sm:text-[11px]">{passwordError}</p>
+                  ) : null}
+                  {!passwordError && !emailError && credentialError ? (
+                    <p className="text-[10px] text-semantic-red sm:text-[11px]">{credentialError}</p>
+                  ) : null}
                   <div className={`mt-2 block ${isRTL ? "text-left" : "text-right"}`}>
                     <Link href="/forgot-password" className="text-[13px] font-bold text-[#4E5BFF]">
                       {t("auth.forgot_password")}
@@ -274,3 +327,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

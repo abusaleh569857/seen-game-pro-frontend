@@ -1,9 +1,12 @@
 import Script from "next/script";
 import { cookies } from "next/headers";
 import { Plus_Jakarta_Sans, Noto_Sans_Arabic } from "next/font/google";
+import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import ReduxProvider from "@/providers/ReduxProvider";
+import ConfirmProvider from "@/components/ConfirmProvider";
+import ToastProvider from "@/components/ToastProvider";
 import {
   DEFAULT_LANGUAGE,
   isRtlLocale,
@@ -57,7 +60,10 @@ export default async function RootLayout({ children }) {
           strategy="afterInteractive"
         />
         <ReduxProvider initialLanguage={initialLanguage}>
-          <AppShell>{children}</AppShell>
+          <ConfirmProvider>
+            <AppShell>{children}</AppShell>
+          </ConfirmProvider>
+          <ToastProvider />
         </ReduxProvider>
       </body>
     </html>

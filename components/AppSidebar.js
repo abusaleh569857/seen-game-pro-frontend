@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { useI18n } from '@/lib/i18n';
 import { logoutUser } from '@/store/slices/authSlice';
 import { isRtlLanguage } from '@/lib/languages';
@@ -22,6 +23,7 @@ import {
   Plus,
   ChevronDown,
   CircleDot,
+  LogOut,
 } from 'lucide-react';
 
 const NAV_SECTIONS = [
@@ -57,6 +59,7 @@ const NAV_SECTIONS = [
     items: [
       { icon: Bell, label: 'Notifications', labelKey: 'notifications', href: '#', badge: '0', badgeColor: 'bg-purple-500', comingSoon: true },
       { icon: Settings, label: 'Settings', labelKey: 'settings_item', href: '#', comingSoon: true },
+      { icon: LogOut, label: 'Logout', labelKey: 'logout', href: '#', action: 'logout' },
     ],
   },
 ];
@@ -74,7 +77,7 @@ export default function AppSidebar() {
 
   const qeemBalance = user?.qeemBalance ?? user?.qeem_balance ?? 0;
   const initials = user?.username?.slice(0, 2).toUpperCase() || 'UN';
-  const comingSoonMessage = 'This section is currently in building process. It is not built yet.';
+  const comingSoonMessage = t('sidebar.coming_soon_message');
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
@@ -166,7 +169,24 @@ export default function AppSidebar() {
               </p>
               {section.items.map((item) => {
                 const active = isActive(item.href, item.activePrefix);
+                const isLogoutAction = item.action === 'logout';
                 return (
+                  isLogoutAction ? (
+                    <button
+                      key={item.label}
+                      type="button"
+                      className={`relative w-full flex items-center justify-between px-3 py-2 rounded-lg mb-0.5 group transition-all text-red-600 hover:bg-red-50 ${isRTL ? 'flex-row-reverse' : ''}`}
+                      onClick={async () => {
+                        setIsOpen(false);
+                        await handleLogout();
+                      }}
+                    >
+                      <div className={`flex items-center gap-2.5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <item.icon className="w-4 h-4 shrink-0 text-red-500" />
+                        <span className="text-[12px] font-semibold">{t(`nav.${item.labelKey}`)}</span>
+                      </div>
+                    </button>
+                  ) : (
                     <Link
                      key={item.label}
                      href={item.href}
@@ -181,7 +201,7 @@ export default function AppSidebar() {
                        item.comingSoon
                           ? (e) => {
                               e.preventDefault();
-                              window.alert(comingSoonMessage);
+                              toast.info(comingSoonMessage);
                             }
                           : () => {
                               setIsOpen(false);
@@ -203,6 +223,7 @@ export default function AppSidebar() {
                     )}
                     {active && <div className={`w-1 h-4 rounded-full bg-violet-600 absolute ${isRTL ? 'left-0' : 'right-0'}`} />}
                   </Link>
+                  )
                 );
               })}
             </div>
@@ -223,7 +244,9 @@ export default function AppSidebar() {
                 <p className="text-[12px] font-bold text-gray-800 leading-none truncate max-w-[90px]">
                   {user?.username}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">{user?.points ?? 0} pts</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  {user?.points ?? 0} {t('leaderboard.points_short')}
+                </p>
               </div>
             </div>
             <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />

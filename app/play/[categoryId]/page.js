@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import {
   AlertCircle,
   Check,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useConfirm } from '@/components/ConfirmProvider';
 import api from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
 import { getLocalizedCategoryName, normalizeLanguageCode } from '@/lib/languages';
@@ -294,6 +296,7 @@ function ActiveQuizContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { categoryId } = useParams();
+  const confirm = useConfirm();
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const lang = normalizeLanguageCode(searchParams.get('lang') || selectedLang);
   const isRTL = lang === 'ar';
@@ -412,9 +415,7 @@ function ActiveQuizContent() {
 
         dispatch(selectAnswer(data.selected));
       } catch (requestError) {
-        window.alert(
-          requestError.response?.data?.message || t('quiz.answer_check_failed'),
-        );
+        toast.error(requestError.response?.data?.message || t('quiz.answer_check_failed'));
       } finally {
         setIsCheckingAnswer(false);
       }
@@ -430,7 +431,7 @@ function ActiveQuizContent() {
 
   useEffect(() => {
     if (error && quizStatus === 'idle') {
-      window.alert(error);
+      toast.error(error);
       router.push('/categories');
     }
   }, [error, quizStatus, router]);
@@ -520,15 +521,18 @@ function ActiveQuizContent() {
     dispatch(nextQuestion());
   }, [answers, currentIndex, dispatch, questions.length, quizStatus, sessionId]);
 
-  const handleQuit = useCallback(() => {
-      const shouldQuit = window.confirm(t('quiz.leave_quiz_confirm'));
+  const handleQuit = useCallback(async () => {
+    const shouldQuit = await confirm({
+      message: t('quiz.leave_quiz_confirm'),
+      tone: 'danger',
+    });
     if (!shouldQuit) {
       return;
     }
 
     dispatch(resetQuiz());
     router.push('/categories');
-  }, [dispatch, router, t]);
+  }, [confirm, dispatch, router, t]);
 
   const applyJokerEffect = useCallback(
     (type) => {
@@ -556,7 +560,7 @@ function ActiveQuizContent() {
         );
         const suggestedOption = availableOptions[0];
         if (suggestedOption) {
-          window.alert(t('quiz.hint_option', { option: suggestedOption }));
+          toast.info(t('quiz.hint_option', { option: suggestedOption }));
         }
       }
     },
@@ -574,7 +578,10 @@ function ActiveQuizContent() {
 
       if (!data.success) {
         if (data.message === 'insufficient_balance' && allowShopRedirect) {
-          const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+          const shouldRedirect = await confirm({
+            message: t('quiz.not_enough_qeem'),
+            confirmLabel: t('common.go_to_shop'),
+          });
           if (shouldRedirect) {
             router.push('/shop');
           }
@@ -585,7 +592,7 @@ function ActiveQuizContent() {
       applyJokerEffect(type);
       return { success: true, source: data.source };
     },
-    [applyJokerEffect, dispatch, router, t],
+    [applyJokerEffect, confirm, dispatch, router, t],
   );
 
   const handleConfirmPurchase = useCallback(async () => {
@@ -603,13 +610,16 @@ function ActiveQuizContent() {
     }
 
     if (resultInfo.reason === 'insufficient_balance') {
-      const shouldRedirect = window.confirm(t('quiz.not_enough_qeem'));
+      const shouldRedirect = await confirm({
+        message: t('quiz.not_enough_qeem'),
+        confirmLabel: t('common.go_to_shop'),
+      });
       if (shouldRedirect) {
         setIsPurchaseModalOpen(false);
         router.push('/shop');
       }
     }
-  }, [isPurchasingJoker, performJokerAction, router, selectedPurchaseType, t]);
+  }, [confirm, isPurchasingJoker, performJokerAction, router, selectedPurchaseType, t]);
 
   const handleJoker = useCallback(
     async (type) => {
