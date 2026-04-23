@@ -1,5 +1,7 @@
 # 🎮 Seen Game Pro - AI-Powered Quiz and Monetization Platform
 
+🌐 **Visit live website:** https://seen-pro-game-frontend.vercel.app/
+
 A production-oriented **full-stack web application** built with **Next.js + Express + MySQL** for multilingual quiz gameplay, joker economy, leaderboard competition, and Tap-based package purchases.
 
 ---
