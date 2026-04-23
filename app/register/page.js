@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { Check, Eye, EyeOff, Lock, Mail, UserCircle, CheckCircle2 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import RegisterVisualPanel from "@/components/auth/RegisterVisualPanel";
@@ -34,6 +35,12 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(true);
   const [socialLoading, setSocialLoading] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+  });
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -67,16 +74,38 @@ export default function RegisterPage() {
     [form.confirmPassword, form.password],
   );
 
+  const emailError = useMemo(() => {
+    const email = form.email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      return t("auth.invalid_email");
+    }
+    return "";
+  }, [form.email, t]);
+
+  const passwordError = useMemo(() => {
+    const password = form.password;
+    if (password.length < 6) return t("auth.password_min_length");
+    if (!/[a-z]/.test(password)) return t("auth.password_require_lowercase");
+    if (!/[A-Z]/.test(password)) return t("auth.password_require_uppercase");
+    if (!/[^A-Za-z0-9]/.test(password)) return t("auth.password_require_special");
+    return "";
+  }, [form.password, t]);
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    setSubmitted(true);
 
     if (!acceptedTerms) {
-      window.alert(t("auth.please_accept_terms"));
+      toast.warning(t("auth.please_accept_terms"));
+      return;
+    }
+
+    if (emailError || passwordError) {
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      window.alert(t("auth.passwords_do_not_match"));
       return;
     }
 
@@ -99,7 +128,7 @@ export default function RegisterPage() {
         router.push("/");
       }
     } catch (socialError) {
-      window.alert(socialError.message || t("auth.google_signup_failed"));
+      toast.error(socialError.message || t("auth.google_signup_failed"));
     } finally {
       setSocialLoading("");
     }
@@ -205,8 +234,13 @@ export default function RegisterPage() {
                     icon={Mail}
                     value={form.email}
                     onChange={(event) => setForm({ ...form, email: event.target.value })}
+                    onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
                     placeholder="alex@example.com"
+                    className={((touched.email || submitted) && emailError) ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10" : ""}
                   />
+                  {(touched.email || submitted) && emailError ? (
+                    <p className="text-[10px] text-semantic-red sm:text-[11px]">{emailError}</p>
+                  ) : null}
                 </div>
 
                 <div className="space-y-1.5 lg:space-y-2">
@@ -219,32 +253,10 @@ export default function RegisterPage() {
                       icon={Lock}
                       value={form.password}
                       onChange={(event) => setForm({ ...form, password: event.target.value })}
+                      onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
                       placeholder={t("auth.min_six_chars")}
-                      className={isRTL ? "pl-14" : "pr-14"}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((current) => !current)}
-                      className={`absolute top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand ${isRTL ? "left-4" : "right-4"}`}
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 lg:space-y-2">
-                  <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
-                    {t("auth.confirm_password")}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      icon={Lock}
-                      value={form.confirmPassword}
-                      onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
-                      placeholder={t("auth.reenter_password")}
                       className={`${isRTL ? "pl-14" : "pr-14"} ${
-                        !!form.confirmPassword && !passwordsMatch
+                        ((touched.password || submitted) && passwordError)
                           ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10"
                           : ""
                       }`}
@@ -257,7 +269,38 @@ export default function RegisterPage() {
                       {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
-                  {form.confirmPassword && !passwordsMatch && (
+                  {(touched.password || submitted) && passwordError ? (
+                    <p className="text-[10px] text-semantic-red sm:text-[11px]">{passwordError}</p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-1.5 lg:space-y-2">
+                  <label className="text-[12px] font-bold text-[#4B5563] sm:text-[13px] lg:text-text-1 lg:font-semibold">
+                    {t("auth.confirm_password")}
+                  </label>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      icon={Lock}
+                      value={form.confirmPassword}
+                      onChange={(event) => setForm({ ...form, confirmPassword: event.target.value })}
+                      onBlur={() => setTouched((prev) => ({ ...prev, confirmPassword: true }))}
+                      placeholder={t("auth.reenter_password")}
+                      className={`${isRTL ? "pl-14" : "pr-14"} ${
+                        (!!form.confirmPassword && !passwordsMatch) || ((touched.confirmPassword || submitted) && !passwordsMatch)
+                          ? "border-semantic-red focus:border-semantic-red focus:ring-semantic-red/10"
+                          : ""
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((current) => !current)}
+                      className={`absolute top-1/2 -translate-y-1/2 text-text-3 transition-colors hover:text-brand ${isRTL ? "left-4" : "right-4"}`}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {(touched.confirmPassword || submitted) && form.confirmPassword && !passwordsMatch && (
                     <p className="text-[10px] text-semantic-red sm:text-[11px]">
                       {t("auth.passwords_do_not_match")}
                     </p>

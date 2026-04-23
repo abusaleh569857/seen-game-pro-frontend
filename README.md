@@ -378,4 +378,4 @@ You can add more page screenshots under `images/` and list them here for client/
 ---
 
 **Developed by Abusaleh Alam Khan (Seen Game Pro Project)**  
-Production-readme prepared from current frontend + backend codebase analysis.
+

@@ -2,42 +2,71 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Flame, Info, Trophy, Gamepad2, ChevronRight } from 'lucide-react';
+import {
+  BookOpen,
+  Brush,
+  Building2,
+  Car,
+  Coffee,
+  Flame,
+  Gamepad2,
+  Globe2,
+  Info,
+  Microscope,
+  Monitor,
+  Music,
+  Pizza,
+  Play,
+  Trophy,
+  User,
+} from 'lucide-react';
 import PageHeader from '@/components/PageHeader';
 import { useI18n } from '@/lib/i18n';
 import { fetchLeaderboard } from '@/store/slices/quizSlice';
 import { normalizeLanguageCode } from '@/lib/languages';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // === HELPER FUNCTIONS ===
 function getInitials(username) {
   return username?.slice(0, 2).toUpperCase() || 'U';
 }
 
-function getBadges(entry, t, lang) {
-  const badges = [];
-  const topRanker = t ? t('leaderboard.badge_top_ranker') : 'Top Ranker';
-  const quizMaster = t ? t('leaderboard.badge_quiz_master') : 'Quiz Master';
-  const growthHacker = t ? t('leaderboard.badge_growth_hacker') : 'Growth Hacker';
-  const fastLearner = t ? t('leaderboard.badge_fast_learner') : 'Fast Learner';
-  const topDesigner = t ? t('leaderboard.badge_top_designer') : 'Top Designer';
-  const mrNumber = t ? t('leaderboard.badge_mr_number') : 'Mr. Number';
-  const codeStreak = t ? t('leaderboard.badge_code_streak') : 'Code Streak';
-  const topCategory = entry.favorite_category?.[lang] || entry.favorite_category?.en || (t ? t('leaderboard.category_general') : 'General');
+function containsArabicScript(value) {
+  return /[\u0600-\u06FF]/.test(String(value || ''));
+}
 
-  if (entry.rank === 1) badges.push({ label: `🏆 ${topRanker}`, className: 'bg-[#FFF8E6] text-[#D99A1A] border border-[#FDECB1]' });
-  if (entry.rank <= 3) badges.push({ label: '🎯 Top ' + (entry.favorite_category?.en || 'Nature'), className: 'bg-[#EBF5FF] text-[#1D74E8] border border-[#BFDBFE]' });
-  
-  if (entry.rank >= 4 && entry.rank <= 6) badges.push({ label: '🎨 Top Designer', className: 'bg-[#EBF5FF] text-[#1D74E8] border border-[#BFDBFE]' });
-  if (entry.best_streak >= 5 && badges.length < 2) badges.push({ label: `🧠 ${quizMaster}`, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
-  if (entry.games_played >= 10 && badges.length < 2) badges.push({ label: '🔢 Mr. Number', className: 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]' });
-  if (entry.games_played >= 20 && badges.length < 2) badges.push({ label: `📈 ${growthHacker}`, className: 'bg-[#F5F3FF] text-[#7C3AED] border border-[#EDE9FE]' });
-  if (entry.points >= 500 && badges.length < 2) badges.push({ label: '💻 Code Streak', className: 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]' });
-  
-  if (badges.length === 0) badges.push({ label: `⚡ ${fastLearner}`, className: 'bg-[#EEF2FF] text-[#4F46E5] border border-[#C7D2FE]' });
-  if (badges.length < 2 && entry.best_streak >= 3) badges.push({ label: `🧠 ${quizMaster}`, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
+function getLocalizedCategoryLabel(categoryObj, lang, fallbackLabel) {
+  const localized = categoryObj?.[lang];
+  const english = categoryObj?.en;
 
-  return badges;
+  if (lang === 'ar') {
+    return localized || english || fallbackLabel;
+  }
+
+  if (localized && !containsArabicScript(localized)) {
+    return localized;
+  }
+
+  return english || localized || fallbackLabel;
+}
+
+function getCategoryDisplayLabel(categoryObj, lang, t, fallbackLabel) {
+  const base = getLocalizedCategoryLabel(categoryObj, lang, fallbackLabel);
+  if (lang !== 'es') return base;
+
+  const source = String(categoryObj?.en || base || '').trim().toLowerCase();
+  const esCategoryKeyMap = {
+    sports: 'leaderboard.category_sports',
+    history: 'leaderboard.category_history',
+    games: 'leaderboard.category_games',
+    entertainment: 'leaderboard.category_entertainment',
+    business: 'leaderboard.category_business',
+    general: 'leaderboard.category_general',
+  };
+
+  const i18nKey = esCategoryKeyMap[source];
+  return i18nKey ? t(i18nKey) : base;
 }
 
 function getBadgesV2(entry, t, lang) {
@@ -49,50 +78,41 @@ function getBadgesV2(entry, t, lang) {
   const topDesigner = t('leaderboard.badge_top_designer');
   const mrNumber = t('leaderboard.badge_mr_number');
   const codeStreak = t('leaderboard.badge_code_streak');
-  const topCategory = entry.favorite_category?.[lang] || entry.favorite_category?.en || t('leaderboard.category_general');
+  const topCategory = getCategoryDisplayLabel(entry.favorite_category, lang, t, t('leaderboard.category_general'));
 
-  if (entry.rank === 1) badges.push({ label: `🏆 ${topRanker}`, className: 'bg-[#FFF8E6] text-[#D99A1A] border border-[#FDECB1]' });
+  if (entry.rank === 1) badges.push({ label: topRanker, className: 'bg-[#FFF8E6] text-[#D99A1A] border border-[#FDECB1]' });
   if (entry.rank <= 3) badges.push({ label: t('leaderboard.badge_top_category', { category: topCategory }), className: 'bg-[#EBF5FF] text-[#1D74E8] border border-[#BFDBFE]' });
-  if (entry.rank >= 4 && entry.rank <= 6) badges.push({ label: `🎨 ${topDesigner}`, className: 'bg-[#EBF5FF] text-[#1D74E8] border border-[#BFDBFE]' });
-  if (entry.best_streak >= 5 && badges.length < 2) badges.push({ label: `🧠 ${quizMaster}`, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
-  if (entry.games_played >= 10 && badges.length < 2) badges.push({ label: `🔢 ${mrNumber}`, className: 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]' });
-  if (entry.games_played >= 20 && badges.length < 2) badges.push({ label: `📈 ${growthHacker}`, className: 'bg-[#F5F3FF] text-[#7C3AED] border border-[#EDE9FE]' });
-  if (entry.points >= 500 && badges.length < 2) badges.push({ label: `💻 ${codeStreak}`, className: 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]' });
-  if (badges.length === 0) badges.push({ label: `⚡ ${fastLearner}`, className: 'bg-[#EEF2FF] text-[#4F46E5] border border-[#C7D2FE]' });
-  if (badges.length < 2 && entry.best_streak >= 3) badges.push({ label: `🧠 ${quizMaster}`, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
+  if (entry.rank >= 4 && entry.rank <= 6) badges.push({ label: topDesigner, className: 'bg-[#EBF5FF] text-[#1D74E8] border border-[#BFDBFE]' });
+  if (entry.best_streak >= 5 && badges.length < 2) badges.push({ label: quizMaster, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
+  if (entry.games_played >= 10 && badges.length < 2) badges.push({ label: mrNumber, className: 'bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]' });
+  if (entry.games_played >= 20 && badges.length < 2) badges.push({ label: growthHacker, className: 'bg-[#F5F3FF] text-[#7C3AED] border border-[#EDE9FE]' });
+  if (entry.points >= 500 && badges.length < 2) badges.push({ label: codeStreak, className: 'bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]' });
+  if (badges.length === 0) badges.push({ label: fastLearner, className: 'bg-[#EEF2FF] text-[#4F46E5] border border-[#C7D2FE]' });
+  if (badges.length < 2 && entry.best_streak >= 3) badges.push({ label: quizMaster, className: 'bg-[#FDF2F8] text-[#DB2777] border border-[#FBCFE8]' });
 
   return badges;
 }
 
-const CATEGORY_ICONS = {
-  'Arts': '🎨', 'Nature': '🌿', 'Technology': '💻', 'Science': '🔬', 
-  'Business': '💼', 'Geography': '🌍', 'Entertainment': '🎭', 'General': '🎯'
+const CATEGORY_ICON_META = {
+  Sports: { icon: Gamepad2, className: 'text-emerald-500' },
+  History: { icon: BookOpen, className: 'text-amber-600' },
+  Science: { icon: Microscope, className: 'text-teal-500' },
+  Geography: { icon: Globe2, className: 'text-blue-500' },
+  Culture: { icon: Coffee, className: 'text-violet-500' },
+  Arts: { icon: Brush, className: 'text-pink-500' },
+  Entertainment: { icon: Play, className: 'text-rose-500' },
+  Nature: { icon: Flame, className: 'text-emerald-500' },
+  Technology: { icon: Monitor, className: 'text-blue-600' },
+  Food: { icon: Pizza, className: 'text-amber-500' },
+  Cars: { icon: Car, className: 'text-red-500' },
+  Business: { icon: Building2, className: 'text-purple-500' },
+  Games: { icon: Gamepad2, className: 'text-emerald-500' },
+  Music: { icon: Music, className: 'text-pink-500' },
+  General: { icon: User, className: 'text-slate-500' },
 };
 
-function getFavCategoryIcon(catName) {
-  return CATEGORY_ICONS[catName] || '🎯';
-}
-
-function FallingBadgesBackground({ topCategories }) {
-  if (!topCategories || topCategories.length === 0) return null;
-  const positions = [
-    { top: '10%', right: '15%' }, { top: '30%', right: '35%' }, { top: '30%', right: '5%' },
-    { top: '50%', right: '25%' }, { top: '50%', right: '5%' }, { top: '70%', right: '35%' },
-    { top: '70%', right: '10%' }, { top: '85%', right: '30%' }, { top: '85%', right: '5%' },
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 hidden md:block">
-      {positions.map((pos, idx) => {
-        const cat = topCategories[idx % topCategories.length];
-        return (
-          <div key={idx} className="absolute bg-[#36277D] text-white/80 py-1.5 px-3 rounded-full text-[10px] font-bold border border-white/10" style={pos}>
-            {getFavCategoryIcon(cat.name?.en)} {cat.name?.en}
-          </div>
-        );
-      })}
-    </div>
-  );
+function getFavCategoryMeta(catName) {
+  return CATEGORY_ICON_META[catName] || CATEGORY_ICON_META.General;
 }
 
 // === COMPONENTS ===
@@ -137,7 +157,7 @@ function TopCard({ entry, lang, t, isRTL }) {
       <div className="mb-3 flex-1">
         <p className="text-[15px] font-black text-gray-900">{entry.username}</p>
         <p className="text-[11px] font-medium text-gray-400 mt-0.5">
-          {t('leaderboard.games_count', { count: entry.games_played })} • <Flame className="w-3 h-3 inline text-orange-500" />{' '}
+          {t('leaderboard.games_count', { count: entry.games_played })} &bull; <Flame className="w-3 h-3 inline text-orange-500" />{' '}
           {t('leaderboard.streak_wins', { count: entry.best_streak })}
         </p>
       </div>
@@ -164,8 +184,12 @@ function ListRow({ entry, lang, t, isRTL }) {
   const avatarColors = ['bg-indigo-500', 'bg-rose-500', 'bg-emerald-500', 'bg-amber-500', 'bg-cyan-500'];
   const avatarColor = avatarColors[entry.rank % avatarColors.length];
   
-  const categoryName = entry.favorite_category?.[lang] || entry.favorite_category?.en || t('leaderboard.category_general');
-  const categoryIcon = getFavCategoryIcon(entry.favorite_category?.en || 'General');
+  const hasPlayed = Number(entry.games_played || 0) > 0;
+  const categoryName = hasPlayed
+    ? getCategoryDisplayLabel(entry.favorite_category, lang, t, t('leaderboard.category_general'))
+    : t('leaderboard.no_games_played');
+  const categoryMeta = getFavCategoryMeta(entry.favorite_category?.en || 'General');
+  const CategoryIcon = categoryMeta.icon;
 
   const whoLabel = entry.isCurrentUser ? t('common.you') : entry.username;
 
@@ -183,7 +207,7 @@ function ListRow({ entry, lang, t, isRTL }) {
         </p>
       </div>
       <div className="col-span-3 lg:col-span-2 flex items-center gap-2">
-        <span className="text-[14px]">{categoryIcon}</span>
+        {hasPlayed ? <CategoryIcon className={`h-4 w-4 ${categoryMeta.className}`} /> : null}
         <span className="text-[12px] font-semibold text-gray-600 truncate">{categoryName}</span>
       </div>
       <div className="col-span-2 flex items-center">
@@ -214,8 +238,12 @@ function ListRow({ entry, lang, t, isRTL }) {
 function StickyFooter({ currentUserRankData, lang, t, isRTL }) {
   if (!currentUserRankData) return null;
   const initials = getInitials(currentUserRankData.username);
-  const categoryName = currentUserRankData.favorite_category?.[lang] || currentUserRankData.favorite_category?.en || t('leaderboard.category_general');
-  const categoryIcon = getFavCategoryIcon(currentUserRankData.favorite_category?.en || 'General');
+  const hasPlayed = Number(currentUserRankData.games_played || 0) > 0;
+  const categoryName = hasPlayed
+    ? getCategoryDisplayLabel(currentUserRankData.favorite_category, lang, t, t('leaderboard.category_general'))
+    : t('leaderboard.no_games_played');
+  const categoryMeta = getFavCategoryMeta(currentUserRankData.favorite_category?.en || 'General');
+  const CategoryIcon = categoryMeta.icon;
   
   const hasComparisonRank = Number(currentUserRankData.rank) > 1 || Number(currentUserRankData.rank) === 1;
   const previousRankDiff = Number(currentUserRankData.diffFromPrevious ?? 0);
@@ -245,7 +273,8 @@ function StickyFooter({ currentUserRankData, lang, t, isRTL }) {
           <div className="flex flex-col">
             <p className="text-[14px] font-black text-gray-900">{t('common.you')}</p>
             <p className="text-[11px] font-medium text-gray-500 flex items-center gap-1">
-              {categoryIcon} {categoryName} • <Flame className="w-3 h-3 text-orange-500" />{' '}
+              {hasPlayed ? <CategoryIcon className={`h-3.5 w-3.5 ${categoryMeta.className}`} /> : null}
+              {categoryName} &bull; <Flame className="w-3 h-3 text-orange-500" />{' '}
               {t('leaderboard.streak_wins', { count: currentUserRankData.best_streak })}
             </p>
           </div>
@@ -255,7 +284,7 @@ function StickyFooter({ currentUserRankData, lang, t, isRTL }) {
       <div className={`flex items-center gap-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`hidden lg:flex items-center gap-6 divide-gray-100 ${isRTL ? 'divide-x-reverse divide-x flex-row-reverse' : 'divide-x'}`}>
           <div className={`flex flex-col items-center ${isRTL ? 'pr-6' : 'pl-6'}`}>
-            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{t('leaderboard.gap_to_top3')}</span>
+            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{t('leaderboard.vs_previous_rank')}</span>
             <span className={`text-[13px] font-black ${previousRankDiffClass}`}>
               {hasComparisonRank ? `${previousRankDiffSign}${previousRankDiffAbs} ${t('leaderboard.points_short')}` : '-'}
             </span>
@@ -263,7 +292,7 @@ function StickyFooter({ currentUserRankData, lang, t, isRTL }) {
           <div className={`flex flex-col items-center ${isRTL ? 'pr-6' : 'pl-6'}`}>
             <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">{t('leaderboard.top_10')}</span>
             <span className={`text-[13px] font-black ${isTop10 ? 'text-emerald-500' : 'text-gray-400'}`}>
-              {isTop10 ? `✓ ${t('leaderboard.inside_top')}` : '-'}
+              {isTop10 ? t('leaderboard.inside_top') : '-'}
             </span>
           </div>
           <div className={`flex flex-col items-center ${isRTL ? 'pl-6 pr-0' : 'pl-6 pr-6'}`}>
@@ -273,7 +302,7 @@ function StickyFooter({ currentUserRankData, lang, t, isRTL }) {
         </div>
         
         <Link href="/play/active" className="bg-indigo-500 hover:bg-indigo-600 transition-colors text-white text-[12px] font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-indigo-200 flex items-center gap-2">
-          <span>▶</span> {t('leaderboard.play_now')}
+          <span aria-hidden="true">&gt;</span> {t('leaderboard.play_now')}
         </Link>
       </div>
     </div>
@@ -387,7 +416,7 @@ export default function LeaderboardPage() {
           <div>
             <h2 className="text-xl font-black text-gray-900">{t('leaderboard.global_title')}</h2>
             <p className="text-[11px] text-gray-500 font-medium">
-              {t('leaderboard.updated_line', { players: leaderboardSummary?.totalPlayers || 0 })} • {periodLabel}
+              {t('leaderboard.updated_line', { players: leaderboardSummary?.totalPlayers || 0 })} &bull; {periodLabel}
             </p>
           </div>
           
@@ -421,7 +450,7 @@ export default function LeaderboardPage() {
             <div className="relative z-10 w-full md:w-1/2 mb-6 md:mb-0">
               <h2 className="text-white text-xl font-black mb-2">{t('leaderboard.hero_title')}</h2>
               <p className={`text-white/80 text-[11px] font-medium leading-relaxed mb-4 ${isRTL ? 'pl-4' : 'pr-4'}`}>
-                {t('leaderboard.hero_subtitle')}
+                {t('leaderboard.hero_subtitle_ss', { points: currentUserRankData?.gapToTargetRank ?? 9 })}
               </p>
               <Link href="/play/active" className="inline-flex bg-white text-[#170E3A] text-[11px] font-bold px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm w-max">
                 {t('leaderboard.play_game')}
@@ -431,15 +460,17 @@ export default function LeaderboardPage() {
             {/* Structured Category Grid - Enhanced Visibility */}
             <div className="relative z-10 w-full md:w-[45%] lg:w-[42%] grid grid-cols-2 sm:grid-cols-3 gap-3 self-start md:mt-2">
               {(topCategories.length > 0 ? topCategories : fallbackTopCategories).slice(0, 9).map((cat, idx) => {
-                const catLabel = cat.label || cat.name?.[lang] || cat.name?.en || t('leaderboard.category_general');
+                const catLabel = getCategoryDisplayLabel(cat.name, lang, t, cat.label || t('leaderboard.category_general'));
                 const iconKey = cat.key || cat.name?.en || 'General';
+                const iconMeta = getFavCategoryMeta(iconKey);
+                const HeroCategoryIcon = iconMeta.icon;
 
                 return (
                 <div
                   key={idx} 
                   className="bg-white/15 backdrop-blur-md text-white py-2 px-2.5 rounded-xl text-[11px] font-extrabold border border-white/30 flex items-center justify-center text-center truncate shadow-sm hover:bg-white/25 hover:scale-105 transition-all cursor-default"
                 >
-                  <span className="mr-1.5 text-[13px]">{getFavCategoryIcon(iconKey)}</span>
+                  <HeroCategoryIcon className={`mr-1.5 h-3.5 w-3.5 ${iconMeta.className}`} />
                   {catLabel}
                 </div>
               )})}
@@ -451,7 +482,7 @@ export default function LeaderboardPage() {
 
           {/* Right Hero Card - Dynamic Countdown */}
           <div className="lg:col-span-4 bg-gradient-to-br from-[#FFFAEB] to-[#FFF3E6] border border-[#FEF3C7] rounded-2xl p-6 shadow-sm relative flex flex-col justify-center min-h-[160px]">
-            <h3 className="text-gray-800 font-bold text-[14px]">{t('leaderboard.remaining_time')} 🔥</h3>
+            <h3 className="text-gray-800 font-bold text-[14px]">{t('leaderboard.remaining_time')}</h3>
             
             <div className="flex items-center gap-4 mt-3 mb-3">
               <div className="flex flex-col items-center min-w-[32px]">
@@ -475,8 +506,8 @@ export default function LeaderboardPage() {
               <span className="text-[10px] font-medium leading-tight max-w-[80%]">{t('leaderboard.prize_note')}</span>
             </div>
             
-            <div className={`absolute top-1/2 -translate-y-[55%] text-6xl opacity-30 select-none pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>
-              🏆
+            <div className={`absolute top-1/2 -translate-y-[55%] opacity-30 select-none pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>
+              <Image src="/icons/trophy.png" alt="Champion Trophy" width={74} height={74} className="h-[74px] w-[74px] object-contain" />
             </div>
           </div>
         </div>
@@ -499,7 +530,7 @@ export default function LeaderboardPage() {
           <div className="border-b border-gray-100 p-5 pb-3">
             <h3 className="text-[14px] font-black text-gray-900">{t('leaderboard.full_rankings')}</h3>
             <p className="text-[11px] text-gray-400 font-medium">
-              {t('leaderboard.positions_line', { from: 4, to: Math.max(4, leaderboard.length) })} • {periodLabel}
+              {t('leaderboard.positions_line', { from: 4, to: Math.max(4, leaderboard.length) })} &bull; {periodLabel}
             </p>
           </div>
           

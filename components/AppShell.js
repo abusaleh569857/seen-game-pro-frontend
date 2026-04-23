@@ -9,7 +9,7 @@ import { isRtlLanguage } from '@/lib/languages';
 import { stripLocaleFromPathname } from '@/lib/i18n-settings';
 
 // These pages never show any nav
-const NO_NAV_PATHS = new Set(['/login', '/register']);
+const NO_NAV_PATHS = new Set(['/login', '/register', '/forgot-password', '/reset-password']);
 
 // Landing page — ALWAYS shows original Top Navbar (logged in or out)
 const LANDING_PATH = '/';

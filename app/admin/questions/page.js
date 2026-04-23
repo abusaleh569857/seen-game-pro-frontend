@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useConfirm } from '@/components/ConfirmProvider';
 import { useI18n } from '@/lib/i18n';
 import { deleteQuestion, fetchAdminQuestions } from '@/store/slices/adminSlice';
 
@@ -23,13 +24,18 @@ function QuestionsContent() {
   const dispatch = useDispatch();
   const { questions, questionsLoading } = useSelector((state) => state.admin);
   const { t } = useI18n();
+  const confirm = useConfirm();
 
   useEffect(() => {
     dispatch(fetchAdminQuestions());
   }, [dispatch]);
 
-  const handleDelete = (id) => {
-    const shouldDelete = window.confirm(t('admin.delete_confirm'));
+  const handleDelete = async (id) => {
+    const shouldDelete = await confirm({
+      message: t('admin.delete_confirm'),
+      confirmLabel: t('admin.delete'),
+      tone: 'danger',
+    });
     if (shouldDelete) {
       dispatch(deleteQuestion(id));
     }

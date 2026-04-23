@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { CircleDot } from "lucide-react";
@@ -6,25 +6,78 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import AnimatedDotBackground from "@/components/auth/AnimatedDotBackground";
 import { useI18n } from "@/lib/i18n";
-import { isRtlLanguage } from "@/lib/languages";
+import { isRtlLanguage, normalizeLanguageCode } from "@/lib/languages";
 
 const CATEGORIES = [
-  { name: "Geography", icon: "🌍" },
-  { name: "Science", icon: "🔬" },
-  { name: "History", icon: "📜" },
-  { name: "Technology", icon: "💻" },
-  { name: "Music", icon: "🎵" },
-  { name: "Sports", icon: "⚽" },
-  { name: "Games", icon: "🎮" },
-  { name: "Arts", icon: "🎨" },
-  { name: "Food", icon: "🍽️" },
-  { name: "Cars", icon: "🚗" },
+  { key: "geography", icon: "🌍" },
+  { key: "science", icon: "🔬" },
+  { key: "history", icon: "📜" },
+  { key: "technology", icon: "💻" },
+  { key: "music", icon: "🎵" },
+  { key: "sports", icon: "⚽" },
+  { key: "games", icon: "🎮" },
+  { key: "arts", icon: "🎨" },
+  { key: "food", icon: "🍽️" },
+  { key: "cars", icon: "🚗" },
 ];
+
+const CATEGORY_LABELS = {
+  en: {
+    geography: "Geography",
+    science: "Science",
+    history: "History",
+    technology: "Technology",
+    music: "Music",
+    sports: "Sports",
+    games: "Games",
+    arts: "Arts",
+    food: "Food",
+    cars: "Cars",
+  },
+  ar: {
+    geography: "الجغرافيا",
+    science: "العلوم",
+    history: "التاريخ",
+    technology: "التقنية",
+    music: "الموسيقى",
+    sports: "الرياضة",
+    games: "الألعاب",
+    arts: "الفنون",
+    food: "الطعام",
+    cars: "السيارات",
+  },
+  fr: {
+    geography: "Géographie",
+    science: "Science",
+    history: "Histoire",
+    technology: "Technologie",
+    music: "Musique",
+    sports: "Sports",
+    games: "Jeux",
+    arts: "Arts",
+    food: "Cuisine",
+    cars: "Voitures",
+  },
+  es: {
+    geography: "Geografía",
+    science: "Ciencia",
+    history: "Historia",
+    technology: "Tecnología",
+    music: "Música",
+    sports: "Deportes",
+    games: "Juegos",
+    arts: "Artes",
+    food: "Comida",
+    cars: "Coches",
+  },
+};
 
 export default function LoginVisualPanel() {
   const { t } = useI18n();
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const isRTL = isRtlLanguage(selectedLang);
+  const activeLang = normalizeLanguageCode(selectedLang);
+  const labels = CATEGORY_LABELS[activeLang] || CATEGORY_LABELS.en;
 
   const stats = [
     { value: "15", label: t("landing.categories") },
@@ -82,7 +135,7 @@ export default function LoginVisualPanel() {
           <div className="hidden w-full grid-cols-5 gap-3 lg:grid xl:gap-5">
             {CATEGORIES.map((cat, i) => (
               <motion.div
-                key={cat.name}
+                key={cat.key}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05, duration: 0.4 }}
@@ -91,7 +144,7 @@ export default function LoginVisualPanel() {
               >
                 <div className="mb-2 text-[26px] drop-shadow-md xl:text-[32px]">{cat.icon}</div>
                 <span className="text-[10px] font-semibold tracking-wide text-white/80 xl:text-[11px]">
-                  {cat.name}
+                  {labels[cat.key] || CATEGORY_LABELS.en[cat.key]}
                 </span>
               </motion.div>
             ))}
@@ -99,9 +152,9 @@ export default function LoginVisualPanel() {
 
           <div className="flex w-full flex-nowrap items-center justify-center gap-1.5 px-0.5 lg:hidden">
             {CATEGORIES.slice(0, 4).map((cat) => (
-              <div key={cat.name} className="flex shrink-0 items-center gap-1 rounded-[10px] border border-white/10 bg-white/5 px-2 py-1">
+              <div key={cat.key} className="flex shrink-0 items-center gap-1 rounded-[10px] border border-white/10 bg-white/5 px-2 py-1">
                 <span className="text-[11px]">{cat.icon}</span>
-                <span className="whitespace-nowrap text-[9.5px] font-bold text-white/90">{cat.name}</span>
+                <span className="whitespace-nowrap text-[9.5px] font-bold text-white/90">{labels[cat.key] || CATEGORY_LABELS.en[cat.key]}</span>
               </div>
             ))}
           </div>
