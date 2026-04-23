@@ -445,7 +445,7 @@ export default function LeaderboardPage() {
         {/* HERO SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 mt-4">
           {/* Left Hero Card - Restructured */}
-          <div className="lg:col-span-8 bg-gradient-to-r from-[#170E3A] to-[#25175B] rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between min-h-[160px] shadow-lg">
+          <div className="lg:col-span-8 bg-linear-to-r from-[#170E3A] to-[#25175B] rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between min-h-[160px] shadow-lg">
             {/* Text Content */}
             <div className="relative z-10 w-full md:w-1/2 mb-6 md:mb-0">
               <h2 className="text-white text-xl font-black mb-2">{t('leaderboard.hero_title')}</h2>
@@ -481,7 +481,7 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Right Hero Card - Dynamic Countdown */}
-          <div className="lg:col-span-4 bg-gradient-to-br from-[#FFFAEB] to-[#FFF3E6] border border-[#FEF3C7] rounded-2xl p-6 shadow-sm relative flex flex-col justify-center min-h-[160px]">
+          <div className="lg:col-span-4 bg-linear-to-br from-[#FFFAEB] to-[#FFF3E6] border border-[#FEF3C7] rounded-2xl p-6 shadow-sm relative flex flex-col justify-center min-h-[160px]">
             <h3 className="text-gray-800 font-bold text-[14px]">{t('leaderboard.remaining_time')}</h3>
             
             <div className="flex items-center gap-4 mt-3 mb-3">

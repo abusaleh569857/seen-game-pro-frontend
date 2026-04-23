@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { createCharge } from '@/store/slices/shopSlice';
@@ -12,7 +12,7 @@ export default function PackageCard({ packageKey, pkg }) {
 
   return (
     <div
-      className={`flex flex-col items-center gap-3 rounded-2xl border bg-gradient-to-b p-6 text-center transition-transform hover:scale-105 ${pkg.color}`}
+      className={`flex flex-col items-center gap-3 rounded-2xl border bg-linear-to-b p-6 text-center transition-transform hover:scale-105 ${pkg.color}`}
     >
       <h3 className="text-xl font-bold">{pkg.label}</h3>
       <p className="text-5xl font-black text-yellow-300">{pkg.qeem}</p>

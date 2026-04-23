@@ -37,7 +37,7 @@ export default function CtaSection() {
 
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
             <Link href="/register" className="w-full sm:w-auto">
-              <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-[14px] text-white text-[14px] lg:text-[15px] font-bold tracking-wide bg-gradient-to-r from-[#6248FF] to-[#486CFF] shadow-hero hover:shadow-[0_8px_30px_rgba(98,72,255,0.5)] transition-all hover:-translate-y-0.5">
+              <button className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-[14px] text-white text-[14px] lg:text-[15px] font-bold tracking-wide bg-linear-to-r from-[#6248FF] to-[#486CFF] shadow-hero hover:shadow-[0_8px_30px_rgba(98,72,255,0.5)] transition-all hover:-translate-y-0.5">
                 <Play fill="currentColor" size={14} />
                 {t('common.create_account')}
               </button>

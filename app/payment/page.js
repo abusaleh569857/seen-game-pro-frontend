@@ -132,7 +132,7 @@ function PaymentGatewayContent() {
       <div className="mx-auto max-w-[1440px] px-4 pb-10 pt-2 lg:max-w-[1700px] lg:px-8 xl:max-w-[1820px]">
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
           <section className="xl:col-span-4">
-            <div className="rounded-[22px] bg-gradient-to-br from-[#21135a] via-[#2a196b] to-[#1f1658] p-5 text-white shadow-[0_24px_60px_rgba(34,26,92,0.3)]">
+            <div className="rounded-[22px] bg-linear-to-br from-[#21135a] via-[#2a196b] to-[#1f1658] p-5 text-white shadow-[0_24px_60px_rgba(34,26,92,0.3)]">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">{t('payment.your_order')}</p>
               <p className="mt-4 text-[11px] font-black uppercase tracking-[0.2em] text-white/60">{t('payment.selected_package')}</p>
               <div className="mt-1 flex items-center gap-2">
@@ -215,7 +215,7 @@ function PaymentGatewayContent() {
 
           <section className="xl:col-span-8">
             <div className="rounded-[22px] border border-white/80 bg-white shadow-sm">
-              <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-[#0f2a63] to-[#173f90] px-5 py-4 text-white ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-linear-to-r from-[#0f2a63] to-[#173f90] px-5 py-4 text-white ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className={isRTL ? 'text-right' : ''}>
                   <h1 className="text-lg font-black">{t('payment.gateway_title')}</h1>
                   <p className="text-xs text-white/70">{t('payment.gateway_subtitle')}</p>
@@ -285,7 +285,7 @@ function PaymentGatewayContent() {
                 </div>
 
                 <p className="mb-2 text-xs font-black uppercase tracking-[0.12em] text-slate-600">{t('payment.card_details')}</p>
-                <div className="rounded-2xl bg-gradient-to-r from-[#172749] to-[#0f1c36] p-5 text-white">
+                <div className="rounded-2xl bg-linear-to-r from-[#172749] to-[#0f1c36] p-5 text-white">
                   <div className="mb-6 flex items-center justify-between">
                     <WalletCards className="h-5 w-5 text-amber-300" />
                     <span className="text-xs font-black text-white/75">{t('payment.expiry_short')}</span>
@@ -353,7 +353,7 @@ function PaymentGatewayContent() {
                   className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-black text-white transition ${
                     loadingPackage
                       ? 'cursor-not-allowed bg-indigo-300'
-                      : 'bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400'
+                      : 'bg-linear-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400'
                   }`}
                 >
                   <CreditCard className="h-4 w-4" />

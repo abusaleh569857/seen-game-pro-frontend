@@ -158,7 +158,7 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
             <button
               type="button"
               onClick={() => setShowProfileMenu((prev) => !prev)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-violet-500 to-indigo-600 text-[11px] font-black text-white shadow-sm"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-white bg-linear-to-br from-violet-500 to-indigo-600 text-[11px] font-black text-white shadow-sm"
             >
               {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
             </button>
@@ -242,7 +242,7 @@ export default function PageHeader({ pageName, breadcrumbs = [] }) {
           >
             <button
               type="button"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-[12px] font-black text-white"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-violet-500 to-indigo-600 text-[12px] font-black text-white"
             >
               {user?.username?.slice(0, 2).toUpperCase() || 'UN'}
             </button>

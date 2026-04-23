@@ -162,7 +162,7 @@ function JokerPurchaseModal({
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-900/60 p-3 sm:p-5">
       <div className="relative w-full max-w-[760px] overflow-hidden rounded-[22px] border border-white/20 bg-[#f7f8fc] shadow-[0_35px_80px_rgba(15,23,42,0.42)]">
-        <div className="bg-gradient-to-r from-[#20125f] via-[#251866] to-[#1b2f66] px-4 py-3 text-white sm:px-6">
+        <div className="bg-linear-to-r from-[#20125f] via-[#251866] to-[#1b2f66] px-4 py-3 text-white sm:px-6">
           <button
             type="button"
             onClick={onClose}
@@ -206,7 +206,7 @@ function JokerPurchaseModal({
                   key={powerUp.type}
                   type="button"
                   onClick={() => onSelectType(powerUp.type)}
-                  className={`relative rounded-[14px] border bg-gradient-to-b ${theme} px-3 py-3 text-center text-white transition ${
+                  className={`relative rounded-[14px] border bg-linear-to-b ${theme} px-3 py-3 text-center text-white transition ${
                     isSelected
                       ? 'shadow-[0_0_0_2px_rgba(251,191,36,0.55)]'
                       : 'hover:-translate-y-0.5'
@@ -279,7 +279,7 @@ function JokerPurchaseModal({
               className={`rounded-[14px] px-4 py-3 text-sm font-black text-white transition ${
                 isPurchasing || !hasEnoughBalance
                   ? 'cursor-not-allowed bg-indigo-300'
-                  : 'bg-gradient-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400'
+                  : 'bg-linear-to-r from-violet-500 to-indigo-500 hover:from-violet-400 hover:to-indigo-400'
               }`}
             >
               {isPurchasing ? t('common.loading') : t('quiz.modal_confirm_purchase')}
@@ -701,7 +701,7 @@ function ActiveQuizContent() {
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-200">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-500"
+                      className="h-full rounded-full bg-linear-to-r from-violet-500 to-indigo-500 transition-all duration-500"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
@@ -792,7 +792,7 @@ function ActiveQuizContent() {
                   })}
                 </div>
 
-                <div className="overflow-hidden rounded-[28px] bg-gradient-to-r from-[#1f164f] via-[#23185f] to-[#10183f] p-4 text-white shadow-[0_24px_60px_rgba(49,46,129,0.24)] sm:p-5 lg:min-h-[154px] lg:p-5">
+                <div className="overflow-hidden rounded-[28px] bg-linear-to-r from-[#1f164f] via-[#23185f] to-[#10183f] p-4 text-white shadow-[0_24px_60px_rgba(49,46,129,0.24)] sm:p-5 lg:min-h-[154px] lg:p-5">
                   <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                     <div className="flex flex-col gap-2 xl:min-w-[150px]">
                       <div className="flex items-center gap-3">
@@ -821,7 +821,7 @@ function ActiveQuizContent() {
                             type="button"
                             onClick={() => handleJoker(powerUp.type)}
                             disabled={quizStatus !== 'playing' || isCheckingAnswer}
-                            className={`relative min-h-[120px] rounded-[20px] border bg-gradient-to-b ${powerUp.accent} ${powerUp.border} px-3 py-3 ${isRTL ? 'text-right' : 'text-left'} transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`relative min-h-[120px] rounded-[20px] border bg-linear-to-b ${powerUp.accent} ${powerUp.border} px-3 py-3 ${isRTL ? 'text-right' : 'text-left'} transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             <span className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} rounded-full border-2 border-[#1c1350] bg-violet-500 px-2 py-0.5 text-[10px] font-black text-white`}>
                               {isEmpty ? t('shop.empty_short') : quantity}

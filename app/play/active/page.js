@@ -432,7 +432,7 @@ function ActiveJokerDockPage() {
             <p className="text-sm font-bold text-white/70">{t('common.loading')}</p>
           </div>
         ) : (
-          <div className="rounded-[30px] border border-white/10 bg-gradient-to-br from-[#08063c] via-[#0b0a52] to-[#09062a] p-4 shadow-[0_30px_80px_rgba(10,12,50,0.55)] lg:p-6">
+          <div className="rounded-[30px] border border-white/10 bg-linear-to-br from-[#08063c] via-[#0b0a52] to-[#09062a] p-4 shadow-[0_30px_80px_rgba(10,12,50,0.55)] lg:p-6">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-black text-white">
@@ -454,7 +454,7 @@ function ActiveJokerDockPage() {
 
             <div className="mb-7 h-1.5 overflow-hidden rounded-full bg-white/10">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 to-blue-500 transition-all"
+                className="h-full rounded-full bg-linear-to-r from-violet-500 to-blue-500 transition-all"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -524,7 +524,7 @@ function ActiveJokerDockPage() {
                         type="button"
                         onClick={() => handleJoker(joker.type)}
                         disabled={quizStatus !== 'playing' || isCheckingAnswer}
-                        className={`relative rounded-2xl border bg-gradient-to-b p-3 text-white transition hover:-translate-y-0.5 disabled:opacity-60 ${joker.cardClass}`}
+                        className={`relative rounded-2xl border bg-linear-to-b p-3 text-white transition hover:-translate-y-0.5 disabled:opacity-60 ${joker.cardClass}`}
                       >
                         <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} rounded-full border-2 border-[#100b3b] bg-violet-600 px-2 py-0.5 text-[10px] font-black`}>
                           {empty ? t('shop.empty_short') : `x${qty}`}

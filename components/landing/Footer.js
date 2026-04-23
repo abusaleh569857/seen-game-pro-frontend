@@ -13,7 +13,7 @@ export default function Footer() {
     <footer className="w-full px-4 py-8 lg:px-10 lg:py-12 border-t border-white/5">
       <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-gradient-to-br from-[#6248FF] to-[#486CFF] shadow-sm">
+          <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-linear-to-br from-[#6248FF] to-[#486CFF] shadow-sm">
             <div className="flex h-4 w-4 items-center justify-center rounded-full border-2 border-white/80">
               <CircleDot className="h-2 w-2 text-white" strokeWidth={3} />
             </div>
