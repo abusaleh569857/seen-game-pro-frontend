@@ -128,7 +128,7 @@ export default function AppSidebar() {
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-4 py-5 border-b border-gray-100">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-gradient-to-br from-[#6248FF] to-[#486CFF] border border-white/10 shadow-md">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-linear-to-br from-[#6248FF] to-[#486CFF] border border-white/10 shadow-md">
             <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-white/80">
               <CircleDot className="h-2.5 w-2.5 text-white" strokeWidth={3} />
             </div>
@@ -140,7 +140,7 @@ export default function AppSidebar() {
         </div>
 
         {/* Qeem Balance */}
-        <div className="mx-3 mt-4 mb-2 rounded-xl bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 p-3">
+        <div className="mx-3 mt-4 mb-2 rounded-xl bg-linear-to-br from-violet-50 to-indigo-50 border border-violet-100 p-3">
           <p className="text-[9px] font-bold uppercase tracking-widest text-violet-400 mb-0.5">{t('common.qeem_balance')}</p>
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
@@ -237,7 +237,7 @@ export default function AppSidebar() {
             className={`w-full flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-gray-50 transition group ${isRTL ? 'flex-row-reverse' : ''}`}
           >
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-[11px] font-black shrink-0">
                 {initials}
               </div>
               <div className={isRTL ? 'text-right' : 'text-left'}>

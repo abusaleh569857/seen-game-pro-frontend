@@ -5,18 +5,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { 
   Users, 
   Search, 
-  ShieldAlert, 
   UserPlus, 
   UserMinus, 
   Coins, 
   Trophy,
-  ArrowLeft,
   Mail,
   ShieldCheck
 } from 'lucide-react';
-import Link from 'next/link';
-import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import AdminDashboardShell from '@/components/AdminDashboardShell';
 import { useI18n } from '@/lib/i18n';
 import { isRtlLanguage, normalizeLanguageCode } from '@/lib/languages';
 import { fetchAdminUsers, toggleBanUser } from '@/store/slices/adminSlice';
@@ -42,39 +39,37 @@ function UsersContent() {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-black pt-[76px] text-white">
-        <main className="mx-auto max-w-5xl px-4 py-12">
+    <AdminDashboardShell>
+      <main className="mx-auto max-w-6xl px-4 py-8 text-gray-900">
           {/* Header */}
-          <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="mb-6 rounded-3xl border border-gray-100 bg-white p-6 shadow-sm flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="bg-blue-600/20 p-3 rounded-2xl border border-blue-500/30">
-                <Users className="w-8 h-8 text-blue-500" />
+              <div className="bg-blue-50 p-3 rounded-2xl border border-blue-100">
+                <Users className="w-7 h-7 text-blue-600" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold tracking-tight">{t('admin.users_heading')}</h1>
-                <p className="text-gray-400 mt-1">{t('admin.users_subtitle')}</p>
+                <h1 className="text-3xl font-black tracking-tight text-gray-900">{t('admin.users_heading')}</h1>
+                <p className="text-gray-500 mt-1">{t('admin.users_subtitle')}</p>
               </div>
             </div>
           </div>
 
           {/* Search Box */}
-          <div className="mb-10 relative group">
+          <div className="mb-8 relative group">
             <div className={`absolute inset-y-0 flex items-center pointer-events-none ${isRTL ? 'right-5' : 'left-5'}`}>
-              <Search className="w-5 h-5 text-gray-500 group-focus-within:text-purple-500 transition-colors" />
+              <Search className="w-5 h-5 text-gray-400 group-focus-within:text-violet-500 transition-colors" />
             </div>
             <input
               placeholder={t('admin.search_placeholder')}
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               onKeyDown={(event) => event.key === 'Enter' && handleSearch()}
-              className={`w-full rounded-[2rem] border border-gray-800 bg-gray-900/50 py-5 text-lg transition focus:border-purple-500/50 focus:outline-none focus:ring-4 focus:ring-purple-500/5 backdrop-blur-xl ${isRTL ? 'pr-14 pl-32 text-right' : 'pl-14 pr-32'}`}
+              className={`w-full rounded-3xl border border-gray-200 bg-white py-4 text-base text-gray-900 transition focus:border-violet-400 focus:outline-none focus:ring-4 focus:ring-violet-100 ${isRTL ? 'pr-14 pl-32 text-right' : 'pl-14 pr-32'}`}
             />
             <button
               type="button"
               onClick={handleSearch}
-              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-purple-600 px-8 py-3 font-bold transition hover:bg-purple-500 active:scale-95 shadow-xl shadow-purple-500/20 ${isRTL ? 'left-3' : 'right-3'}`}
+              className={`absolute top-1/2 -translate-y-1/2 rounded-full bg-linear-to-r from-violet-600 to-indigo-600 text-white px-7 py-2.5 text-sm font-bold transition hover:brightness-110 active:scale-95 ${isRTL ? 'left-3' : 'right-3'}`}
             >
               {t('admin.search')}
             </button>
@@ -84,7 +79,7 @@ function UsersContent() {
           {usersLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="h-24 rounded-3xl bg-gray-900 animate-pulse border border-gray-800" />
+                <div key={index} className="h-24 rounded-2xl bg-white animate-pulse border border-gray-100" />
               ))}
             </div>
           ) : (
@@ -92,15 +87,15 @@ function UsersContent() {
               {users.map((user) => (
                 <div
                   key={user.id}
-                  className={`flex flex-col sm:flex-row items-center justify-between rounded-3xl border p-6 transition-all hover:bg-gray-900/40 ${
+                  className={`flex flex-col sm:flex-row items-center justify-between rounded-3xl border p-6 transition-all hover:bg-gray-50 ${
                     user.is_banned 
-                      ? 'border-red-900/30 bg-red-900/5' 
-                      : 'border-gray-800 bg-gray-900/20'
+                      ? 'border-red-200 bg-red-50' 
+                      : 'border-gray-100 bg-white'
                   }`}
                 >
                   <div className="flex items-center gap-5 w-full sm:w-auto">
                     <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border text-xl font-black ${
-                      user.is_banned ? 'border-red-800 bg-red-900/20 text-red-500' : 'border-gray-700 bg-gray-800 text-gray-400'
+                      user.is_banned ? 'border-red-200 bg-red-100 text-red-600' : 'border-gray-200 bg-gray-100 text-gray-700'
                     }`}>
                       {user.username.charAt(0).toUpperCase()}
                     </div>
@@ -109,13 +104,13 @@ function UsersContent() {
                       <div className="flex items-center flex-wrap gap-2">
                         <p className="truncate text-xl font-bold tracking-tight">{user.username}</p>
                         {user.role === 'admin' && (
-                          <span className="flex items-center gap-1 rounded-full bg-red-600/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-500 border border-red-500/30">
+                          <span className="flex items-center gap-1 rounded-full bg-red-50 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-600 border border-red-200">
                             <ShieldCheck className="w-3 h-3" />
                             {t('admin.admin_badge')}
                           </span>
                         )}
                         {user.is_banned && (
-                          <span className="flex items-center gap-1 rounded-full bg-red-900/50 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-300 border border-red-800">
+                          <span className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-700 border border-red-200">
                              {t('admin.banned_badge')}
                           </span>
                         )}
@@ -127,13 +122,13 @@ function UsersContent() {
                       </div>
                       
                       <div className="mt-3 flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-yellow-500/80">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600">
                           <Trophy className="w-3.5 h-3.5" />
                            {user.points} {t('admin.points_unit')}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-blue-500/80">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-blue-600">
                           <Coins className="w-3.5 h-3.5" />
-                          {user.qeem_balance} Qeem
+                          {user.qeem_balance} {t('common.qeem')}
                         </div>
                       </div>
                     </div>
@@ -147,7 +142,7 @@ function UsersContent() {
                       className={`w-full sm:w-32 flex items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-black transition-all disabled:opacity-20 ${
                         user.is_banned
                           ? 'bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-500/20'
-                          : 'bg-red-600/10 text-red-500 border border-red-500/30 hover:bg-red-600 hover:text-white'
+                          : 'bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white'
                       }`}
                     >
                       {user.is_banned ? (
@@ -167,9 +162,8 @@ function UsersContent() {
               ))}
             </div>
           )}
-        </main>
-      </div>
-    </>
+      </main>
+    </AdminDashboardShell>
   );
 }
 

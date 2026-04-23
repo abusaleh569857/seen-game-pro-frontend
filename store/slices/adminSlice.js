@@ -39,10 +39,10 @@ export const toggleBanUser = createAsyncThunk(
 
 export const fetchAdminQuestions = createAsyncThunk(
   'admin/fetchQuestions',
-  async ({ page = 1, categoryId = '', language = '' } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 20, categoryId = '', language = '' } = {}, { rejectWithValue }) => {
     try {
       const { data } = await api.get(
-        `/questions?page=${page}&categoryId=${categoryId}&language=${language}`
+        `/questions?page=${page}&limit=${limit}&categoryId=${categoryId}&language=${language}`
       );
       return data;
     } catch (error) {
@@ -59,6 +59,18 @@ export const deleteQuestion = createAsyncThunk(
       return questionId;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to delete');
+    }
+  }
+);
+
+export const updateQuestion = createAsyncThunk(
+  'admin/updateQuestion',
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      await api.put(`/questions/${id}`, payload);
+      return { id, payload };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update question');
     }
   }
 );
@@ -147,6 +159,21 @@ const adminSlice = createSlice({
       })
       .addCase(deleteQuestion.fulfilled, (state, action) => {
         state.questions = state.questions.filter((question) => question.id !== action.payload);
+        state.questionsTotal = Math.max(0, (state.questionsTotal || 0) - 1);
+      })
+      .addCase(updateQuestion.fulfilled, (state, action) => {
+        const { id, payload } = action.payload;
+        const target = state.questions.find((question) => Number(question.id) === Number(id));
+
+        if (target) {
+          target.question_text = payload.question_text;
+          target.option_a = payload.option_a;
+          target.option_b = payload.option_b;
+          target.option_c = payload.option_c;
+          target.option_d = payload.option_d;
+          target.correct_answer = payload.correct_answer;
+          target.difficulty = payload.difficulty;
+        }
       })
       .addCase(generateQuestions.pending, (state) => {
         state.generateLoading = true;

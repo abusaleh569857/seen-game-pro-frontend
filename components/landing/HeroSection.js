@@ -60,7 +60,7 @@ export default function HeroSection() {
           className="text-[42px] sm:text-[56px] lg:text-[72px] font-black leading-[1.05] tracking-tight text-white mb-6"
         >
           {t('landing.hero_title_line1')}<br className="hidden sm:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4E5BFF] to-[#34D399]">{t('landing.hero_title_line2')}</span>
+          <span className="text-transparent bg-clip-text bg-linear-to-r from-[#4E5BFF] to-[#34D399]">{t('landing.hero_title_line2')}</span>
         </motion.h1>
 
         <motion.p
@@ -114,7 +114,7 @@ export default function HeroSection() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
           onClick={handleStartPlay}
-          className="group flex items-center gap-3 px-8 lg:px-10 py-4 rounded-[16px] text-white font-black tracking-wide bg-gradient-to-r from-[#6248FF] to-[#486CFF] shadow-hero hover:shadow-[0_8px_40px_rgba(98,72,255,0.6)] transition-all hover:-translate-y-1"
+          className="group flex items-center gap-3 px-8 lg:px-10 py-4 rounded-[16px] text-white font-black tracking-wide bg-linear-to-r from-[#6248FF] to-[#486CFF] shadow-hero hover:shadow-[0_8px_40px_rgba(98,72,255,0.6)] transition-all hover:-translate-y-1"
         >
           <Play fill="currentColor" size={16} />
           {t('landing.start_playing')}

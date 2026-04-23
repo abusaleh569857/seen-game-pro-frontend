@@ -1,10 +1,23 @@
-# Seen Game Pro - AI-Powered Quiz and Monetization Platform
+# 🎮 Seen Game Pro - AI-Powered Quiz and Monetization Platform
 
 A production-oriented **full-stack web application** built with **Next.js + Express + MySQL** for multilingual quiz gameplay, joker economy, leaderboard competition, and Tap-based package purchases.
 
 ---
 
-## Setup and Run
+## 🔗 Navigation
+
+- [⚙️ Setup and Run](#-setup-and-run)
+- [🏗️ Architecture Overview](#-architecture-overview)
+- [🌐 API Overview](#-api-overview)
+- [🛠️ Technical Decisions](#-technical-decisions)
+- [🚧 Challenges Faced](#-challenges-faced)
+- [✅ Current Completion Snapshot](#-current-completion-snapshot)
+- [🧭 User Flow (Quick Manual)](#-user-flow-quick-manual)
+- [📸 Screenshots](#-screenshots)
+
+---
+
+## ⚙️ Setup and Run
 
 Follow these steps to run the full project locally (frontend + backend).
 
@@ -95,7 +108,7 @@ Open:
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - Backend: [http://localhost:5000](http://localhost:5000)
 
-## Architecture Overview
+## 🏗️ Architecture Overview
 
 ### 1. Folder Structure
 
@@ -264,7 +277,7 @@ Why this approach:
 
 ---
 
-## API Overview
+## 🌐 API Overview
 
 Base URL: `http://localhost:5000/api`
 
@@ -304,7 +317,7 @@ Base URL: `http://localhost:5000/api`
 
 ---
 
-## Technical Decisions
+## 🛠️ Technical Decisions
 
 ### 1. Libraries and Patterns
 
@@ -330,7 +343,7 @@ Base URL: `http://localhost:5000/api`
 - Add stronger anti-cheat and gameplay anomaly detection.
 - Add CI/CD checks (lint, test, build, migration verification).
 
-## Challenges Faced
+## 🚧 Challenges Faced
 
 ### 1. Social Auth Environment Consistency
 
@@ -347,13 +360,13 @@ Base URL: `http://localhost:5000/api`
 - **Problem:** Local development callbacks can differ from production behavior if `BASE_URL` / webhook endpoints are misconfigured.
 - **Solution:** Callback + webhook handlers were implemented with transaction state checks and controlled redirects.
 
-## Current Completion Snapshot
+## ✅ Current Completion Snapshot
 
 - Landing, auth, categories, active quiz, result, leaderboard, profile, shop, and joker flows are implemented.
 - Admin pages (users/questions/AI generation) and related backend endpoints are implemented.
 - Tap payment and AI generation are code-complete but require real credentials/config to be fully production-operational.
 
-## User Flow (Quick Manual)
+## 🧭 User Flow (Quick Manual)
 
 1. User lands on the home page and chooses language.
 2. User logs in/registers (email-password or social provider).
@@ -365,7 +378,7 @@ Base URL: `http://localhost:5000/api`
 8. User visits shop, selects package, and proceeds to Tap payment.
 9. On successful payment, Qeem balance updates and user returns to app flow.
 
-## Screenshots
+## 📸 Screenshots
 
 Available sample assets in this repository:
 
@@ -378,4 +391,3 @@ You can add more page screenshots under `images/` and list them here for client/
 ---
 
 **Developed by Abusaleh Alam Khan (Seen Game Pro Project)**  
-

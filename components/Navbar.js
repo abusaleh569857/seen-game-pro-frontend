@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { useI18n } from '@/lib/i18n';
 import { getLanguageByCode, SUPPORTED_LANGUAGES } from '@/lib/languages';
+import { buildLocalizedPath } from '@/lib/i18n-settings';
 import { logoutUser } from '@/store/slices/authSlice';
 import { setSelectedLang } from '@/store/slices/quizSlice';
 import { CircleDot } from 'lucide-react';
@@ -16,6 +17,7 @@ export default function Navbar() {
   const { user, isLoggedIn } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
   const activeLanguage = getLanguageByCode(selectedLang);
+  const withLocale = (path) => buildLocalizedPath(path, selectedLang);
   const { t } = useI18n();
   const compactSignUpLabel =
     selectedLang === 'fr'
@@ -50,7 +52,7 @@ export default function Navbar() {
       <div className="w-full max-w-7xl mx-auto px-4 lg:px-10 h-full flex items-center justify-between relative z-10">
         {/* Left Area: Logo & Brand */}
         <Link href="/" className="relative z-10 flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#6248FF] to-[#486CFF] shadow-lg border border-white/10">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-linear-to-br from-[#6248FF] to-[#486CFF] shadow-lg border border-white/10">
             <div className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-white/80">
               <CircleDot className="h-3 w-3 text-white" strokeWidth={3} />
             </div>
@@ -108,7 +110,7 @@ export default function Navbar() {
 
             {user?.role === 'admin' && (
               <Link
-                href="/admin"
+                href={withLocale('/admin')}
                 className="hidden sm:flex items-center justify-center px-3 h-[34px] rounded-lg border border-[#6248FF]/50 bg-[#6248FF]/10 text-[#A78BFA] text-[12px] font-bold hover:bg-[#6248FF]/20 transition"
               >
                 {t('nav.admin_panel')}

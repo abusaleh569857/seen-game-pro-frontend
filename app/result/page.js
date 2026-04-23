@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -179,7 +179,7 @@ function ResultContent() {
 
       <div className="mx-auto max-w-[1440px] px-4 pb-16 pt-4 lg:px-8">
         {/* Full-width Score Summary Header */}
-        <div className="mb-6 overflow-hidden rounded-[32px] bg-gradient-to-r from-[#2b155d] via-[#32206b] to-[#274e9d] p-5 text-white shadow-[0_28px_70px_rgba(49,46,129,0.24)] lg:mb-8 lg:p-6 lg:px-10">
+        <div className="mb-6 overflow-hidden rounded-[32px] bg-linear-to-r from-[#2b155d] via-[#32206b] to-[#274e9d] p-5 text-white shadow-[0_28px_70px_rgba(49,46,129,0.24)] lg:mb-8 lg:p-6 lg:px-10">
           <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-4 lg:gap-6">
               <div className="flex h-[92px] w-[92px] shrink-0 items-center justify-center rounded-[24px] border border-amber-300/20 bg-white/10 text-5xl shadow-inner shadow-amber-200/10">
@@ -306,7 +306,7 @@ function ResultContent() {
                 <button
                   type="button"
                   onClick={handlePlayAgain}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(99,102,241,0.24)] transition hover:from-violet-500 hover:to-blue-400 lg:mt-5 lg:rounded-[20px] lg:py-3.5 lg:text-base"
+                  className="mt-4 inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-violet-600 to-blue-500 px-6 py-3 text-sm font-black text-white shadow-[0_18px_45px_rgba(99,102,241,0.24)] transition hover:from-violet-500 hover:to-blue-400 lg:mt-5 lg:rounded-[20px] lg:py-3.5 lg:text-base"
                 >
                   <Play className="h-4 w-4 fill-white" />
                   {t('result.play_again')}

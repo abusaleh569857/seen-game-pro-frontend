@@ -10,6 +10,7 @@ import { Eye, EyeOff, Lock, Mail, Check } from "lucide-react";
 import LanguageTabs from "@/components/auth/LanguageTabs";
 import LoginVisualPanel from "@/components/auth/LoginVisualPanel";
 import { useI18n } from "@/lib/i18n";
+import { buildLocalizedPath } from "@/lib/i18n-settings";
 import { isRtlLanguage, normalizeLanguageCode } from "@/lib/languages";
 import { getGoogleAccessToken, getFacebookAccessToken } from "@/lib/socialAuth";
 import { clearError, loginUser, socialAuthUser } from "@/store/slices/authSlice";
@@ -24,6 +25,7 @@ function LoginForm() {
   const registered = searchParams.get("registered");
   const { loading, error, isLoggedIn, user } = useSelector((state) => state.auth);
   const selectedLang = useSelector((state) => state.quiz.selectedLang);
+  const activeLang = normalizeLanguageCode(selectedLang);
   const { t } = useI18n();
 
   const [lang, setLang] = useState(selectedLang);
@@ -42,12 +44,12 @@ function LoginForm() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      router.push(user?.role === "admin" ? "/admin" : "/");
+      router.push(user?.role === "admin" ? buildLocalizedPath("/admin", activeLang) : buildLocalizedPath("/", activeLang));
     }
     return () => {
       dispatch(clearError());
     };
-  }, [dispatch, isLoggedIn, router, user]);
+  }, [activeLang, dispatch, isLoggedIn, router, user]);
 
   useEffect(() => {
     dispatch(setSelectedLang(normalizeLanguageCode(lang)));
@@ -105,7 +107,7 @@ function LoginForm() {
     );
 
     if (loginUser.fulfilled.match(result)) {
-      router.push("/");
+      router.push(buildLocalizedPath("/", activeLang));
     }
   };
 
@@ -116,7 +118,7 @@ function LoginForm() {
       const token = await getGoogleAccessToken();
       const result = await dispatch(socialAuthUser({ provider: "google", token }));
       if (socialAuthUser.fulfilled.match(result)) {
-        router.push("/");
+        router.push(buildLocalizedPath("/", activeLang));
       }
     } catch (socialError) {
       toast.error(socialError.message || t("auth.google_login_failed"));
@@ -132,7 +134,7 @@ function LoginForm() {
       const token = await getFacebookAccessToken();
       const result = await dispatch(socialAuthUser({ provider: "facebook", token }));
       if (socialAuthUser.fulfilled.match(result)) {
-        router.push("/");
+        router.push(buildLocalizedPath("/", activeLang));
       }
     } catch (socialError) {
       toast.error(socialError.message || t("auth.facebook_login_failed"));

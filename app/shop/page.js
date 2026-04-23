@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useMemo } from 'react';
 import Cookies from 'js-cookie';
@@ -159,7 +159,7 @@ function ShopContent() {
           </div>
         </div>
 
-        <div className="mb-5 rounded-[18px] bg-gradient-to-r from-[#17345a] via-[#174172] to-[#2456a1] p-3.5 text-white shadow-[0_16px_30px_rgba(23,65,114,0.2)] lg:mb-7 lg:rounded-[26px] lg:p-5 lg:shadow-[0_24px_60px_rgba(23,65,114,0.24)]">
+        <div className="mb-5 rounded-[18px] bg-linear-to-r from-[#17345a] via-[#174172] to-[#2456a1] p-3.5 text-white shadow-[0_16px_30px_rgba(23,65,114,0.2)] lg:mb-7 lg:rounded-[26px] lg:p-5 lg:shadow-[0_24px_60px_rgba(23,65,114,0.24)]">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 lg:h-14 lg:w-14 lg:rounded-[18px]">
@@ -262,7 +262,7 @@ function ShopContent() {
                       type="button"
                       onClick={() => handlePackagePurchase(packageKey)}
                       disabled={loadingPackage === packageKey}
-                      className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r ${pkg.buttonClass} px-3 py-2 text-[11px] font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 md:mt-6 md:gap-2 md:rounded-[16px] md:px-4 md:py-3 md:text-sm`}
+                      className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-linear-to-r ${pkg.buttonClass} px-3 py-2 text-[11px] font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 md:mt-6 md:gap-2 md:rounded-[16px] md:px-4 md:py-3 md:text-sm`}
                     >
                       <ShoppingCart className="h-3.5 w-3.5 md:h-4 md:w-4" />
                       {loadingPackage === packageKey ? t('common.redirecting') : t('common.buy')}
@@ -289,7 +289,7 @@ function ShopContent() {
               return (
                 <article
                   key={jokerType}
-                  className={`rounded-2xl border bg-gradient-to-br ${meta.cardClass} p-3.5 text-white shadow-[0_14px_24px_rgba(15,23,42,0.16)] md:rounded-[28px] md:p-5 md:shadow-[0_22px_50px_rgba(15,23,42,0.16)]`}
+                  className={`rounded-2xl border bg-linear-to-br ${meta.cardClass} p-3.5 text-white shadow-[0_14px_24px_rgba(15,23,42,0.16)] md:rounded-[28px] md:p-5 md:shadow-[0_22px_50px_rgba(15,23,42,0.16)]`}
                 >
                   <div className="mb-3 flex items-start justify-between md:mb-5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 md:h-12 md:w-12 md:rounded-[16px]">
@@ -310,7 +310,7 @@ function ShopContent() {
                     type="button"
                     onClick={() => handleJokerPurchase(jokerType)}
                     disabled={loadingJoker === jokerType}
-                    className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r ${meta.buttonClass} px-3 py-2 text-[11px] font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 md:mt-6 md:gap-2 md:rounded-[16px] md:px-4 md:py-3 md:text-sm`}
+                    className={`mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-linear-to-r ${meta.buttonClass} px-3 py-2 text-[11px] font-black text-white shadow-md transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 md:mt-6 md:gap-2 md:rounded-[16px] md:px-4 md:py-3 md:text-sm`}
                   >
                     <Image src="/icons/coin.png" alt={t('common.qeem')} width={16} height={16} className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     {loadingJoker === jokerType ? t('common.loading') : t('common.buy')}

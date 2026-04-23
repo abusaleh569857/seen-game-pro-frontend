@@ -136,7 +136,7 @@ export default function PricingSection() {
                 onClick={handleBuyViaTap}
                 className={`w-full py-4 rounded-[14px] text-[13px] font-bold transition-all ${
                   pkg.popular
-                    ? 'bg-gradient-to-r from-[#6248FF] to-[#486CFF] text-white shadow-hero hover:shadow-[0_4px_24px_rgba(98,72,255,0.4)]'
+                    ? 'bg-linear-to-r from-[#6248FF] to-[#486CFF] text-white shadow-hero hover:shadow-[0_4px_24px_rgba(98,72,255,0.4)]'
                     : 'bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 hover:text-white'
                 }`}
               >
@@ -160,22 +160,22 @@ export default function PricingSection() {
               borderColor: currentMobilePackage.borderColor,
             }}
           >
-            <button
-              type="button"
-              onClick={handleMobilePrev}
-              className="absolute left-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/25 text-white/85 backdrop-blur transition hover:bg-black/40 hover:text-white"
-              aria-label="Previous package"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleMobileNext}
-              className="absolute right-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/25 text-white/85 backdrop-blur transition hover:bg-black/40 hover:text-white"
-              aria-label="Next package"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+              <button
+                type="button"
+                onClick={handleMobilePrev}
+                className="absolute left-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/25 text-white/85 backdrop-blur transition hover:bg-black/40 hover:text-white"
+                aria-label={t('landing.previous_package')}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleMobileNext}
+                className="absolute right-3 top-1/2 z-10 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/25 text-white/85 backdrop-blur transition hover:bg-black/40 hover:text-white"
+                aria-label={t('landing.next_package')}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
 
             {currentMobilePackage.popular ? (
               <div className="absolute top-0 left-1/2 -translate-x-1/2 bg-[#F59E0B] text-white text-[11px] font-bold tracking-wide px-4 py-1.5 rounded-b-[8px] z-10 flex items-center gap-1 shadow-md">
@@ -205,7 +205,7 @@ export default function PricingSection() {
               onClick={handleBuyViaTap}
               className={`flex w-full items-center justify-center whitespace-nowrap px-4 py-2.5 rounded-[11px] text-[11px] font-bold leading-none text-center transition-all ${
                 currentMobilePackage.popular
-                  ? 'bg-gradient-to-r from-[#6248FF] to-[#486CFF] text-white shadow-hero'
+                  ? 'bg-linear-to-r from-[#6248FF] to-[#486CFF] text-white shadow-hero'
                   : 'bg-white/5 text-white/80 border border-white/10'
               }`}
             >

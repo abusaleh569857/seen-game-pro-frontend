@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import api from '@/lib/api';
-import { clearAuth, getAccessToken, getRefreshToken, getUserFromCookie, saveAuth } from '@/lib/auth';
+import { clearAuth, getAccessToken, getRefreshToken, getUserFromCookie, saveAuth, saveUserToCookie } from '@/lib/auth';
 
 export const loginUser = createAsyncThunk(
   'auth/login',
@@ -55,6 +55,22 @@ export const socialAuthUser = createAsyncThunk(
   }
 );
 
+export const updateProfileUser = createAsyncThunk(
+  'auth/updateProfile',
+  async ({ username, email, currentPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const payload = { username, email };
+      if (currentPassword) payload.currentPassword = currentPassword;
+      if (newPassword) payload.newPassword = newPassword;
+
+      const { data } = await api.put('/auth/profile', payload);
+      return data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Profile update failed');
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -90,6 +106,12 @@ const authSlice = createSlice({
     },
     clearRegisterSuccess(state) {
       state.registerSuccess = false;
+    },
+    setUser(state, action) {
+      state.user = action.payload;
+      if (action.payload) {
+        saveUserToCookie(action.payload);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -151,6 +173,22 @@ const authSlice = createSlice({
         state.user = null;
         state.isLoggedIn = false;
         state.loading = false;
+      })
+      .addCase(updateProfileUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfileUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        state.user = action.payload?.user || state.user;
+        if (action.payload?.user) {
+          saveUserToCookie(action.payload.user);
+        }
+      })
+      .addCase(updateProfileUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || null;
       });
   },
 });
@@ -160,6 +198,7 @@ export const {
   updateUserBalance,
   clearError,
   clearRegisterSuccess,
+  setUser,
 } = authSlice.actions;
 
 export default authSlice.reducer;
